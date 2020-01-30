@@ -8,12 +8,11 @@ namespace A2v10.ProcS
 	{
 		public Dictionary<String, State> States { get; set; }
 
-		public void Run(ActivityContext context)
+		public void Run(ExecuteContext context)
 		{
-			String currState = "";
 			while (true)
 			{
-				if (States.TryGetValue(currState, out State state))
+				if (States.TryGetValue(context.Instance.CurrentState, out State state))
 				{
 					state.ExecuteStep(context);
 				}
