@@ -14,5 +14,6 @@ namespace A2v10.ProcS
 
 		public DynamicObject Data { get; set; }
 		public DynamicObject Parameters { get; set; }
+		public DynamicObject Environment { get; set; }
 	}
 }
