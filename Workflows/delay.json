@@ -1,11 +1,11 @@
 {
-	"Description": "First state machine",
+	"Description": "Delay Test",
 	"InitialState": "S1",
 	"States": {
 		"S1": {
-			"Entry": {
-				@type="A2v10.ProcS.Delay, A2v10.ProcS",
-				"Duration":"00:05"
+			"OnEntry": {
+				"$type": "A2v10.ProcS.Delay, A2v10.ProcS",
+				"Duration": "00:05"
 			},
 			"Transitions": {
 				"S1->End": {

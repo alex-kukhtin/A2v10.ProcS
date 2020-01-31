@@ -9,19 +9,10 @@ namespace A2v10.ProcS.Tests
 	[TestClass]
 	public class SimpleStateMachine
 	{
-		StateMachine Load()
-		{
-			String json = File.ReadAllText("..//..//..//Workflows//simple.json");
-			return JsonConvert.DeserializeObject<StateMachine>(json, new JsonSerializerSettings()
-			{
-				TypeNameHandling = TypeNameHandling.Auto
-			});
-		}
-
 		[TestMethod]
 		public void LoadFromFile()
 		{
-			var stm = Load();
+			var stm = Startup.Load("simple.json");
 			Assert.AreEqual("S1", stm.InitialState);
 			Assert.AreEqual("First state machine", stm.Description);
 
@@ -41,7 +32,7 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public void SimpleRun()
 		{
-			var stm = Load();
+			var stm = Startup.Load("simple.json");
 			var engine = new WorkflowEngine();
 
 			engine.Run(stm);
