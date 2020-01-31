@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Newtonsoft.Json;
@@ -10,7 +11,7 @@ namespace A2v10.ProcS.Tests
 	public class SimpleStateMachine
 	{
 		[TestMethod]
-		public void LoadFromFile()
+		public void LoadDefinition()
 		{
 			var stm = Startup.Load("simple.json");
 			Assert.AreEqual("S1", stm.InitialState);
@@ -30,12 +31,13 @@ namespace A2v10.ProcS.Tests
 		}
 
 		[TestMethod]
-		public void SimpleRun()
+		public async Task SimpleRun()
 		{
 			var stm = Startup.Load("simple.json");
-			var engine = new WorkflowEngine();
+			var bus = new WorkflowServiceBus();
+			var engine = new WorkflowEngine(bus);
 
-			engine.Run(stm);
+			await engine.Run(stm);
 		}
 	}
 }

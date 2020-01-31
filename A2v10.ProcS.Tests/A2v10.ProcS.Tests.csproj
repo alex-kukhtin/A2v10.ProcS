@@ -61,6 +61,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\A2v10.ProcS.Interfaces\A2v10.ProcS.Interfaces.csproj">
+      <Project>{DA421EFD-E50B-4170-8C93-8D1AC09913B5}</Project>
+      <Name>A2v10.ProcS.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\A2v10.ProcS\A2v10.ProcS.csproj">
       <Project>{29ad063e-c56b-43fd-8441-d2a1d63feaa4}</Project>
       <Name>A2v10.ProcS</Name>

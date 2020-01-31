@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
@@ -12,7 +13,7 @@ namespace A2v10.ProcS
 
 		public Dictionary<String, State> States { get; set; }
 
-		public void Run(ExecuteContext context)
+		public async Task Run(ExecuteContext context)
 		{
 			if (States == null || States.Count == 0)
 				return;
@@ -28,10 +29,19 @@ namespace A2v10.ProcS
 			{
 				if (States.TryGetValue(instance.CurrentState, out State state))
 				{
-					var result = state.ExecuteStep(context);
+					var result = await state.ExecuteStep(context);
 					if (result != ExecuteResult.Continue)
 						return;
 				}
+			}
+		}
+
+		public async Task Resume(ExecuteContext context)
+		{
+			var instance = context.Instance;
+			if (States.TryGetValue(instance.CurrentState, out State state))
+			{
+				await state.ContinueStep(context);
 			}
 		}
 	}

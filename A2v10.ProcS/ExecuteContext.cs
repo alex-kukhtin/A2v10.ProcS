@@ -9,12 +9,12 @@ namespace A2v10.ProcS
 	public class ExecuteContext
 	{
 		public WorkflowInstance Instance { get; }
+		private IWorkflowServiceBus ServiceBus { get; }
 
-		private WorkflowScheduler _scheduler;
-
-		public ExecuteContext(WorkflowInstance instance)
+		public ExecuteContext(IWorkflowServiceBus bus, WorkflowInstance instance)
 		{
 			Instance = instance;
+			ServiceBus = bus;
 		}
 
 		public void SetState(String state)
@@ -22,15 +22,27 @@ namespace A2v10.ProcS
 			Instance.CurrentState = state;
 		}
 
-		public void ScheduleAction(String Bookmark, Task<DynamicObject> task)
+		public void SaveInstance()
 		{
-			//_scheduler.Schedule(Bookmark, Instance, task);
+
+		}
+
+		public void ScheduleAction(String Bookmark, IServiceMessage message)
+		{
+			// bookmark, instance, message
+			ServiceBus.Send(message);
 		}
 	}
 
 	public class ContinueContext
 	{
-		public IWorkflowInstance Instance { get; }
 		public String Bookmark { get; }
+
+		/*
+		public ContinueContext(WorkflowInstance instance, String bookmark)
+		{
+			Bookmark = bookmark;
+		}
+		*/
 	}
 }

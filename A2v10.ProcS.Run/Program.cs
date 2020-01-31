@@ -11,7 +11,8 @@ namespace A2v10.ProcS.Run
 	{
 		static void Main(String[] args)
 		{
-			var engine = new WorkflowEngine();
+			var bus = new WorkflowServiceBus();
+			var engine = new WorkflowEngine(bus);
 
 			while (true)
 			{

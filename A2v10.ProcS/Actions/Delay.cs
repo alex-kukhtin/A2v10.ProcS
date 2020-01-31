@@ -1,7 +1,9 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
@@ -9,19 +11,12 @@ namespace A2v10.ProcS
 	{
 		public String Duration { get; set; }
 
-		public override void Execute(ExecuteContext context)
+		public async override Task<ActionResult> Execute(ExecuteContext context)
 		{
 			TimeSpan span = TimeSpan.Parse(Duration);
 			String bookmark = Guid.NewGuid().ToString();
-			context.ScheduleAction(bookmark, DoAsync());
-		}
-
-		async Task<DynamicObject> DoAsync()
-		{
-			await Task.Delay(1000);
-			var r = new DynamicObject();
-			r.Set("Result", 42);
-			return r;
+			await Task.Delay(span);
+			return ActionResult.Idle;
 		}
 	}
 }

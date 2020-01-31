@@ -9,6 +9,6 @@ namespace A2v10.ProcS.Interfaces
 		IWorkflowDefinition FromString(String source);
 		IWorkflowDefinition FromStorage(Guid Id, Int32 Version);
 
-		void Write(IWorkflowDefinition workflowDefinition);
+		IWorkflowInstance Get(Guid id);
 	}
 }

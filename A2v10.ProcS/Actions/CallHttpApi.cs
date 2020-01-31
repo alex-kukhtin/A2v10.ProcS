@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
@@ -13,9 +14,10 @@ namespace A2v10.ProcS
 		public String Url { get; set; }
 		public String Method { get; set; }
 
-		public override void Execute(ExecuteContext context)
+		public override Task<ActionResult> Execute(ExecuteContext context)
 		{
 			//context.ScheduleAction("CallApi")
+			return Task.FromResult(ActionResult.Success);
 		}
 	}
 }

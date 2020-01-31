@@ -24,14 +24,28 @@ namespace A2v10.ProcS
 		public WorkflowAction OnEntry { get; set; }
 		public WorkflowAction OnExit { get; set; }
 
-		public ExecuteResult ExecuteStep(ExecuteContext context)
+		public async Task<ExecuteResult> ExecuteStep(ExecuteContext context)
 		{
-			EnterState(context);
+			if (await EnterState(context) == ActionResult.Idle)
+			{
+				context.SaveInstance();
+				return ExecuteResult.Idle;
+			}
+			return await DoContinue(context);
+		}
+
+		public async Task ContinueStep(ExecuteContext context)
+		{
+			await DoContinue(context);
+		}
+
+		async Task<ExecuteResult> DoContinue(ExecuteContext context)
+		{
 			var next = NextState(context);
 			if (next == null)
 				return ExecuteResult.Exit;
 			next.Action?.Execute(context);
-			ExitState(context);
+			await ExitState(context);
 			context.SetState(next.To);
 			return ExecuteResult.Continue;
 		}
@@ -47,14 +61,18 @@ namespace A2v10.ProcS
 
 		}
 
-		void EnterState(ExecuteContext context)
+		async Task<ActionResult> EnterState(ExecuteContext context)
 		{
-			OnEntry?.Execute(context);
+			if (OnEntry == null)
+				return ActionResult.Success;
+			return await OnEntry.Execute(context);
 		}
 
-		void ExitState(ExecuteContext context)
+		async Task ExitState(ExecuteContext context)
 		{
-			OnExit?.Execute(context);
+			if (OnExit == null)
+				return;
+			await OnExit?.Execute(context);
 		}
 	}
 }
