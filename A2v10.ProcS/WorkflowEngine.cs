@@ -8,23 +8,20 @@ using System.Text;
 
 namespace A2v10.ProcS
 {
-	public class WorkflowEngine : IWorkflowEngine
-	{
-		private readonly IInstanceStorage _storage;
-		
-		public WorkflowEngine(IInstanceStorage storage)
+	public class WorkflowEngine
+	{		
+		public WorkflowEngine()
 		{
-			_storage = storage ?? throw new ArgumentNullException(nameof(storage));
 		}
 
-		public IWorkflowInstance Create(String definitionId)
+		public void Run(StateMachine stateMachine)
 		{
-			return _storage.Create(definitionId);
-		}
-
-		public void Execute(String instanceId)
-		{
-			IWorkflowInstance instance = _storage.Load(instanceId);
+			var instance = new WorkflowInstance()
+			{
+				Id = Guid.NewGuid()
+			};
+			var context = new ExecuteContext(instance);
+			stateMachine.Run(context);
 		}
 	}
 }

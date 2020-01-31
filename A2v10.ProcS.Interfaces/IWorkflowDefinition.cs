@@ -4,8 +4,7 @@ using System.Text;
 
 namespace A2v10.ProcS.Interfaces
 {
-	public interface IWorkflowAction
+	public interface IWorkflowDefinition
 	{
-		void Execute();
 	}
 }

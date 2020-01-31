@@ -11,16 +11,18 @@ namespace A2v10.ProcS.Run
 	{
 		static void Main(String[] args)
 		{
-			var engine = new WorkflowEngine(null);
+			var engine = new WorkflowEngine();
 
 			while (true)
 			{
 				switch (Console.ReadKey().KeyChar)
 				{
-					case 's':
-						engine.Create("1");
+					case 'c':
+						var instance = new WorkflowInstance();
+						Console.WriteLine($"Instance created. Id={instance.Id}");
 						break;
 					case 'l':
+						PrintList(engine);
 						break;
 					case 't':
 						break;
@@ -28,6 +30,11 @@ namespace A2v10.ProcS.Run
 						return;
 				}
 			}
+		}
+
+		static void PrintList(WorkflowEngine engine)
+		{
+
 		}
 	}
 }

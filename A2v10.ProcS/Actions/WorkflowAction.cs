@@ -4,7 +4,11 @@ using System.Text;
 
 namespace A2v10.ProcS
 {
-	public class ActivityContext
+	public class WorkflowAction
 	{
+		public virtual void Execute(ExecuteContext context)
+		{
+
+		}
 	}
 }
