@@ -1,0 +1,40 @@
+{
+	/*data, params, environment*/
+	"Description": "Delay Test",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"OnEntry": {
+				"$type": "A2v10.ProcS.Delay, A2v10.ProcS",
+				"Timeout": "30",
+				"Duration": "00:00:02",
+				"Url": "{{environment.apiUrl}}?key={{params.city}}",
+				"ResponseBody": "data.apiResult", /*response.body, response.header, response.status*/
+				"ResponseHeader": "",
+				"ResponseStatus": 222,
+				"TransitionOnException": "HTTPError"
+			},
+			"Transitions": {
+				"S1->End": {
+					"Condition": "data.apiResult == params.xxx",
+					"To": "End"
+				},
+				"HTTPError": {
+					"To": "Error"
+				}
+				
+			},
+			"OnExit": {
+				"$type": "\"A2v10.ProcS.Sequence, A2v10.ProcS",
+				"Actions": [
+
+				]
+			}
+		},
+		"End": {
+			"Description": "State End",
+			"Result": "OK"
+		},
+		"Error": {}
+	}
+}

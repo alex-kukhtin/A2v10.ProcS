@@ -16,7 +16,10 @@ namespace A2v10.ProcS
 
 		public override Task<ActionResult> Execute(ExecuteContext context)
 		{
+			//var url = context.Resolve(Url);
 			//context.ScheduleAction("CallApi")
+			//result = await GetWeather("");
+
 			return Task.FromResult(ActionResult.Success);
 		}
 	}
