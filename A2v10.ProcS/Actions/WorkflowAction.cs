@@ -8,7 +8,6 @@ namespace A2v10.ProcS
 	{
 		public virtual void Execute(ExecuteContext context)
 		{
-
 		}
 	}
 }

@@ -11,7 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A2v10.ProcS.Run", "A2v10.Pr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{DC046347-1F11-47B5-817F-0627AFD7E5B5}"
 	ProjectSection(SolutionItems) = preProject
-		first.json = first.json
+		Workflows\delay.json = Workflows\delay.json
+		Workflows\simple.json = Workflows\simple.json
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A2v10.ProcS.Tests", "A2v10.ProcS.Tests\A2v10.ProcS.Tests.csproj", "{EA99F7E5-CFE3-41F5-AAB8-7F22EA15706A}"

@@ -11,8 +11,11 @@ namespace A2v10.ProcS.Tests
 	{
 		StateMachine Load()
 		{
-			String json = File.ReadAllText("..//..//..//first.json");
-			return JsonConvert.DeserializeObject<StateMachine>(json);
+			String json = File.ReadAllText("..//..//..//Workflows//simple.json");
+			return JsonConvert.DeserializeObject<StateMachine>(json, new JsonSerializerSettings()
+			{
+				TypeNameHandling = TypeNameHandling.Auto
+			});
 		}
 
 		[TestMethod]
