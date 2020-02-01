@@ -14,6 +14,6 @@ namespace A2v10.ProcS.Interfaces
 
 	public interface IWorkflowAction
 	{
-		Task<ActionResult> Execute(IWorkflowExecuteContext context);
+		Task<ActionResult> Execute(IExecuteContext context);
 	}
 }

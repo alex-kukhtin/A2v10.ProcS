@@ -9,6 +9,7 @@ using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
+	/*
 	public interface IStartWithMessage<T>
 	{
 		Task Start(T message);
@@ -16,24 +17,28 @@ namespace A2v10.ProcS
 
 	public interface IHandleMessage<T>
 	{
-		void Handle(T message);
+		Task Handle(T message);
+	}
+	*/
+
+	public interface IMessage
+	{
+		Guid Id { get; }
 	}
 
 	public interface ISaga
 	{
 		Boolean IsComplete { get; }
 		Guid Id { get; }
+
+		Task Start(Object message);
+		Task Handle(Object message);
 	}
 
-	public class CallApiRequest
+	public class CallApiRequest : IMessage
 	{
+		public Guid Id { get; set; }
 		public String Url { get; set; }
-	}
-
-
-	public class ResumeProcessMessage : IDomainEvent
-	{
-		public Guid Id { get; }
 	}
 
 	public interface IDomainEvent
@@ -41,26 +46,32 @@ namespace A2v10.ProcS
 		Guid Id { get; }
 	}
 
-	public class CallHttpApiSaga: ISaga,
-		IStartWithMessage<CallApiRequest>
+	public class CallHttpApiSaga: SagaBase
 	{
-
-		private readonly IServiceBus _serviceBus;
-
-		public CallHttpApiSaga(IServiceBus serviceBus)
+		public CallHttpApiSaga(Guid id, IServiceBus serviceBus, IInstanceStorage instanceStorage)
+			:base(id, serviceBus, instanceStorage)
 		{
-			_serviceBus = serviceBus;
 		}
 
-		public Guid Id { get; set; }
-		public Boolean IsComplete => true;
+		#region dispatch
+		public override Task Start(Object message)
+		{
+			switch (message)
+			{
+				case CallApiRequest apiRequest:
+					return Start(apiRequest);
+			}
+			throw new ArgumentOutOfRangeException(message.GetType().FullName);
+		}
+		#endregion
 
 		public async Task Start(CallApiRequest message)
 		{
 			await Task.Delay(1000);
 
-			var resumeProcess = new ResumeProcessMessage();
-			_serviceBus.Send(resumeProcess);
+			IsComplete = true;
+			var resumeProcess = new ResumeProcess(Id);
+			ServiceBus.Send(resumeProcess);
 		}
 
 		public static void Register()
@@ -74,13 +85,14 @@ namespace A2v10.ProcS
 		public String Url { get; set; }
 		public String Method { get; set; }
 
-		async public Task<ActionResult> Execute(IWorkflowExecuteContext context)
+		async public Task<ActionResult> Execute(IExecuteContext context)
 		{
 			await context.SaveInstance();
 			//var url = context.Resolve(Url);
 			var request = new CallApiRequest();
+			request.Id = context.Instance.Id;
 			request.Url = Url;
-			//context.SendMessage(request);
+			context.SendMessage(request);
 			//context.ScheduleAction("CallApi")
 			//result = await GetWeather("");
 			return ActionResult.Idle;

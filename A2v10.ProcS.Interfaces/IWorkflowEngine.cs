@@ -7,6 +7,7 @@ namespace A2v10.ProcS.Interfaces
 {
 	public interface IWorkflowEngine
 	{
-		Task StartWorkflow(String processId);
+		Task<IInstance> StartWorkflow(IIdentity identity);
+		Task<IInstance> ResumeWorkflow(Guid instaceId);
 	}
 }

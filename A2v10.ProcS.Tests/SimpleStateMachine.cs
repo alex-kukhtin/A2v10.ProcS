@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using A2v10.ProcS.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Newtonsoft.Json;
@@ -11,11 +12,11 @@ namespace A2v10.ProcS.Tests
 	public class SimpleStateMachine
 	{
 		[TestMethod]
-		public void LoadDefinition()
+		public async Task LoadDefinition()
 		{
 
 			var storage = new FakeStorage();
-			var stm = storage.WorkflowFromStorage("simple.json") as StateMachine;
+			var stm = await storage.WorkflowFromStorage(new Identity("simple.json")) as StateMachine;
 
 			Assert.AreEqual("S1", stm.InitialState);
 			Assert.AreEqual("First state machine", stm.Description);
@@ -34,16 +35,16 @@ namespace A2v10.ProcS.Tests
 		}
 
 		[TestMethod]
-		public async Task SimpleRun()
+		public async Task SimpleRunStateMachine()
 		{
 			var storage = new FakeStorage();
 
-			var stm = storage.WorkflowFromStorage("simple.json");
+			//var stm = await storage.WorkflowFromStorage(new Identity("simple.json"));
 
-			var bus = new WorkflowServiceBus();
+			var bus = new WorkflowServiceBus(storage);
 			var engine = new WorkflowEngine(storage, storage, bus);
 
-			await engine.Run(stm);
+			await engine.StartWorkflow(new Identity("simple.json"));
 		}
 	}
 }

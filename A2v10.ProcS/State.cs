@@ -24,7 +24,7 @@ namespace A2v10.ProcS
 		public IWorkflowAction OnEntry { get; set; }
 		public IWorkflowAction OnExit { get; set; }
 
-		public async Task<ExecuteResult> ExecuteStep(IWorkflowExecuteContext context)
+		public async Task<ExecuteResult> ExecuteStep(IExecuteContext context)
 		{
 			if (await EnterState(context) == ActionResult.Idle)
 			{
@@ -34,12 +34,12 @@ namespace A2v10.ProcS
 			return await DoContinue(context);
 		}
 
-		public async Task ContinueStep(ExecuteContext context)
+		public async Task ContinueStep(IExecuteContext context)
 		{
 			await DoContinue(context);
 		}
 
-		async Task<ExecuteResult> DoContinue(IWorkflowExecuteContext context)
+		async Task<ExecuteResult> DoContinue(IExecuteContext context)
 		{
 			var next = NextState(context);
 			if (next == null)
@@ -50,7 +50,7 @@ namespace A2v10.ProcS
 			return ExecuteResult.Continue;
 		}
 
-		Transition NextState(IWorkflowExecuteContext context)
+		Transition NextState(IExecuteContext context)
 		{
 			if (Transitions == null || Transitions.Count == 0 || Final)
 				return null;
@@ -61,14 +61,14 @@ namespace A2v10.ProcS
 
 		}
 
-		async Task<ActionResult> EnterState(IWorkflowExecuteContext context)
+		async Task<ActionResult> EnterState(IExecuteContext context)
 		{
 			if (OnEntry == null)
 				return ActionResult.Success;
 			return await OnEntry.Execute(context);
 		}
 
-		async Task ExitState(IWorkflowExecuteContext context)
+		async Task ExitState(IExecuteContext context)
 		{
 			if (OnExit == null)
 				return;

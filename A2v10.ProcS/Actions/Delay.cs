@@ -11,7 +11,7 @@ namespace A2v10.ProcS
 	{
 		public String Duration { get; set; }
 
-		public async Task<ActionResult> Execute(IWorkflowExecuteContext context)
+		public async Task<ActionResult> Execute(IExecuteContext context)
 		{
 			TimeSpan span = TimeSpan.Parse(Duration);
 			String bookmark = Guid.NewGuid().ToString();

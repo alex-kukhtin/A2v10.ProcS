@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
@@ -15,12 +16,19 @@ namespace A2v10.ProcS
 
 		ConcurrentQueue<Object> _messages = new ConcurrentQueue<Object>();
 
+		private readonly IInstanceStorage _instanceStorage;
+
+		public WorkflowServiceBus(IInstanceStorage instanceStorage)
+		{
+			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
+		}
+
 		public void Send(Object message) 
 		{
 			_messages.Enqueue(message);
 		}
 
-		public static void RegisterSaga<TStartMessage, TSaga>()
+		public static void RegisterSaga<TStartMessage, TSaga>()  where TStartMessage : IMessage where  TSaga : ISaga
 		{
 			_starters.Add(typeof(TStartMessage), typeof(TSaga));
 		}
@@ -37,48 +45,45 @@ namespace A2v10.ProcS
 		{
 			// domain messages
 			if (message is IDomainEvent)
+			{
 				await ProcessDomainEvent(message);
+			}
 			// try to start new saga
-			if (_starters.TryGetValue(message.GetType(), out Type sagaType)) {
+			if (_starters.TryGetValue(message.GetType(), out Type sagaType)) 
+			{
 				await StartSaga(sagaType, message);
 				return;
 			}
-			// process all sagas
-			await ProcessAllSagas(message);
+			
+			// process existing sagas
+			if (message is IMessage iMsg)
+			{
+				if (_sagas.TryGetValue(iMsg.Id, out ISaga saga))
+					await HandleSaga(saga, message);
+			}
 		}
 
 		async Task ProcessDomainEvent(Object message)
 		{
-			foreach (var saga in _sagas)
-			{
-				var sagaType = saga.GetType();
-				var mi = sagaType.GetMethod("Handle");
-				mi = mi.MakeGenericMethod(typeof(IDomainEvent));
-				await (Task<Object>)mi.Invoke(saga, new Object[] { message });
+			foreach (var sagaKV in _sagas) {
+				var saga = sagaKV.Value;
+				await (Task) saga.Handle(message);
 			}
 		}
 
 		async Task StartSaga(Type sagaType, Object message)
 		{
-			var messageType = message.GetType();
-			var saga = System.Activator.CreateInstance(sagaType, this) as ISaga;
-			var mi = sagaType.GetMethod("Start");
-			mi = mi.MakeGenericMethod(messageType);
-			var result = mi.Invoke(saga, new Object[] { this, message });
-			if (!saga.IsComplete)
-				_sagas.Add(saga.Id, saga);
-			await (Task<Object>) result;
+			var iMsg = message as IMessage;
+			var saga = System.Activator.CreateInstance(sagaType, iMsg.Id, this, _instanceStorage) as ISaga;
+			await saga.Start(message);
+			_sagas.Add(saga.Id, saga);
 		}
 
-		Task ProcessAllSagas(Object message)
+		async Task HandleSaga(ISaga saga, Object message)
 		{
-			foreach (var s in _sagas)
-			{
-				ISaga saga = s.Value;
-
-			}
-			return Task.FromResult(0);
+			await (Task) saga.Handle(message);
+			if (saga.IsComplete)
+				_sagas.Remove(saga.Id);
 		}
-
 	}
 }

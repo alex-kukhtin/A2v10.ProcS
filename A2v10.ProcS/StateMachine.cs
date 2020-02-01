@@ -13,7 +13,12 @@ namespace A2v10.ProcS
 
 		public Dictionary<String, State> States { get; set; }
 
-		public async Task Run(IWorkflowExecuteContext context)
+		private IIdentity _identity;
+
+		public IIdentity GetIdentity() { return _identity; }
+		public void SetIdentity(IIdentity identity) { _identity = identity; }
+
+		public async Task Run(IExecuteContext context)
 		{
 			if (States == null || States.Count == 0)
 				return;
@@ -36,13 +41,14 @@ namespace A2v10.ProcS
 			}
 		}
 
-		public async Task Resume(ExecuteContext context)
+		public async Task Resume(IExecuteContext context)
 		{
 			var instance = context.Instance;
 			if (States.TryGetValue(instance.CurrentState, out State state))
 			{
 				await state.ContinueStep(context);
 			}
+			await Run(context);
 		}
 	}
 }

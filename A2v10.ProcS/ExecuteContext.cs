@@ -6,19 +6,18 @@ using System.Threading.Tasks;
 
 namespace A2v10.ProcS
 {
-	public class ExecuteContext : IWorkflowExecuteContext
+	public class ExecuteContext : IExecuteContext
 	{
-		public IWorkflowInstance Instance { get; }
+		public IInstance Instance { get; }
 
 		private readonly IServiceBus _serviceBus;
 		private readonly IInstanceStorage _instanceStorage;
 
-		public ExecuteContext(IServiceBus bus, IInstanceStorage storage, WorkflowInstance instance)
+		public ExecuteContext(IServiceBus bus, IInstanceStorage storage, IInstance instance)
 		{
 			_serviceBus = bus;
 			_instanceStorage = storage;
 			Instance = instance;
-
 		}
 
 		public async Task SaveInstance()
@@ -26,11 +25,11 @@ namespace A2v10.ProcS
 			await _instanceStorage.Save(Instance);
 		}
 
-		public void ScheduleAction(String Bookmark, Object message)
+		public void SendMessage(Object message)
 		{
-			// bookmark, instance, message
 			_serviceBus.Send(message);
 		}
+
 	}
 
 	public class ContinueContext

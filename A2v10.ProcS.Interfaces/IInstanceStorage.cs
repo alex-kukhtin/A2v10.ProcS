@@ -7,8 +7,8 @@ namespace A2v10.ProcS.Interfaces
 {
 	public interface IInstanceStorage
 	{
-		IWorkflowInstance Create(Guid processId);
-		IWorkflowInstance Load(Guid instanceId);
-		Task Save(IWorkflowInstance instance);
+		IInstance Create(Guid processId);
+		Task<IInstance> Load(Guid instanceId);
+		Task Save(IInstance instance);
 	}
 }

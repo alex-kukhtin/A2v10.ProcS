@@ -11,6 +11,50 @@ using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
+	public class StartDomain : IMessage
+	{
+		public Guid Id { get; } = Guid.NewGuid();
+	}
+
+	public class ResumeProcess : IMessage, IDomainEvent
+	{
+		public Guid Id { get; private set; }
+
+		public ResumeProcess(Guid id)
+		{
+			Id = id;
+		}
+	}
+
+	public class DomainEventsSaga: SagaBase
+		//IHandleMessage<ResumeProcess>
+	{
+
+		public DomainEventsSaga(Guid id, IServiceBus serviceBus, IInstanceStorage instanceStorage)
+			:base(id, serviceBus, instanceStorage)
+		{ 
+		}
+
+		#region dispatch
+		public override Task Handle(Object message)
+		{
+			switch (message)
+			{
+				case ResumeProcess resumeProcess:
+					return HandleResume(resumeProcess);
+			}
+			return Task.FromResult(0);
+		}
+		#endregion
+
+		public async Task HandleResume(ResumeProcess message)
+		{
+			var instance = await InstanceStorage.Load(message.Id);
+			var context = new ExecuteContext(ServiceBus, InstanceStorage, instance);
+			await instance.Workflow.Resume(context);
+		}
+	}
+
 	public class WorkflowEngine : IWorkflowEngine
 	{
 		private readonly IServiceBus _serviceBus;
@@ -22,30 +66,39 @@ namespace A2v10.ProcS
 			_serviceBus = serviceBus ?? throw new ArgumentNullException(nameof(serviceBus));
 			_workflowStorage = workflowStorage ?? throw new ArgumentNullException(nameof(workflowStorage));
 			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
+			serviceBus.Send(new StartDomain());
+		}
 
-			// register sagas
+		public static void RegisterSagas()
+		{
 			CallHttpApiSaga.Register();
+			WorkflowServiceBus.RegisterSaga<StartDomain, DomainEventsSaga>();
 		}
 
-		public async Task StartWorkflow(String processId)
+		public async Task<IInstance> StartWorkflow(IIdentity identity)
 		{
-			var workflow = _workflowStorage.WorkflowFromStorage(processId, -1);
-			var instance = new WorkflowInstance()
-			{
-				Id = Guid.NewGuid()
-			};
-			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);
-			await workflow.Run(context);
+			var workflow = await _workflowStorage.WorkflowFromStorage(identity);
+			return await Run(workflow);
 		}
 
-		public async Task Run(IWorkflowDefinition workflow)
+		public async Task<IInstance> Run(IWorkflowDefinition workflow)
 		{
 			var instance = new WorkflowInstance()
 			{
-				Id = Guid.NewGuid()
+				Id = Guid.NewGuid(),
+				Workflow = workflow
 			};
 			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);
 			await workflow.Run(context);
+			return instance;
+		}
+
+		public async Task<IInstance> ResumeWorkflow(Guid instaceId)
+		{
+			var instance = await _instanceStorage.Load(instaceId);
+			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);
+			await instance.Workflow.Resume(context);
+			return instance;
 		}
 	}
 }

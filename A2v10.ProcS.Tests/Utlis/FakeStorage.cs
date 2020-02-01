@@ -6,26 +6,40 @@ using Newtonsoft.Json;
 
 using A2v10.ProcS.Interfaces;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace A2v10.ProcS.Tests
 {
 	public class FakeStorage : IWorkflowStorage, IInstanceStorage
 	{
+		private readonly Dictionary<Guid, IInstance> _instances = new Dictionary<Guid, IInstance>();
+
 		#region IInstanceStorage
-		public IWorkflowInstance Create(Guid processId)
+		public IInstance Create(Guid processId)
 		{
 			throw new NotImplementedException(nameof(Create));
 		}
 
-		public IWorkflowInstance Load(Guid instanceId)
+		public async Task<IInstance> Load(Guid instanceId)
 		{
-			throw new NotImplementedException(nameof(Load));
+			if (_instances.TryGetValue(instanceId, out IInstance instance))
+			{
+				var workflow = await WorkflowFromStorage(instance.Workflow.GetIdentity());
+				instance.Workflow = workflow;
+				return instance;
+			}
+			throw new ArgumentOutOfRangeException(nameof(instanceId));
 		}
 
-		public Task Save(IWorkflowInstance instance)
+		public Task Save(IInstance instance)
 		{
-			throw new NotImplementedException(nameof(Save));
+			if (_instances.ContainsKey(instance.Id))
+				_instances[instance.Id] = instance;
+			else
+				_instances.Add(instance.Id, instance);
+			return Task.FromResult(0);
 		}
+
 		#endregion
 
 		#region IWorkflowStorage
@@ -39,13 +53,15 @@ namespace A2v10.ProcS.Tests
 			throw new NotImplementedException(nameof(WorkflowFromString));
 		}
 
-		public IWorkflowDefinition WorkflowFromStorage(String processId, Int32 Version = -1)
+		public Task<IWorkflowDefinition> WorkflowFromStorage(IIdentity identity)
 		{
-			String json = File.ReadAllText($"..//..//..//Workflows//{processId}");
-			return JsonConvert.DeserializeObject<StateMachine>(json, new JsonSerializerSettings()
+			String json = File.ReadAllText($"..//..//..//Workflows//{identity.ProcessId}");
+			var result = JsonConvert.DeserializeObject<StateMachine>(json, new JsonSerializerSettings()
 			{
 				TypeNameHandling = TypeNameHandling.Auto
-			});
+			}) as IWorkflowDefinition;
+			result.SetIdentity(identity);
+			return Task.FromResult(result);
 		}
 		#endregion
 	}

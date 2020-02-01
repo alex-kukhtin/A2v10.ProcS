@@ -5,10 +5,12 @@ using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
-	public class WorkflowInstance : IWorkflowInstance
+	public class WorkflowInstance : IInstance
 	{
 		public Guid Id { get; set; }
 		public String CurrentState { get; set; }
+
+		public IWorkflowDefinition Workflow { get; set; }
 
 		public Boolean IsComplete { get; set; }
 

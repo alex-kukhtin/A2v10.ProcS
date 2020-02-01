@@ -1,15 +1,15 @@
 ﻿// Copyright © 2020 Alex Kukhtin. All rights reserved.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace A2v10.ProcS.Interfaces
 {
-	public interface IWorkflowExecuteContext
+	public interface IExecuteContext
 	{
-		IWorkflowInstance Instance { get; }
+		IInstance Instance { get; }
 		Task SaveInstance();
+
+		void SendMessage(Object message);
 	}
 }
