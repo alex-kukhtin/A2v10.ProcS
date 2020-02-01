@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Copyright © 2020 Alex Kukhtin. All rights reserved.
+
+using System;
 
 namespace A2v10.ProcS.Interfaces
 {
 	public interface IWorkflowStorage
 	{
-		IWorkflowDefinition FromString(String source);
-		IWorkflowDefinition FromStorage(Guid Id, Int32 Version);
-
-		IWorkflowInstance Get(Guid id);
+		IWorkflowDefinition WorkflowFromString(String source);
+		IWorkflowDefinition WorkflowFromStorage(String processId, Int32 Version = -1);
 	}
 }

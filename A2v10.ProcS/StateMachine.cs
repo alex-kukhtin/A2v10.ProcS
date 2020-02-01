@@ -6,14 +6,14 @@ using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
-	public class StateMachine
+	public class StateMachine : IWorkflowDefinition
 	{
 		public String Description { get; set; }
 		public String InitialState { get; set; }
 
 		public Dictionary<String, State> States { get; set; }
 
-		public async Task Run(ExecuteContext context)
+		public async Task Run(IWorkflowExecuteContext context)
 		{
 			if (States == null || States.Count == 0)
 				return;

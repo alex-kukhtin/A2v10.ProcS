@@ -8,5 +8,7 @@ namespace A2v10.ProcS.Interfaces
 	{
 		Guid Id { get; }
 		String CurrentState { get; set; }
+
+		void SetState(String state);
 	}
 }

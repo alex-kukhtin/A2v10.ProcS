@@ -5,14 +5,9 @@ using System.Threading.Tasks;
 
 namespace A2v10.ProcS.Interfaces
 {
-	public interface IServiceMessage
+	public interface IServiceBus
 	{
-		Task<Boolean> ExecuteAsync();
-	}
-
-	public interface IWorkflowServiceBus
-	{
-		void Send(IServiceMessage message);
+		void Send(Object message);
 		Task Run();
 	}
 }

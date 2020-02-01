@@ -13,9 +13,9 @@ namespace A2v10.ProcS
 		public String Description { get; set; }
 
 		public String To { get; set; }
-		public WorkflowAction Action { get; set; }
+		public IWorkflowAction Action { get; set; }
 
-		public Boolean Evaluate(ExecuteContext context)
+		public Boolean Evaluate(IWorkflowExecuteContext context)
 		{
 			return true;
 		}

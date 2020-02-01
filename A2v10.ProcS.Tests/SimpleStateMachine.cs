@@ -13,7 +13,10 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public void LoadDefinition()
 		{
-			var stm = Startup.Load("simple.json");
+
+			var storage = new FakeStorage();
+			var stm = storage.WorkflowFromStorage("simple.json") as StateMachine;
+
 			Assert.AreEqual("S1", stm.InitialState);
 			Assert.AreEqual("First state machine", stm.Description);
 
@@ -33,9 +36,12 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleRun()
 		{
-			var stm = Startup.Load("simple.json");
+			var storage = new FakeStorage();
+
+			var stm = storage.WorkflowFromStorage("simple.json");
+
 			var bus = new WorkflowServiceBus();
-			var engine = new WorkflowEngine(bus);
+			var engine = new WorkflowEngine(storage, storage, bus);
 
 			await engine.Run(stm);
 		}

@@ -21,14 +21,14 @@ namespace A2v10.ProcS
 		public Dictionary<String, Transition>  Transitions { get; set; }
 		public Boolean Final { get; set; }
 
-		public WorkflowAction OnEntry { get; set; }
-		public WorkflowAction OnExit { get; set; }
+		public IWorkflowAction OnEntry { get; set; }
+		public IWorkflowAction OnExit { get; set; }
 
-		public async Task<ExecuteResult> ExecuteStep(ExecuteContext context)
+		public async Task<ExecuteResult> ExecuteStep(IWorkflowExecuteContext context)
 		{
 			if (await EnterState(context) == ActionResult.Idle)
 			{
-				context.SaveInstance();
+				//context.SaveInstance();
 				return ExecuteResult.Idle;
 			}
 			return await DoContinue(context);
@@ -39,18 +39,18 @@ namespace A2v10.ProcS
 			await DoContinue(context);
 		}
 
-		async Task<ExecuteResult> DoContinue(ExecuteContext context)
+		async Task<ExecuteResult> DoContinue(IWorkflowExecuteContext context)
 		{
 			var next = NextState(context);
 			if (next == null)
 				return ExecuteResult.Exit;
 			next.Action?.Execute(context);
 			await ExitState(context);
-			context.SetState(next.To);
+			context.Instance.SetState(next.To);
 			return ExecuteResult.Continue;
 		}
 
-		Transition NextState(ExecuteContext context)
+		Transition NextState(IWorkflowExecuteContext context)
 		{
 			if (Transitions == null || Transitions.Count == 0 || Final)
 				return null;
@@ -61,14 +61,14 @@ namespace A2v10.ProcS
 
 		}
 
-		async Task<ActionResult> EnterState(ExecuteContext context)
+		async Task<ActionResult> EnterState(IWorkflowExecuteContext context)
 		{
 			if (OnEntry == null)
 				return ActionResult.Success;
 			return await OnEntry.Execute(context);
 		}
 
-		async Task ExitState(ExecuteContext context)
+		async Task ExitState(IWorkflowExecuteContext context)
 		{
 			if (OnExit == null)
 				return;

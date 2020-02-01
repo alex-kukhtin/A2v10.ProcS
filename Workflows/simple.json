@@ -16,7 +16,6 @@
 			"Description": "State 2",
 			"Transitions": {
 				"S2->End": {
-					"Trigger": "",
 					"Default": true,
 					"To": "End"
 				}

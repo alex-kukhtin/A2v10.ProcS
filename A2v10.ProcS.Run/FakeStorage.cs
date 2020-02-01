@@ -9,17 +9,17 @@ namespace A2v10.ProcS.Run
 {
 	public class FakeStorage : IInstanceStorage
 	{
-		public IWorkflowInstance Create(String processId)
+		public IWorkflowInstance Create(Guid processId)
 		{
 			throw new NotImplementedException(nameof(Create));
 		}
 
-		public IWorkflowInstance Load(String instanceId)
+		public IWorkflowInstance Load(Guid instanceId)
 		{
 			throw new NotImplementedException(nameof(Load));
 		}
 
-		public void Save(IWorkflowInstance instance)
+		public Task Save(IWorkflowInstance instance)
 		{
 			throw new NotImplementedException(nameof(Save));
 		}

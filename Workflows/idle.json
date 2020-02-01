@@ -1,0 +1,24 @@
+{
+	"Description": "Call Http Api",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"OnEntry": {
+				"$type": "A2v10.ProcS.CallHttpApi, A2v10.ProcS",
+				"Url": "url_for_call"
+			},
+			"Description": "Call",
+			"Transitions": {
+				"S1->End": {
+					"Description": "From S1 to End",
+					"Default": true,
+					"To": "End"
+				}
+			}
+		},
+		"End": {
+			"Description": "State End",
+			"Result": "OK"
+		}
+	}
+}
