@@ -44,7 +44,7 @@ namespace A2v10.ProcS
 			var next = NextState(context);
 			if (next == null)
 				return ExecuteResult.Exit;
-			next.Action?.Execute(context);
+			await next.ExecuteAction(context);
 			await ExitState(context);
 			context.Instance.SetState(next.To);
 			return ExecuteResult.Continue;
@@ -72,7 +72,7 @@ namespace A2v10.ProcS
 		{
 			if (OnExit == null)
 				return;
-			await OnExit?.Execute(context);
+			await OnExit.Execute(context);
 		}
 	}
 }
