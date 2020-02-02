@@ -7,7 +7,7 @@ namespace A2v10.ProcS
 {
 	public class WorkflowScheduler
 	{
-		public void Schedule(String bookmark, WorkflowInstance instance, Task<DynamicObject> task)
+		public void Schedule(String bookmark, Instance instance, Task<DynamicObject> task)
 		{
 
 		}

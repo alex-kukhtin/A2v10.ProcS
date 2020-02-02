@@ -83,7 +83,7 @@ namespace A2v10.ProcS
 
 		public IInstance CreateInstance(IWorkflowDefinition workflow)
 		{
-			return new WorkflowInstance()
+			return new Instance()
 			{
 				Id = Guid.NewGuid(),
 				Workflow = workflow

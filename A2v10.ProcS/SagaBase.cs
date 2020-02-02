@@ -16,6 +16,7 @@ namespace A2v10.ProcS
 		private readonly IServiceBus _serviceBus;
 		private readonly IInstanceStorage _instanceStorage;
 
+		/* required */
 		public SagaBase(Guid id, IServiceBus serviceBus, IInstanceStorage instanceStorage)
 		{
 			Id = id;
