@@ -18,11 +18,13 @@ namespace A2v10.ProcS
 
 	public class ResumeProcess : IMessage, IDomainEvent
 	{
-		public Guid Id { get; private set; }
+		public Guid Id { get; }
+		public String Result { get; }
 
-		public ResumeProcess(Guid id)
+		public ResumeProcess(Guid id, String result)
 		{
 			Id = id;
+			Result = result;
 		}
 	}
 
@@ -49,7 +51,10 @@ namespace A2v10.ProcS
 		public async Task HandleResume(ResumeProcess message)
 		{
 			var instance = await InstanceStorage.Load(message.Id);
-			var context = new ExecuteContext(ServiceBus, InstanceStorage, instance);
+			var context = new ResumeContext(ServiceBus, InstanceStorage, instance)
+			{
+				Result = message.Result
+			};
 			await instance.Workflow.Resume(context);
 		}
 	}
@@ -96,10 +101,14 @@ namespace A2v10.ProcS
 			return await Run(identity);
 		}
 
-		public async Task<IInstance> ResumeWorkflow(Guid instaceId)
+		public async Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, String result)
 		{
 			var instance = await _instanceStorage.Load(instaceId);
-			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);
+			var context = new ResumeContext(_serviceBus, _instanceStorage, instance)
+			{
+				Bookmark = bookmark,
+				Result = result
+			};
 			await instance.Workflow.Resume(context);
 			return instance;
 		}

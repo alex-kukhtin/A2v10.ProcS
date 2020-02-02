@@ -1,8 +1,9 @@
-﻿using A2v10.ProcS.Interfaces;
+﻿// Copyright © 2020 Alex Kukhtin. All rights reserved.
+
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
+
+using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
@@ -30,17 +31,20 @@ namespace A2v10.ProcS
 			_serviceBus.Send(message);
 		}
 
+		public String Resolve(String source)
+		{
+			return source;
+		}
 	}
 
-	public class ContinueContext
+	public class ResumeContext : ExecuteContext, IResumeContext
 	{
-		public String Bookmark { get; }
+		public String Bookmark { get; set; }
+		public String Result { get; set; }
 
-		/*
-		public ContinueContext(WorkflowInstance instance, String bookmark)
+		public ResumeContext(IServiceBus bus, IInstanceStorage storage, IInstance instance)
+			: base(bus, storage, instance)
 		{
-			Bookmark = bookmark;
 		}
-		*/
 	}
 }

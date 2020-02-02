@@ -5,19 +5,22 @@
 	"States": {
 		"S1": {
 			"OnEntry": {
-				"$type": "A2v10.ProcS.Delay, A2v10.ProcS",
+				"$type": "A2v10.ProcS.CallHttpApi, A2v10.ProcS",
 				"Timeout": "30",
-				"Duration": "00:00:02",
-				"Url": "{{environment.apiUrl}}?key={{params.city}}",
-				"ResponseBody": "data.apiResult", /*response.body, response.header, response.status*/
-				"ResponseHeader": "",
-				"ResponseStatus": 222,
+				"Url": "{{environment.OpenWeatherMapApi.url}}?q={{params.city}}&appid={{environment.OpenWeatherMapApi.appId}}",
+				"OnSuccess": "/*Kelvin!*/\ndata.temp = Math.round(response.body.main.temp - 273.0)",
+				//"ResponseBody": "data.apiResult", /*response.body, response.header, response.status*/
+				//"ResponseHeader": "",
+				//"ResponseStatus": 222,
 				"TransitionOnException": "HTTPError"
 			},
 			"Transitions": {
 				"S1->End": {
 					"Condition": "data.apiResult == params.xxx",
 					"To": "End"
+				},
+				"S1->Continue": {
+					"Condition":  "data.temp > 0"
 				},
 				"HTTPError": {
 					"To": "Error"

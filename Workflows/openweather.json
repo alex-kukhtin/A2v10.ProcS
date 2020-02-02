@@ -1,0 +1,29 @@
+{
+	"Description": "Open Weather data",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"Description": "State 1",
+			"Transitions": {
+				"S1->S2": {
+					"Description": "From S1 to S2",
+					"Default": true,
+					"To": "S2"
+				}
+			}
+		},
+		"S2": {
+			"Description": "State 2",
+			"Transitions": {
+				"S2->End": {
+					"Default": true,
+					"To": "End"
+				}
+			}
+		},
+		"End": {
+			"Description":  "State End",
+			"Result": "OK"
+		}
+	}
+}

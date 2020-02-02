@@ -10,21 +10,21 @@ using A2v10.ProcS.Interfaces;
 namespace A2v10.ProcS.Tests
 {
 	[TestClass]
-	public class IdleAction
+	public class IdleActions
 	{
 		[TestMethod]
 		public async Task SimpleCallApi()
 		{
 			var storage = new FakeStorage();
 
-			var wf = await storage.WorkflowFromStorage(new Identity("idle.json")) as StateMachine;
+			var wf = await storage.WorkflowFromStorage(new Identity("callapi.json")) as StateMachine;
 			var stm = wf as StateMachine;
 			Assert.IsInstanceOfType(stm.States["S1"].OnEntry, typeof(CallHttpApi));
 
 			var bus = new ServiceBus(storage);
 
 			var engine = new WorkflowEngine(storage, storage, bus);
-			IInstance instance = await engine.Run(new Identity("idle.json"));
+			IInstance instance = await engine.Run(wf);
 
 			await bus.Run();
 

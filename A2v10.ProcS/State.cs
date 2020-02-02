@@ -34,8 +34,9 @@ namespace A2v10.ProcS
 			return await DoContinue(context);
 		}
 
-		public async Task ContinueStep(IExecuteContext context)
+		public async Task ContinueStep(IResumeContext context)
 		{
+			// process context.Result
 			await DoContinue(context);
 		}
 

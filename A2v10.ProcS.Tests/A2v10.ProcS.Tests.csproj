@@ -53,7 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DelayAction.cs" />
-    <Compile Include="IdleAction.cs" />
+    <Compile Include="IdleActions.cs" />
     <Compile Include="Utlis\FakeStorage.cs" />
     <Compile Include="SimpleStateMachine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

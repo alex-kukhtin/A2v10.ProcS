@@ -41,7 +41,7 @@ namespace A2v10.ProcS
 			}
 		}
 
-		public async Task Resume(IExecuteContext context)
+		public async Task Resume(IResumeContext context)
 		{
 			var instance = context.Instance;
 			if (States.TryGetValue(instance.CurrentState, out State state))

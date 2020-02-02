@@ -5,7 +5,8 @@
 		"S1": {
 			"OnEntry": {
 				"$type": "A2v10.ProcS.CallHttpApi, A2v10.ProcS",
-				"Url": "url_for_call"
+				"Url": "https://samples.openweathermap.org/data/2.5/weather?q=London&appid=b6907d289e10d714a6e88b30761fae22",
+				"Method": "Get" /* todo: enum */
 			},
 			"Description": "Call",
 			"Transitions": {

@@ -11,5 +11,12 @@ namespace A2v10.ProcS.Interfaces
 		Task SaveInstance();
 
 		void SendMessage(IMessage message);
+		String Resolve(String source);
+	}
+
+	public interface IResumeContext : IExecuteContext
+	{
+		String Bookmark { get; }
+		String Result { get; }
 	}
 }
