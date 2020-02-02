@@ -17,15 +17,14 @@ namespace A2v10.ProcS.Tests
 		{
 			var storage = new FakeStorage();
 
-			var wf = await storage.WorkflowFromStorage(new Identity("idle.json"));
-
+			var wf = await storage.WorkflowFromStorage(new Identity("idle.json")) as StateMachine;
 			var stm = wf as StateMachine;
 			Assert.IsInstanceOfType(stm.States["S1"].OnEntry, typeof(CallHttpApi));
 
-			var bus = new WorkflowServiceBus(storage);
+			var bus = new ServiceBus(storage);
 
 			var engine = new WorkflowEngine(storage, storage, bus);
-			IInstance instance = await engine.Run(wf);
+			IInstance instance = await engine.Run(new Identity("idle.json"));
 
 			await bus.Run();
 

@@ -21,29 +21,11 @@ namespace A2v10.ProcS
 	}
 	*/
 
-	public interface IMessage
-	{
-		Guid Id { get; }
-	}
-
-	public interface ISaga
-	{
-		Boolean IsComplete { get; }
-		Guid Id { get; }
-
-		Task Start(Object message);
-		Task Handle(Object message);
-	}
 
 	public class CallApiRequest : IMessage
 	{
 		public Guid Id { get; set; }
 		public String Url { get; set; }
-	}
-
-	public interface IDomainEvent
-	{
-		Guid Id { get; }
 	}
 
 	public class CallHttpApiSaga: SagaBase
@@ -54,7 +36,7 @@ namespace A2v10.ProcS
 		}
 
 		#region dispatch
-		public override Task Start(Object message)
+		public override Task Start(IMessage message)
 		{
 			switch (message)
 			{
@@ -76,7 +58,7 @@ namespace A2v10.ProcS
 
 		public static void Register()
 		{
-			WorkflowServiceBus.RegisterSaga<CallApiRequest, CallHttpApiSaga>();
+			ProcS.ServiceBus.RegisterSaga<CallApiRequest, CallHttpApiSaga>();
 		}
 	}
 

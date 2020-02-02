@@ -11,7 +11,7 @@ namespace A2v10.ProcS.Run
 	{
 		static void Main(String[] args)
 		{
-			var bus = new WorkflowServiceBus(null);
+			var bus = new ServiceBus(null);
 			var engine = new WorkflowEngine(null, null, bus);
 
 			while (true)
@@ -19,7 +19,7 @@ namespace A2v10.ProcS.Run
 				switch (Console.ReadKey().KeyChar)
 				{
 					case 'c':
-						var instance = new WorkflowInstance();
+						var instance = engine.CreateInstance(new Identity("program"));
 						Console.WriteLine($"Instance created. Id={instance.Id}");
 						break;
 					case 'l':

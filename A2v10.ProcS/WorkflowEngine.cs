@@ -27,7 +27,6 @@ namespace A2v10.ProcS
 	}
 
 	public class DomainEventsSaga: SagaBase
-		//IHandleMessage<ResumeProcess>
 	{
 
 		public DomainEventsSaga(Guid id, IServiceBus serviceBus, IInstanceStorage instanceStorage)
@@ -36,7 +35,7 @@ namespace A2v10.ProcS
 		}
 
 		#region dispatch
-		public override Task Handle(Object message)
+		public override Task Handle(IMessage message)
 		{
 			switch (message)
 			{
@@ -72,25 +71,29 @@ namespace A2v10.ProcS
 		public static void RegisterSagas()
 		{
 			CallHttpApiSaga.Register();
-			WorkflowServiceBus.RegisterSaga<StartDomain, DomainEventsSaga>();
+			ServiceBus.RegisterSaga<StartDomain, DomainEventsSaga>();
 		}
 
-		public async Task<IInstance> StartWorkflow(IIdentity identity)
+		#region IWorkflowEngine
+		public async Task<IInstance> CreateInstance(IIdentity identity)
 		{
 			var workflow = await _workflowStorage.WorkflowFromStorage(identity);
-			return await Run(workflow);
+			return CreateInstance(workflow);
 		}
 
-		public async Task<IInstance> Run(IWorkflowDefinition workflow)
+		public IInstance CreateInstance(IWorkflowDefinition workflow)
 		{
-			var instance = new WorkflowInstance()
+			return new WorkflowInstance()
 			{
 				Id = Guid.NewGuid(),
 				Workflow = workflow
 			};
-			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);
-			await workflow.Run(context);
-			return instance;
+		}
+
+
+		public async Task<IInstance> StartWorkflow(IIdentity identity)
+		{
+			return await Run(identity);
 		}
 
 		public async Task<IInstance> ResumeWorkflow(Guid instaceId)
@@ -98,6 +101,24 @@ namespace A2v10.ProcS
 			var instance = await _instanceStorage.Load(instaceId);
 			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);
 			await instance.Workflow.Resume(context);
+			return instance;
+		}
+		#endregion
+
+
+		public async Task<IInstance> Run(IIdentity identity)
+		{
+			var instance = await CreateInstance(identity);
+			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);
+			await instance.Workflow.Run(context);
+			return instance;
+		}
+
+		public async Task<IInstance> Run(IWorkflowDefinition workflow)
+		{
+			var instance = CreateInstance(workflow);
+			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);
+			await instance.Workflow.Run(context);
 			return instance;
 		}
 	}

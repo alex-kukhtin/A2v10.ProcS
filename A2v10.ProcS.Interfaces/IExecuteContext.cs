@@ -10,6 +10,6 @@ namespace A2v10.ProcS.Interfaces
 		IInstance Instance { get; }
 		Task SaveInstance();
 
-		void SendMessage(Object message);
+		void SendMessage(IMessage message);
 	}
 }

@@ -14,7 +14,7 @@ namespace A2v10.ProcS.Tests
 		public async Task SimpleRun()
 		{
 			var storage = new FakeStorage();
-			var bus = new WorkflowServiceBus(storage);
+			var bus = new ServiceBus(storage);
 			var stm = await storage.WorkflowFromStorage(new Identity("delay.json")) as StateMachine;
 
 			Assert.AreEqual("S1", stm.InitialState);

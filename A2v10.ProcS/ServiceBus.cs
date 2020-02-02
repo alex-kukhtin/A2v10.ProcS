@@ -9,21 +9,21 @@ using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
-	public class WorkflowServiceBus : IServiceBus
+	public class ServiceBus : IServiceBus
 	{
 		private static readonly Dictionary<Type, Type> _starters = new Dictionary<Type, Type>();
 		private static readonly Dictionary<Guid, ISaga> _sagas = new Dictionary<Guid, ISaga>();
 
-		ConcurrentQueue<Object> _messages = new ConcurrentQueue<Object>();
+		ConcurrentQueue<IMessage> _messages = new ConcurrentQueue<IMessage>();
 
 		private readonly IInstanceStorage _instanceStorage;
 
-		public WorkflowServiceBus(IInstanceStorage instanceStorage)
+		public ServiceBus(IInstanceStorage instanceStorage)
 		{
 			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
 		}
 
-		public void Send(Object message) 
+		public void Send(IMessage message) 
 		{
 			_messages.Enqueue(message);
 		}
@@ -35,13 +35,13 @@ namespace A2v10.ProcS
 
 		public async Task Run()
 		{
-			while (_messages.TryDequeue(out Object message))
+			while (_messages.TryDequeue(out IMessage message))
 			{
 				await ProcessMessage(message);
 			}
 		}
 
-		async Task ProcessMessage(Object message)
+		async Task ProcessMessage(IMessage message)
 		{
 			// domain messages
 			if (message is IDomainEvent)
@@ -56,14 +56,12 @@ namespace A2v10.ProcS
 			}
 			
 			// process existing sagas
-			if (message is IMessage iMsg)
-			{
-				if (_sagas.TryGetValue(iMsg.Id, out ISaga saga))
-					await HandleSaga(saga, message);
+			if (_sagas.TryGetValue(message.Id, out ISaga saga)) { 
+				await HandleSaga(saga, message);
 			}
 		}
 
-		async Task ProcessDomainEvent(Object message)
+		async Task ProcessDomainEvent(IMessage message)
 		{
 			foreach (var sagaKV in _sagas) {
 				var saga = sagaKV.Value;
@@ -71,7 +69,7 @@ namespace A2v10.ProcS
 			}
 		}
 
-		async Task StartSaga(Type sagaType, Object message)
+		async Task StartSaga(Type sagaType, IMessage message)
 		{
 			var iMsg = message as IMessage;
 			var saga = System.Activator.CreateInstance(sagaType, iMsg.Id, this, _instanceStorage) as ISaga;
@@ -79,7 +77,7 @@ namespace A2v10.ProcS
 			_sagas.Add(saga.Id, saga);
 		}
 
-		async Task HandleSaga(ISaga saga, Object message)
+		async Task HandleSaga(ISaga saga, IMessage message)
 		{
 			await (Task) saga.Handle(message);
 			if (saga.IsComplete)

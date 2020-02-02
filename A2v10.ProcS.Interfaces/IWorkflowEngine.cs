@@ -9,5 +9,8 @@ namespace A2v10.ProcS.Interfaces
 	{
 		Task<IInstance> StartWorkflow(IIdentity identity);
 		Task<IInstance> ResumeWorkflow(Guid instaceId);
+
+		Task<IInstance> CreateInstance(IIdentity identity);
+		IInstance CreateInstance(IWorkflowDefinition workflow);
 	}
 }

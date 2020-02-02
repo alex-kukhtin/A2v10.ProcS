@@ -25,7 +25,7 @@ namespace A2v10.ProcS
 			await _instanceStorage.Save(Instance);
 		}
 
-		public void SendMessage(Object message)
+		public void SendMessage(IMessage message)
 		{
 			_serviceBus.Send(message);
 		}

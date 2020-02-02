@@ -26,12 +26,12 @@ namespace A2v10.ProcS
 		public IServiceBus ServiceBus => _serviceBus;
 		public IInstanceStorage InstanceStorage => _instanceStorage;
 
-		public virtual Task Start(Object message)
+		public virtual Task Start(IMessage message)
 		{
 			return Task.FromResult(0);
 		}
 
-		public virtual Task Handle(Object message)
+		public virtual Task Handle(IMessage message)
 		{
 			return Task.FromResult(0);
 		}
