@@ -6,12 +6,6 @@ using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
-	public class StartDomain : IMessage, IStartMessage
-	{
-		public Guid Id { get; }
-		public String CorrelationId { get; }
-	}
-
 	public class ResumeProcess : IMessage
 	{
 		public String CorrelationId { get; }
@@ -30,7 +24,6 @@ namespace A2v10.ProcS
 	{
 		public static void Register()
 		{
-			A2v10.ProcS.ServiceBus.RegisterSaga<StartDomain, ProcessSaga>();
 			A2v10.ProcS.ServiceBus.RegisterSaga<ResumeProcess, ProcessSaga>();
 		}
 

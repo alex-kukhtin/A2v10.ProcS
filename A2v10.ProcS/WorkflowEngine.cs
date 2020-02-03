@@ -23,7 +23,6 @@ namespace A2v10.ProcS
 			_serviceBus = serviceBus ?? throw new ArgumentNullException(nameof(serviceBus));
 			_workflowStorage = workflowStorage ?? throw new ArgumentNullException(nameof(workflowStorage));
 			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
-			serviceBus.Send(new StartDomain());
 		}
 
 		public static void RegisterSagas()
