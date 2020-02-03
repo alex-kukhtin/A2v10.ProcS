@@ -10,15 +10,9 @@ namespace A2v10.ProcS.Interfaces
 		String CorrelationId { get; }
 	}
 
-	public interface IStartMessage : IMessage
-	{
-		Guid Id { get; }
-	}
-
 	public interface ISaga
 	{
 		Boolean IsComplete { get; }
-		Guid Id { get; }
 
 		Task<String> Handle(IMessage message);
 	}

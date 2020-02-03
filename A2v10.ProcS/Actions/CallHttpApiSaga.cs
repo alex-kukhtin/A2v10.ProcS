@@ -8,7 +8,7 @@ using A2v10.ProcS.Interfaces;
 namespace A2v10.ProcS
 {
 
-	public class CallApiRequest : IMessage, IStartMessage
+	public class CallApiRequest : IMessage
 	{
 		public Guid Id { get; set; }
 		public String CorrelationId { get; set; }
@@ -27,8 +27,11 @@ namespace A2v10.ProcS
 	{
 		private static readonly HttpClient _httpClient = new HttpClient();
 
-		public CallHttpApiSaga(Guid id, IServiceBus serviceBus, IInstanceStorage instanceStorage)
-			: base(id, serviceBus, instanceStorage)
+		// serializable
+		private Guid _id;
+
+		public CallHttpApiSaga(IServiceBus serviceBus, IInstanceStorage instanceStorage)
+			: base(serviceBus, instanceStorage)
 		{
 		}
 
@@ -63,6 +66,7 @@ namespace A2v10.ProcS
 
 		async Task<String> ExecuteGet(CallApiRequest message)
 		{
+			_id = message.Id;
 			using (var response = await _httpClient.GetAsync(message.Url))
 			{
 				if (response.IsSuccessStatusCode)
@@ -85,7 +89,7 @@ namespace A2v10.ProcS
 
 		public Task<String> HandleResponse(CallApiResponse message)
 		{
-			var resumeProcess = new ResumeProcess(Id, message.Result);
+			var resumeProcess = new ResumeProcess(_id, message.Result);
 			ServiceBus.Send(resumeProcess);
 			IsComplete = true;
 			return Task.FromResult<String>(null);

@@ -27,8 +27,8 @@ namespace A2v10.ProcS
 			A2v10.ProcS.ServiceBus.RegisterSaga<ResumeProcess, ProcessSaga>();
 		}
 
-		public ProcessSaga(Guid id, IServiceBus serviceBus, IInstanceStorage instanceStorage)
-			: base(id, serviceBus, instanceStorage)
+		public ProcessSaga(IServiceBus serviceBus, IInstanceStorage instanceStorage)
+			: base(serviceBus, instanceStorage)
 		{
 		}
 

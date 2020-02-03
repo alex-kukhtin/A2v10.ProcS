@@ -12,7 +12,7 @@ namespace A2v10.ProcS
 	public class ServiceBus : IServiceBus
 	{
 		private static readonly Dictionary<Type, Type> _messagesMap = new Dictionary<Type, Type>();
-		private static readonly Dictionary<String, ISaga> _sagas = new Dictionary<String, ISaga>();
+		private static readonly Dictionary<Tuple<Type, String>, ISaga> _sagas = new Dictionary<Tuple<Type, String>, ISaga>();
 		ConcurrentQueue<IMessage> _messages = new ConcurrentQueue<IMessage>();
 
 
@@ -49,23 +49,21 @@ namespace A2v10.ProcS
 
 		async Task ProcessMessage(Type sagaType, IMessage message)
 		{
-			if (message.CorrelationId != null && _sagas.TryGetValue(message.CorrelationId, out ISaga saga))
+			var key = Tuple.Create(sagaType, message.CorrelationId);
+			if (message.CorrelationId != null && _sagas.TryGetValue(key, out ISaga saga))
 			{
 				await saga.Handle(message);
 				if (saga.IsComplete)
-					_sagas.Remove(message.CorrelationId);
+					_sagas.Remove(Tuple.Create(sagaType, message.CorrelationId));
 			}
-			else if (message is IStartMessage startMessage)
+			else 
 			{
-				saga = System.Activator.CreateInstance(sagaType, startMessage.Id, this, _instanceStorage) as ISaga;
+				saga = System.Activator.CreateInstance(sagaType, this, _instanceStorage) as ISaga;
 				var corrId = await saga.Handle(message);
 				if (corrId != null)
-					_sagas.Add(corrId, saga);
-			}
-			else
-			{
-				saga = System.Activator.CreateInstance(sagaType, Guid.Empty, this, _instanceStorage) as ISaga;
-				await saga.Handle(message);
+				{
+					_sagas.Add(Tuple.Create(sagaType, corrId), saga);
+				}
 			}
 		}
 	}

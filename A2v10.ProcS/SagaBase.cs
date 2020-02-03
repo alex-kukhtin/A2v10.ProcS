@@ -11,15 +11,12 @@ namespace A2v10.ProcS
 	{
 		public Boolean IsComplete { get; set; }
 
-		public Guid Id { get; protected set; }
-
 		private readonly IServiceBus _serviceBus;
 		private readonly IInstanceStorage _instanceStorage;
 
 		/* required */
-		public SagaBase(Guid id, IServiceBus serviceBus, IInstanceStorage instanceStorage)
+		public SagaBase(IServiceBus serviceBus, IInstanceStorage instanceStorage)
 		{
-			Id = id;
 			_serviceBus = serviceBus;
 			_instanceStorage = instanceStorage;
 		}
