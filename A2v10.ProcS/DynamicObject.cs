@@ -35,7 +35,7 @@ namespace A2v10.ProcS
 				if (val is T)
 					return (T)val;
 			}
-			return default(T);
+			return default;
 		}
 	}
 }

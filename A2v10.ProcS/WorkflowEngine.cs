@@ -80,6 +80,8 @@ namespace A2v10.ProcS
 		public async Task<IInstance> Run(IWorkflowDefinition workflow, IDynamicObject data = null)
 		{
 			var instance = CreateInstance(workflow);
+			if (data != null)
+				instance.SetParameters(data);
 			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);
 			await instance.Workflow.Run(context);
 			return instance;

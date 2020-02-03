@@ -13,7 +13,7 @@ namespace A2v10.ProcS
 	{
 		private static readonly Dictionary<Type, Type> _messagesMap = new Dictionary<Type, Type>();
 		private static readonly Dictionary<Tuple<Type, String>, ISaga> _sagas = new Dictionary<Tuple<Type, String>, ISaga>();
-		ConcurrentQueue<IMessage> _messages = new ConcurrentQueue<IMessage>();
+		private static readonly ConcurrentQueue<IMessage> _messages = new ConcurrentQueue<IMessage>();
 
 
 		private readonly IInstanceStorage _instanceStorage;

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace A2v10.ProcS.Tests
 {
 	[TestClass]
-	public class Init
+	public static class Init
 	{
 		[AssemblyInitialize]
 		public static void AssemblyInitialize(TestContext context)
