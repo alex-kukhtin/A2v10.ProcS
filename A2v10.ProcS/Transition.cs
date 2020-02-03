@@ -10,6 +10,7 @@ namespace A2v10.ProcS
 	public class Transition
 	{
 		public Boolean Default { get; set; }
+		public String Condition { get; set; }
 		public String Description { get; set; }
 
 		public String To { get; set; }
@@ -17,7 +18,9 @@ namespace A2v10.ProcS
 
 		public Boolean Evaluate(IExecuteContext context)
 		{
-			return true;
+			if (String.IsNullOrEmpty(Condition))
+				return true;
+			return context.Evaluate<Boolean>(Condition);
 		}
 
 		public async Task ExecuteAction(IExecuteContext context)

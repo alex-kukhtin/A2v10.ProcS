@@ -47,19 +47,26 @@ namespace A2v10.ProcS
 				await ProcessMessage(sagaType, message);
 		}
 
+		IHandleContext CreateHandleContext()
+		{
+			return new HandleContext(this, _instanceStorage);
+		}
+
 		async Task ProcessMessage(Type sagaType, IMessage message)
 		{
 			var key = Tuple.Create(sagaType, message.CorrelationId);
 			if (message.CorrelationId != null && _sagas.TryGetValue(key, out ISaga saga))
 			{
-				await saga.Handle(message);
+				var hc = CreateHandleContext();
+				await saga.Handle(hc, message);
 				if (saga.IsComplete)
 					_sagas.Remove(Tuple.Create(sagaType, message.CorrelationId));
 			}
 			else 
 			{
-				saga = System.Activator.CreateInstance(sagaType, this, _instanceStorage) as ISaga;
-				var corrId = await saga.Handle(message);
+				saga = System.Activator.CreateInstance(sagaType) as ISaga;
+				var hc = CreateHandleContext();
+				var corrId = await saga.Handle(hc, message);
 				if (corrId != null)
 				{
 					_sagas.Add(Tuple.Create(sagaType, corrId), saga);

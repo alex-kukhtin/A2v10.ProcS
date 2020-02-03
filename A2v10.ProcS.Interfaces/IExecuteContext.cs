@@ -5,18 +5,26 @@ using System.Threading.Tasks;
 
 namespace A2v10.ProcS.Interfaces
 {
-	public interface IExecuteContext
+	public interface IHandleContext 
+	{
+		Task<IInstance> LoadInstance(Guid id);
+		void SendMessage(IMessage message);
+
+		IResumeContext CreateResumeContext(IInstance instance);
+	}
+
+	public interface IExecuteContext : IHandleContext
 	{
 		IInstance Instance { get; }
 		Task SaveInstance();
 
-		void SendMessage(IMessage message);
 		String Resolve(String source);
+		T Evaluate<T>(String expression);
 	}
 
 	public interface IResumeContext : IExecuteContext
 	{
 		String Bookmark { get; }
-		String Result { get; }
+		String Result { get; set; }
 	}
 }

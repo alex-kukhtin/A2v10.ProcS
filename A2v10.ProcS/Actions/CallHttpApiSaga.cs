@@ -23,33 +23,30 @@ namespace A2v10.ProcS
 	}
 
 
-	public class CallHttpApiSaga : SagaBase
+	public class CallHttpApiSaga : ISaga
 	{
 		private static readonly HttpClient _httpClient = new HttpClient();
+
+		public Boolean IsComplete { get; set; }
 
 		// serializable
 		private Guid _id;
 
-		public CallHttpApiSaga(IServiceBus serviceBus, IInstanceStorage instanceStorage)
-			: base(serviceBus, instanceStorage)
-		{
-		}
-
 		#region dispatch
-		public override Task<String> Handle(IMessage message)
+		public Task<String> Handle(IHandleContext context, IMessage message)
 		{
 			switch (message)
 			{
 				case CallApiRequest apiRequest:
-					return HandleRequest(apiRequest);
+					return HandleRequest(context, apiRequest);
 				case CallApiResponse apiResponse:;
-					return HandleResponse(apiResponse);
+					return HandleResponse(context, apiResponse);
 			}
 			throw new ArgumentOutOfRangeException(message.GetType().FullName);
 		}
 		#endregion
 
-		public Task<String> HandleRequest(CallApiRequest message)
+		public Task<String> HandleRequest(IHandleContext context, CallApiRequest message)
 		{
 			var method = message.Method?.Trim()?.ToLowerInvariant();
 			if (String.IsNullOrEmpty(method))
@@ -57,14 +54,14 @@ namespace A2v10.ProcS
 			switch (method)
 			{
 				case "get":
-					return ExecuteGet(message);
+					return ExecuteGet(context, message);
 				case "post":
-					return ExecutePost(message);
+					return ExecutePost(context, message);
 			}
 			throw new ArgumentOutOfRangeException($"invalid method");
 		}
 
-		async Task<String> ExecuteGet(CallApiRequest message)
+		async Task<String> ExecuteGet(IHandleContext context, CallApiRequest message)
 		{
 			_id = message.Id;
 			using (var response = await _httpClient.GetAsync(message.Url))
@@ -81,29 +78,29 @@ namespace A2v10.ProcS
 						CorrelationId = "CorrelationId",
 						Result = json
 					};
-					ServiceBus.Send(responseMessage);
+					context.SendMessage(responseMessage);
 				}
 			}
 			return "CorrelationId";
 		}
 
-		public Task<String> HandleResponse(CallApiResponse message)
+		public Task<String> HandleResponse(IHandleContext context, CallApiResponse message)
 		{
 			var resumeProcess = new ResumeProcess(_id, message.Result);
-			ServiceBus.Send(resumeProcess);
+			context.SendMessage(resumeProcess);
 			IsComplete = true;
 			return Task.FromResult<String>(null);
 		}
 
-		Task<String> ExecutePost(CallApiRequest message)
+		Task<String> ExecutePost(IHandleContext context, CallApiRequest message)
 		{
 			throw new NotImplementedException(nameof(ExecutePost));
 		}
 
 		public static void Register()
 		{
-			ProcS.ServiceBus.RegisterSaga<CallApiRequest, CallHttpApiSaga>();
-			ProcS.ServiceBus.RegisterSaga<CallApiResponse, CallHttpApiSaga>();
+			ServiceBus.RegisterSaga<CallApiRequest, CallHttpApiSaga>();
+			ServiceBus.RegisterSaga<CallApiResponse, CallHttpApiSaga>();
 		}
 	}
 }

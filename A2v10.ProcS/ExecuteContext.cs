@@ -7,17 +7,43 @@ using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
-	public class ExecuteContext : IExecuteContext
+	public class HandleContext : IHandleContext
 	{
-		public IInstance Instance { get; }
+		protected readonly IServiceBus _serviceBus;
+		protected readonly IInstanceStorage _instanceStorage;
+		protected readonly IScriptEngine _scriptEngine;
 
-		private readonly IServiceBus _serviceBus;
-		private readonly IInstanceStorage _instanceStorage;
-
-		public ExecuteContext(IServiceBus bus, IInstanceStorage storage, IInstance instance)
+		public HandleContext(IServiceBus bus, IInstanceStorage storage)
 		{
 			_serviceBus = bus;
 			_instanceStorage = storage;
+			_scriptEngine = new ScriptEngine();
+		}
+
+		public Task<IInstance> LoadInstance(Guid id)
+		{
+			return _instanceStorage.Load(id);
+		}
+
+		public void SendMessage(IMessage message)
+		{
+			_serviceBus.Send(message);
+		}
+
+		public IResumeContext CreateResumeContext(IInstance instance)
+		{
+			return new ResumeContext(_serviceBus, _instanceStorage, instance);
+		}
+
+	}
+
+	public class ExecuteContext : HandleContext, IExecuteContext
+	{
+		public IInstance Instance { get; }
+
+		public ExecuteContext(IServiceBus bus, IInstanceStorage storage, IInstance instance)
+			: base(bus, storage)
+		{
 			Instance = instance;
 		}
 
@@ -26,14 +52,14 @@ namespace A2v10.ProcS
 			await _instanceStorage.Save(Instance);
 		}
 
-		public void SendMessage(IMessage message)
-		{
-			_serviceBus.Send(message);
-		}
-
 		public String Resolve(String source)
 		{
 			return source;
+		}
+
+		public T Evaluate<T>(String expression)
+		{
+			return _scriptEngine.Eval<T>(expression);
 		}
 	}
 

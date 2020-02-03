@@ -13,9 +13,9 @@ namespace A2v10.ProcS.Interfaces
 	public interface ISaga
 	{
 		Boolean IsComplete { get; }
-
-		Task<String> Handle(IMessage message);
+		Task<String> Handle(IHandleContext context, IMessage message);
 	}
+
 
 	public interface IServiceBus
 	{

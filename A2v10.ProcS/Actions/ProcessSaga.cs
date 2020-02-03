@@ -20,38 +20,33 @@ namespace A2v10.ProcS
 		}
 	}
 
-	public class ProcessSaga : SagaBase
+	public class ProcessSaga : ISaga
 	{
+		public Boolean IsComplete => false;
+
 		public static void Register()
 		{
-			A2v10.ProcS.ServiceBus.RegisterSaga<ResumeProcess, ProcessSaga>();
-		}
-
-		public ProcessSaga(IServiceBus serviceBus, IInstanceStorage instanceStorage)
-			: base(serviceBus, instanceStorage)
-		{
+			ServiceBus.RegisterSaga<ResumeProcess, ProcessSaga>();
 		}
 
 		#region dispatch
-		public override Task<String> Handle(IMessage message)
+		public Task<String> Handle(IHandleContext context, IMessage message)
 		{
 			switch (message)
 			{
 				case ResumeProcess resumeProcess:
-					return HandleResume(resumeProcess);
+					return HandleResume(context, resumeProcess);
 			}
 			return Task.FromResult<String>(null);
 		}
 		#endregion
 
-		public async Task<String> HandleResume(ResumeProcess message)
+		public async Task<String> HandleResume(IHandleContext context, ResumeProcess message)
 		{
-			var instance = await InstanceStorage.Load(message.Id);
-			var context = new ResumeContext(ServiceBus, InstanceStorage, instance)
-			{
-				Result = message.Result
-			};
-			await instance.Workflow.Resume(context);
+			var instance = await context.LoadInstance(message.Id);
+			var resumeContext = context.CreateResumeContext(instance);
+			resumeContext.Result = message.Result;
+			await instance.Workflow.Resume(resumeContext);
 			return null;
 		}
 	}
