@@ -7,7 +7,7 @@ using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
-	public class SagaBase : ISaga
+	public abstract class SagaBase : ISaga
 	{
 		public Boolean IsComplete { get; set; }
 
@@ -27,14 +27,6 @@ namespace A2v10.ProcS
 		public IServiceBus ServiceBus => _serviceBus;
 		public IInstanceStorage InstanceStorage => _instanceStorage;
 
-		public virtual Task Start(IMessage message)
-		{
-			return Task.FromResult(0);
-		}
-
-		public virtual Task Handle(IMessage message)
-		{
-			return Task.FromResult(0);
-		}
+		public abstract Task<String> Handle(IMessage message);
 	}
 }

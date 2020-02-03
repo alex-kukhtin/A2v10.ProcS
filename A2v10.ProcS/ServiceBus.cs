@@ -11,10 +11,10 @@ namespace A2v10.ProcS
 {
 	public class ServiceBus : IServiceBus
 	{
-		private static readonly Dictionary<Type, Type> _starters = new Dictionary<Type, Type>();
-		private static readonly Dictionary<Guid, ISaga> _sagas = new Dictionary<Guid, ISaga>();
-
+		private static readonly Dictionary<Type, Type> _messagesMap = new Dictionary<Type, Type>();
+		private static readonly Dictionary<String, ISaga> _sagas = new Dictionary<String, ISaga>();
 		ConcurrentQueue<IMessage> _messages = new ConcurrentQueue<IMessage>();
+
 
 		private readonly IInstanceStorage _instanceStorage;
 
@@ -23,14 +23,14 @@ namespace A2v10.ProcS
 			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
 		}
 
-		public void Send(IMessage message) 
+		public void Send(IMessage message)
 		{
 			_messages.Enqueue(message);
 		}
 
-		public static void RegisterSaga<TStartMessage, TSaga>()  where TStartMessage : IMessage where  TSaga : ISaga
+		public static void RegisterSaga<TStartMessage, TSaga>() where TStartMessage : IMessage where TSaga : ISaga
 		{
-			_starters.Add(typeof(TStartMessage), typeof(TSaga));
+			_messagesMap.Add(typeof(TStartMessage), typeof(TSaga));
 		}
 
 		public async Task Run()
@@ -43,45 +43,30 @@ namespace A2v10.ProcS
 
 		async Task ProcessMessage(IMessage message)
 		{
-			// domain messages
-			if (message is IDomainEvent)
+			if (_messagesMap.TryGetValue(message.GetType(), out Type sagaType))
+				await ProcessMessage(sagaType, message);
+		}
+
+		async Task ProcessMessage(Type sagaType, IMessage message)
+		{
+			if (message.CorrelationId != null && _sagas.TryGetValue(message.CorrelationId, out ISaga saga))
 			{
-				await ProcessDomainEvent(message);
+				await saga.Handle(message);
+				if (saga.IsComplete)
+					_sagas.Remove(message.CorrelationId);
 			}
-			// try to start new saga
-			if (_starters.TryGetValue(message.GetType(), out Type sagaType)) 
+			else if (message is IStartMessage startMessage)
 			{
-				await StartSaga(sagaType, message);
-				return;
+				saga = System.Activator.CreateInstance(sagaType, startMessage.Id, this, _instanceStorage) as ISaga;
+				var corrId = await saga.Handle(message);
+				if (corrId != null)
+					_sagas.Add(corrId, saga);
 			}
-			
-			// process existing sagas
-			if (_sagas.TryGetValue(message.Id, out ISaga saga)) { 
-				await HandleSaga(saga, message);
+			else
+			{
+				saga = System.Activator.CreateInstance(sagaType, Guid.Empty, this, _instanceStorage) as ISaga;
+				await saga.Handle(message);
 			}
-		}
-
-		async Task ProcessDomainEvent(IMessage message)
-		{
-			foreach (var sagaKV in _sagas) {
-				var saga = sagaKV.Value;
-				await (Task) saga.Handle(message);
-			}
-		}
-
-		async Task StartSaga(Type sagaType, IMessage message)
-		{
-			var iMsg = message as IMessage;
-			var saga = System.Activator.CreateInstance(sagaType, iMsg.Id, this, _instanceStorage) as ISaga;
-			await saga.Start(message);
-			_sagas.Add(saga.Id, saga);
-		}
-
-		async Task HandleSaga(ISaga saga, IMessage message)
-		{
-			await (Task) saga.Handle(message);
-			if (saga.IsComplete)
-				_sagas.Remove(saga.Id);
 		}
 	}
 }

@@ -11,53 +11,6 @@ using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
-	public class StartDomain : IMessage
-	{
-		public Guid Id { get; } = Guid.NewGuid();
-	}
-
-	public class ResumeProcess : IMessage, IDomainEvent
-	{
-		public Guid Id { get; }
-		public String Result { get; }
-
-		public ResumeProcess(Guid id, String result)
-		{
-			Id = id;
-			Result = result;
-		}
-	}
-
-	public class DomainEventsSaga: SagaBase
-	{
-
-		public DomainEventsSaga(Guid id, IServiceBus serviceBus, IInstanceStorage instanceStorage)
-			:base(id, serviceBus, instanceStorage)
-		{ 
-		}
-
-		#region dispatch
-		public override Task Handle(IMessage message)
-		{
-			switch (message)
-			{
-				case ResumeProcess resumeProcess:
-					return HandleResume(resumeProcess);
-			}
-			return Task.FromResult(0);
-		}
-		#endregion
-
-		public async Task HandleResume(ResumeProcess message)
-		{
-			var instance = await InstanceStorage.Load(message.Id);
-			var context = new ResumeContext(ServiceBus, InstanceStorage, instance)
-			{
-				Result = message.Result
-			};
-			await instance.Workflow.Resume(context);
-		}
-	}
 
 	public class WorkflowEngine : IWorkflowEngine
 	{
@@ -75,8 +28,8 @@ namespace A2v10.ProcS
 
 		public static void RegisterSagas()
 		{
+			ProcessSaga.Register();
 			CallHttpApiSaga.Register();
-			ServiceBus.RegisterSaga<StartDomain, DomainEventsSaga>();
 		}
 
 		#region IWorkflowEngine

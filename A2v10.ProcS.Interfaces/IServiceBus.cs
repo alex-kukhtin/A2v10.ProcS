@@ -7,11 +7,12 @@ namespace A2v10.ProcS.Interfaces
 {
 	public interface IMessage
 	{
-		Guid Id { get; }
+		String CorrelationId { get; }
 	}
 
-	public interface IDomainEvent : IMessage
+	public interface IStartMessage : IMessage
 	{
+		Guid Id { get; }
 	}
 
 	public interface ISaga
@@ -19,8 +20,7 @@ namespace A2v10.ProcS.Interfaces
 		Boolean IsComplete { get; }
 		Guid Id { get; }
 
-		Task Start(IMessage message);
-		Task Handle(IMessage message);
+		Task<String> Handle(IMessage message);
 	}
 
 	public interface IServiceBus

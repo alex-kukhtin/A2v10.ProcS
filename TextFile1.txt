@@ -1,0 +1,30 @@
+
+
+
+TelegramSaga 
+
+OnStart
+  httpPost()
+  bus.SendMessage({Correlation.Id = telegram.charId})
+
+
+OnTelegramResponse() {
+    process: resume
+}
+
+
+
+
+
+HttpServer
+    TelegramListener
+        OnResponse
+            bus.SendMessage(new TelegramResponse(chatId))
+    
+
+
+
+EventBus
+    _sagas.Add({typeof(Saga), correlation.Id}, saga)
+
+    TMessage, TSaga

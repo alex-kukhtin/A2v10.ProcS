@@ -8,12 +8,20 @@ using A2v10.ProcS.Interfaces;
 namespace A2v10.ProcS
 {
 
-	public class CallApiRequest : IMessage
+	public class CallApiRequest : IMessage, IStartMessage
 	{
 		public Guid Id { get; set; }
+		public String CorrelationId { get; set; }
 		public String Method { get; set; }
 		public String Url { get; set; }
 	}
+
+	public class CallApiResponse : IMessage
+	{
+		public String CorrelationId { get; set; }
+		public String Result { get; set; }
+	}
+
 
 	public class CallHttpApiSaga : SagaBase
 	{
@@ -25,18 +33,20 @@ namespace A2v10.ProcS
 		}
 
 		#region dispatch
-		public override Task Start(IMessage message)
+		public override Task<String> Handle(IMessage message)
 		{
 			switch (message)
 			{
 				case CallApiRequest apiRequest:
-					return Start(apiRequest);
+					return HandleRequest(apiRequest);
+				case CallApiResponse apiResponse:;
+					return HandleResponse(apiResponse);
 			}
 			throw new ArgumentOutOfRangeException(message.GetType().FullName);
 		}
 		#endregion
 
-		public Task Start(CallApiRequest message)
+		public Task<String> HandleRequest(CallApiRequest message)
 		{
 			var method = message.Method?.Trim()?.ToLowerInvariant();
 			if (String.IsNullOrEmpty(method))
@@ -51,7 +61,7 @@ namespace A2v10.ProcS
 			throw new ArgumentOutOfRangeException($"invalid method");
 		}
 
-		async Task ExecuteGet(CallApiRequest message)
+		async Task<String> ExecuteGet(CallApiRequest message)
 		{
 			using (var response = await _httpClient.GetAsync(message.Url))
 			{
@@ -62,15 +72,26 @@ namespace A2v10.ProcS
 					var charset = headers.ContentType.CharSet;
 
 					var json = await response.Content.ReadAsStringAsync();
-					IsComplete = true;
 
-					var resumeProcess = new ResumeProcess(Id, json);
-					ServiceBus.Send(resumeProcess);
+					var responseMessage = new CallApiResponse() {
+						CorrelationId = "CorrelationId",
+						Result = json
+					};
+					ServiceBus.Send(responseMessage);
 				}
 			}
+			return "CorrelationId";
 		}
 
-		Task ExecutePost(CallApiRequest message)
+		public Task<String> HandleResponse(CallApiResponse message)
+		{
+			var resumeProcess = new ResumeProcess(Id, message.Result);
+			ServiceBus.Send(resumeProcess);
+			IsComplete = true;
+			return Task.FromResult<String>(null);
+		}
+
+		Task<String> ExecutePost(CallApiRequest message)
 		{
 			throw new NotImplementedException(nameof(ExecutePost));
 		}
@@ -78,6 +99,7 @@ namespace A2v10.ProcS
 		public static void Register()
 		{
 			ProcS.ServiceBus.RegisterSaga<CallApiRequest, CallHttpApiSaga>();
+			ProcS.ServiceBus.RegisterSaga<CallApiResponse, CallHttpApiSaga>();
 		}
 	}
 }
