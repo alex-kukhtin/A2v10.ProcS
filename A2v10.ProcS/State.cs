@@ -44,11 +44,17 @@ namespace A2v10.ProcS
 		{
 			var next = NextState(context);
 			if (next == null)
+			{
+				await ExitState(context);
 				return ExecuteResult.Exit;
-			await next.ExecuteAction(context);
-			await ExitState(context);
-			context.Instance.SetState(next.To);
-			return ExecuteResult.Continue;
+			}
+			else
+			{
+				await next.ExecuteAction(context);
+				await ExitState(context);
+				context.Instance.SetState(next.To);
+				return ExecuteResult.Continue;
+			}
 		}
 
 		Transition NextState(IExecuteContext context)
