@@ -11,5 +11,12 @@ namespace A2v10.ProcS.Interfaces
 
 		String CurrentState { get; set; }
 		void SetState(String state);
+
+		void SetParameters(IDynamicObject data);
+		IDynamicObject GetParameters();
+
+		void SetEnvironment(IDynamicObject data);
+
+		IDynamicObject GetData();
 	}
 }

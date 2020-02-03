@@ -58,6 +58,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ScriptAction.cs" />
     <Compile Include="DelayAction.cs" />
     <Compile Include="IdleActions.cs" />
     <Compile Include="Utlis\FakeStorage.cs" />

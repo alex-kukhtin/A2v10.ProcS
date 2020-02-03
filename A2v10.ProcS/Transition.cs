@@ -20,7 +20,7 @@ namespace A2v10.ProcS
 		{
 			if (String.IsNullOrEmpty(Condition))
 				return true;
-			return context.Evaluate<Boolean>(Condition);
+			return context.EvaluateScript<Boolean>(Condition);
 		}
 
 		public async Task ExecuteAction(IExecuteContext context)

@@ -18,12 +18,40 @@ namespace A2v10.ProcS
 		{
 			CurrentState = state;
 		}
+		public void SetParameters(IDynamicObject data)
+		{
+			if (data != null)
+				Parameters = data;
+		}
+
+		public IDynamicObject GetParameters()
+		{
+			return Parameters;
+		}
+
+		public void SetEnvironment(IDynamicObject env)
+		{
+			if (env != null)
+				Environment = env;
+		}
+
+		public IDynamicObject GetData()
+		{
+			return Data;
+		}
 		#endregion
 
 		public Boolean IsComplete { get; set; }
 
-		public DynamicObject Data { get; set; }
-		public DynamicObject Parameters { get; set; }
-		public DynamicObject Environment { get; set; }
+		public Instance()
+		{
+			Data = new DynamicObject();
+			Parameters = new DynamicObject();
+			Environment = new DynamicObject();
+		}
+
+		public IDynamicObject Data { get; set; }
+		public IDynamicObject Parameters { get; set; }
+		public IDynamicObject Environment { get; set; }
 	}
 }

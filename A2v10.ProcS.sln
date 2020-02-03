@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{DC046347-1F11-47B5-817F-0627AFD7E5B5}"
 	ProjectSection(SolutionItems) = preProject
 		Workflows\callapi.json = Workflows\callapi.json
+		Workflows\counter.json = Workflows\counter.json
 		Workflows\delay.json = Workflows\delay.json
 		Workflows\demo.json = Workflows\demo.json
 		Workflows\openweather.json = Workflows\openweather.json

@@ -1,0 +1,26 @@
+{
+	"Description": "Transitions",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"Description": "State 1",
+			"Transitions": {
+				"Return": {
+					"Condition": "params.counter > 0",
+					"To": "S1"
+				},
+				"End": {
+					"To": "End"
+				}
+			},
+			"OnExit": {
+				"$type": "A2v10.ProcS.CodeAction, A2v10.ProcS",
+				"Code": "params.counter -= 1"
+			}
+		},
+		"End": {
+			"Description":  "State End",
+			"Result": "OK"
+		}
+	}
+}

@@ -48,9 +48,9 @@ namespace A2v10.ProcS
 		}
 
 
-		public async Task<IInstance> StartWorkflow(IIdentity identity)
+		public async Task<IInstance> StartWorkflow(IIdentity identity, IDynamicObject data = null)
 		{
-			return await Run(identity);
+			return await Run(identity, data);
 		}
 
 		public async Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, String result)
@@ -67,15 +67,17 @@ namespace A2v10.ProcS
 		#endregion
 
 
-		public async Task<IInstance> Run(IIdentity identity)
+		public async Task<IInstance> Run(IIdentity identity, IDynamicObject data = null)
 		{
 			var instance = await CreateInstance(identity);
+			if (data != null)
+				instance.SetParameters(data);
 			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);
 			await instance.Workflow.Run(context);
 			return instance;
 		}
 
-		public async Task<IInstance> Run(IWorkflowDefinition workflow)
+		public async Task<IInstance> Run(IWorkflowDefinition workflow, IDynamicObject data = null)
 		{
 			var instance = CreateInstance(workflow);
 			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);

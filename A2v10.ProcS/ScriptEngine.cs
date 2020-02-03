@@ -20,5 +20,15 @@ namespace A2v10.ProcS
 			var vo = val.ToObject();
 			return (T) Convert.ChangeType(vo, typeof(T));
 		}
+
+		public void Execute(String code)
+		{
+			_engine.Execute(code);
+		}
+
+		public void SetValue(String name, IDynamicObject val)
+		{
+			_engine.SetValue(name, val.RawValue);
+		}
 	}
 }

@@ -19,7 +19,8 @@ namespace A2v10.ProcS.Interfaces
 		Task SaveInstance();
 
 		String Resolve(String source);
-		T Evaluate<T>(String expression);
+		T EvaluateScript<T>(String expression);
+		void ExecuteScript(String code);
 	}
 
 	public interface IResumeContext : IExecuteContext

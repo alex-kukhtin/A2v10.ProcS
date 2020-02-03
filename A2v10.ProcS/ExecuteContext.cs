@@ -45,6 +45,8 @@ namespace A2v10.ProcS
 			: base(bus, storage)
 		{
 			Instance = instance;
+			_scriptEngine.SetValue("params", Instance.GetParameters());
+			_scriptEngine.SetValue("data", Instance.GetData());
 		}
 
 		public async Task SaveInstance()
@@ -57,9 +59,14 @@ namespace A2v10.ProcS
 			return source;
 		}
 
-		public T Evaluate<T>(String expression)
+		public T EvaluateScript<T>(String expression)
 		{
 			return _scriptEngine.Eval<T>(expression);
+		}
+
+		public void ExecuteScript(String expression)
+		{
+			_scriptEngine.Execute(expression);
 		}
 	}
 
