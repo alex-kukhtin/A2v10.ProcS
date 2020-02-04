@@ -52,14 +52,16 @@ namespace A2v10.ProcS
 	public class ServiceBus : IServiceBus
 	{
 		private readonly ISagaKeeper _sagaKeeper;
+		private readonly IScriptEngine _scriptEngine;
 		private readonly ConcurrentQueue<IMessage> _messages = new ConcurrentQueue<IMessage>();
 
 
 		private readonly IInstanceStorage _instanceStorage;
 
-		public ServiceBus(ISagaKeeper sagaKeeper, IInstanceStorage instanceStorage)
+		public ServiceBus(ISagaKeeper sagaKeeper, IInstanceStorage instanceStorage, IScriptEngine scriptEngine)
 		{
 			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
+			_scriptEngine = scriptEngine ?? throw new ArgumentNullException(nameof(scriptEngine));
 			_sagaKeeper = sagaKeeper;
 		}
 
@@ -76,17 +78,15 @@ namespace A2v10.ProcS
 			}
 		}
 
-		IHandleContext CreateHandleContext()
-		{
-			return new HandleContext(this, _instanceStorage);
-		}
-
 		async Task ProcessMessage(IMessage message)
 		{
 			var saga = _sagaKeeper.GetSagaForMessage(message, out ISagaKeeperKey key, out Boolean isNew);
 
-			var hc = CreateHandleContext();
-			await saga.Handle(hc, message);
+			using (var scriptContext = _scriptEngine.CreateContext())
+			{
+				var hc = new HandleContext(this, _instanceStorage, scriptContext);
+				await saga.Handle(hc, message);
+			}
 
 			_sagaKeeper.SagaUpdate(saga, key);
 		}

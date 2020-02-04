@@ -8,10 +8,27 @@ namespace A2v10.ProcS
 {
 	public class ScriptEngine : IScriptEngine
 	{
+		public IScriptContext CreateContext()
+		{
+			return new ScriptContext();
+		}
+	}
+
+	public class ScriptContext : IScriptContext
+	{
 		private readonly Engine _engine = new Engine((opts)=>
 		{
 			opts.Strict(true);
 		});
+
+		public void Dispose()
+		{
+			Dispose(true);
+		}
+
+		protected virtual void Dispose(Boolean disposing)
+		{
+		}
 
 		public T Eval<T>(String expression)
 		{

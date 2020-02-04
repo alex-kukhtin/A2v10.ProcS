@@ -17,12 +17,14 @@ namespace A2v10.ProcS
 		private readonly IServiceBus _serviceBus;
 		private readonly IWorkflowStorage _workflowStorage;
 		private readonly IInstanceStorage _instanceStorage;
+		private readonly IScriptEngine _scriptEngine;
 
-		public WorkflowEngine(IWorkflowStorage workflowStorage, IInstanceStorage instanceStorage, IServiceBus serviceBus)
+		public WorkflowEngine(IWorkflowStorage workflowStorage, IInstanceStorage instanceStorage, IServiceBus serviceBus, IScriptEngine scriptEngine)
 		{
 			_serviceBus = serviceBus ?? throw new ArgumentNullException(nameof(serviceBus));
 			_workflowStorage = workflowStorage ?? throw new ArgumentNullException(nameof(workflowStorage));
 			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
+			_scriptEngine = scriptEngine ?? throw new ArgumentNullException(nameof(scriptEngine));
 		}
 
 		public static void RegisterSagas()
@@ -56,13 +58,16 @@ namespace A2v10.ProcS
 		public async Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, String result)
 		{
 			var instance = await _instanceStorage.Load(instaceId);
-			var context = new ResumeContext(_serviceBus, _instanceStorage, instance)
+			using (var scriptContext = _scriptEngine.CreateContext())
 			{
-				Bookmark = bookmark,
-				Result = result
-			};
-			await instance.Workflow.Resume(context);
-			return instance;
+				var context = new ResumeContext(_serviceBus, _instanceStorage, scriptContext, instance)
+				{
+					Bookmark = bookmark,
+					Result = result
+				};
+				await instance.Workflow.Resume(context);
+				return instance;
+			}
 		}
 		#endregion
 
@@ -72,9 +77,12 @@ namespace A2v10.ProcS
 			var instance = await CreateInstance(identity);
 			if (data != null)
 				instance.SetParameters(data);
-			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);
-			await instance.Workflow.Run(context);
-			return instance;
+			using (var scriptContext = _scriptEngine.CreateContext())
+			{
+				var context = new ExecuteContext(_serviceBus, _instanceStorage, scriptContext, instance);
+				await instance.Workflow.Run(context);
+				return instance;
+			}
 		}
 
 		public async Task<IInstance> Run(IWorkflowDefinition workflow, IDynamicObject data = null)
@@ -82,9 +90,12 @@ namespace A2v10.ProcS
 			var instance = CreateInstance(workflow);
 			if (data != null)
 				instance.SetParameters(data);
-			var context = new ExecuteContext(_serviceBus, _instanceStorage, instance);
-			await instance.Workflow.Run(context);
-			return instance;
+			using (var scriptContext = _scriptEngine.CreateContext())
+			{
+				var context = new ExecuteContext(_serviceBus, _instanceStorage, scriptContext, instance);
+				await instance.Workflow.Run(context);
+				return instance;
+			}
 		}
 	}
 }

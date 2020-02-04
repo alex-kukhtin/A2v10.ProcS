@@ -13,13 +13,13 @@ namespace A2v10.ProcS
 	{
 		protected readonly IServiceBus _serviceBus;
 		protected readonly IInstanceStorage _instanceStorage;
-		protected readonly IScriptEngine _scriptEngine;
+		protected readonly IScriptContext _scriptContext;
 
-		public HandleContext(IServiceBus bus, IInstanceStorage storage)
+		public HandleContext(IServiceBus bus, IInstanceStorage storage, IScriptContext scriptContext)
 		{
 			_serviceBus = bus;
 			_instanceStorage = storage;
-			_scriptEngine = new ScriptEngine();
+			_scriptContext = scriptContext;
 		}
 
 		public Task<IInstance> LoadInstance(Guid id)
@@ -34,7 +34,7 @@ namespace A2v10.ProcS
 
 		public IResumeContext CreateResumeContext(IInstance instance)
 		{
-			return new ResumeContext(_serviceBus, _instanceStorage, instance);
+			return new ResumeContext(_serviceBus, _instanceStorage, _scriptContext, instance);
 		}
 	}
 
@@ -42,13 +42,13 @@ namespace A2v10.ProcS
 	{
 		public IInstance Instance { get; }
 
-		public ExecuteContext(IServiceBus bus, IInstanceStorage storage, IInstance instance)
-			: base(bus, storage)
+		public ExecuteContext(IServiceBus bus, IInstanceStorage storage, IScriptContext scriptContext, IInstance instance)
+			: base(bus, storage, scriptContext)
 		{
 			Instance = instance;
-			_scriptEngine.SetValue("params", Instance.GetParameters());
-			_scriptEngine.SetValue("data", Instance.GetData());
-			_scriptEngine.SetValue("result", Instance.GetResult());
+			_scriptContext.SetValue("params", Instance.GetParameters());
+			_scriptContext.SetValue("data", Instance.GetData());
+			_scriptContext.SetValue("result", Instance.GetResult());
 		}
 
 		public async Task SaveInstance()
@@ -71,7 +71,7 @@ namespace A2v10.ProcS
 			foreach (Match m in ms)
 			{
 				String key = m.Groups[1].Value;
-				String val = _scriptEngine.Eval<String>(key);
+				String val = _scriptContext.Eval<String>(key);
 				sb.Replace(m.Value, val);
 			}
 			return sb.ToString();
@@ -79,12 +79,12 @@ namespace A2v10.ProcS
 
 		public T EvaluateScript<T>(String expression)
 		{
-			return _scriptEngine.Eval<T>(expression);
+			return _scriptContext.Eval<T>(expression);
 		}
 
 		public void ExecuteScript(String expression)
 		{
-			_scriptEngine.Execute(expression);
+			_scriptContext.Execute(expression);
 		}
 	}
 
@@ -93,8 +93,8 @@ namespace A2v10.ProcS
 		public String Bookmark { get; set; }
 		public String Result { get; set; }
 
-		public ResumeContext(IServiceBus bus, IInstanceStorage storage, IInstance instance)
-			: base(bus, storage, instance)
+		public ResumeContext(IServiceBus bus, IInstanceStorage storage, IScriptContext scriptContext, IInstance instance)
+			: base(bus, storage, scriptContext, instance)
 		{
 		}
 	}
