@@ -88,15 +88,12 @@ namespace A2v10.ProcS
 
 		public Task Handle(IHandleContext context, CallbackMessage message)
 		{
-			var json = message.Result;
-			var se = context.ScriptContext;
+			var cval = context.ScriptContext.GetValueFromJson<String>(message.Result, correlationExpression);
 
-			context.ScriptContext.SetValueFromJson("result", message.Result);
-			var cval = se.Eval<String>(correlationExpression);
-
-			var resumeProcess = new CallbackMessageResume(tag, cval);
-			resumeProcess.Result = message.Result;
-			context.SendMessage(resumeProcess);
+			context.SendMessage(new CallbackMessageResume(tag, cval)
+			{
+				Result = message.Result
+			});
 			return Task.CompletedTask;
 		}
 

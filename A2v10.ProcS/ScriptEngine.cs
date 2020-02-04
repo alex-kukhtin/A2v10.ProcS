@@ -50,10 +50,16 @@ namespace A2v10.ProcS
 			_engine.SetValue(name, val.RawValue);
 		}
 
-		public void SetValueFromJson(String name, String json)
+		public T GetValueFromJson<T>(String json, String expression)
 		{
+			if (json == null || expression == null)
+				return default;
 			var val = new Jint.Native.Json.JsonParser(_engine).Parse(json);
-			_engine.SetValue(name, val);
+			var func = _engine.Execute($"(result) => ({expression})").GetCompletionValue();
+			var result = func.Invoke(val).ToObject();
+			if (result is T)
+				return (T)result;
+			return (T) Convert.ChangeType(result, typeof(T));
 		}
 	}
 }

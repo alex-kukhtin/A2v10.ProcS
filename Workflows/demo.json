@@ -1,5 +1,5 @@
 {
-	/*data, params, environment*/
+	/*data, params, result, environment*/
 	"Description": "Delay Test",
 	"InitialState": "S1",
 	"States": {
@@ -12,7 +12,8 @@
 				//"ResponseBody": "data.apiResult", /*response.body, response.header, response.status*/
 				//"ResponseHeader": "",
 				//"ResponseStatus": 222,
-				"TransitionOnException": "HTTPError"
+				"TransitionOnException": "HTTPError",
+				"CorrelationId": "data.chatId"
 			},
 			"Transitions": {
 				"S1->End": {

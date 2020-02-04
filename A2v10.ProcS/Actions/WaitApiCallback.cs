@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
+
 using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
@@ -16,11 +17,15 @@ namespace A2v10.ProcS
 		async public Task<ActionResult> Execute(IExecuteContext context)
 		{
 			await context.SaveInstance();
-			var mess = new WaitCallbackMessage(Tag);
-			mess.CorrelationExpression = CorrelationExpression;
+
+			var mess = new WaitCallbackMessage(Tag) {
+				CorrelationExpression = CorrelationExpression
+			};
 			context.SendMessage(mess);
-			var mess2 = new WaitCallbackMessageProcess(context.Instance.Id, Tag, CorrelationValue);
-			mess2.CorrelationExpression = CorrelationExpression;
+
+			var mess2 = new WaitCallbackMessageProcess(context.Instance.Id, Tag, CorrelationValue) { 
+				CorrelationExpression = CorrelationExpression
+			};
 			context.SendMessage(mess2);
 			return ActionResult.Idle;
 		}
