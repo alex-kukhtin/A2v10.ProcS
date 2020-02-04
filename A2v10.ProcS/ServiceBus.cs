@@ -13,10 +13,10 @@ namespace A2v10.ProcS
 	{
 		public T Value { get; set; }
 
-		public CorrelationId()
+		/*public CorrelationId()
 		{
 			Value = default;
-		}
+		}*/
 
 		public CorrelationId(T value)
 		{
@@ -44,7 +44,12 @@ namespace A2v10.ProcS
 
 	public class MessageBase<CorrelationT> : IMessage where CorrelationT : IEquatable<CorrelationT>
 	{
-		public CorrelationId<CorrelationT> CorrelationId { get; set; } = new CorrelationId<CorrelationT>();
+		public MessageBase(CorrelationT correlationId)
+		{
+			CorrelationId = new CorrelationId<CorrelationT>(correlationId);
+		}
+
+		public CorrelationId<CorrelationT> CorrelationId { get; }
 
 		ICorrelationId IMessage.CorrelationId => CorrelationId;
 	}

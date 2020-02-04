@@ -10,6 +10,11 @@ namespace A2v10.ProcS
 
 	public class CallApiRequest : MessageBase<String>
 	{
+		public CallApiRequest() : base(null)
+		{
+
+		}
+
 		public Guid Id { get; set; }
 		public String Method { get; set; }
 		public String Url { get; set; }
@@ -17,9 +22,9 @@ namespace A2v10.ProcS
 
 	public class CallApiResponse : MessageBase<String>
 	{
-		public CallApiResponse(String correlationId)
+		public CallApiResponse(String correlationId) : base(correlationId)
 		{
-			CorrelationId.Value = correlationId;
+			
 		}
 
 		public String Result { get; set; }

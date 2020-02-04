@@ -49,5 +49,11 @@ namespace A2v10.ProcS
 		{
 			_engine.SetValue(name, val.RawValue);
 		}
+
+		public void SetValueFromJson(String name, String json)
+		{
+			var val = new Jint.Native.Json.JsonParser(_engine).Parse(json);
+			_engine.SetValue(name, val);
+		}
 	}
 }
