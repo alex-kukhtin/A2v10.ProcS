@@ -22,6 +22,8 @@ namespace A2v10.ProcS
 			_scriptContext = scriptContext;
 		}
 
+		public IScriptContext ScriptContext => _scriptContext; 
+
 		public Task<IInstance> LoadInstance(Guid id)
 		{
 			return _instanceStorage.Load(id);

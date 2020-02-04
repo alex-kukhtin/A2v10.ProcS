@@ -9,6 +9,7 @@ namespace A2v10.ProcS.Interfaces
 	{
 		Task<IInstance> LoadInstance(Guid id);
 		void SendMessage(IMessage message);
+		IScriptContext ScriptContext { get; }
 
 		IResumeContext CreateResumeContext(IInstance instance);
 	}

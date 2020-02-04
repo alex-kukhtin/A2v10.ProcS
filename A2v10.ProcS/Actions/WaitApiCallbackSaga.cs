@@ -89,8 +89,9 @@ namespace A2v10.ProcS
 		public Task Handle(IHandleContext context, CallbackMessage message)
 		{
 			var json = message.Result;
-			var se = new ScriptContext();
-			se.SetValueFromJson("result", message.Result);
+			var se = context.ScriptContext;
+
+			context.ScriptContext.SetValueFromJson("result", message.Result);
 			var cval = se.Eval<String>(correlationExpression);
 
 			var resumeProcess = new CallbackMessageResume(tag, cval);
