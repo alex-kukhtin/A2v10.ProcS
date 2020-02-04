@@ -14,8 +14,9 @@ namespace A2v10.ProcS.Tests
 			var storage = new FakeStorage();
 			var keeper = new InMemorySagaKeeper();
 			var scriptEngine = new ScriptEngine();
-			var bus = new ServiceBus(keeper, storage, scriptEngine);
-			var engine = new WorkflowEngine(storage, storage, bus, scriptEngine);
+			var repository = new Repository(storage, storage);
+			var bus = new ServiceBus(keeper, repository, scriptEngine);
+			var engine = new WorkflowEngine(repository, bus, scriptEngine);
 			return engine;
 		}
 

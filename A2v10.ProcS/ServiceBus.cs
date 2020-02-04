@@ -61,11 +61,11 @@ namespace A2v10.ProcS
 		private readonly ConcurrentQueue<IMessage> _messages = new ConcurrentQueue<IMessage>();
 
 
-		private readonly IInstanceStorage _instanceStorage;
+		private readonly IRepository _repository;
 
-		public ServiceBus(ISagaKeeper sagaKeeper, IInstanceStorage instanceStorage, IScriptEngine scriptEngine)
+		public ServiceBus(ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine)
 		{
-			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
+			_repository = repository ?? throw new ArgumentNullException(nameof(_repository));
 			_scriptEngine = scriptEngine ?? throw new ArgumentNullException(nameof(scriptEngine));
 			_sagaKeeper = sagaKeeper;
 		}
@@ -89,7 +89,7 @@ namespace A2v10.ProcS
 
 			using (var scriptContext = _scriptEngine.CreateContext())
 			{
-				var hc = new HandleContext(this, _instanceStorage, scriptContext);
+				var hc = new HandleContext(this, _repository, scriptContext);
 				await saga.Handle(hc, message);
 			}
 

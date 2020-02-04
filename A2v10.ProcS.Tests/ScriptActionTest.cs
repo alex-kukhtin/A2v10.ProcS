@@ -12,20 +12,10 @@ namespace A2v10.ProcS.Tests
 	[TestClass]
 	public class ScriptActionTest
 	{
-		IWorkflowEngine CreateEngine()
-		{
-			var storage = new FakeStorage();
-			var keeper = new InMemorySagaKeeper();
-			var scriptEngine = new ScriptEngine();
-			var bus = new ServiceBus(keeper, storage, scriptEngine);
-
-			return new WorkflowEngine(storage, storage, bus, scriptEngine);
-		}
-
 		[TestMethod]
 		public async Task SimpleCounter()
 		{
-			var engine = CreateEngine();
+			var engine = ProcessEngine.CreateEngine();
 
 			var data = new DynamicObject();
 			data.Set("counter", 10);
@@ -39,7 +29,7 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleResult()
 		{
-			var engine = CreateEngine();
+			var engine = ProcessEngine.CreateEngine();
 
 			var instance = await engine.StartWorkflow(new Identity("scripts/result.json"));
 

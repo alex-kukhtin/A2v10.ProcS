@@ -18,14 +18,15 @@ namespace A2v10.ProcS.Tests
 			var storage = new FakeStorage();
 			var keeper = new InMemorySagaKeeper();
 			var scriptEngine = new ScriptEngine();
+			var repository = new Repository(storage, storage);
 
 			var wf = await storage.WorkflowFromStorage(new Identity("callapi.json")) as StateMachine;
 			var stm = wf as StateMachine;
 			Assert.IsInstanceOfType(stm.States["S1"].OnEntry, typeof(CallHttpApi));
 
-			var bus = new ServiceBus(keeper, storage, scriptEngine);
+			var bus = new ServiceBus(keeper, repository, scriptEngine);
 
-			var engine = new WorkflowEngine(storage, storage, bus, scriptEngine);
+			var engine = new WorkflowEngine(repository, bus, scriptEngine);
 			IInstance instance = await engine.Run(wf);
 
 			await bus.Run();

@@ -13,7 +13,7 @@ namespace A2v10.ProcS.Run
 		{
 			var scriptEngine = new ScriptEngine();
 			var bus = new ServiceBus(new InMemorySagaKeeper(), null, scriptEngine);
-			var engine = new WorkflowEngine(null, null, bus, scriptEngine);
+			var engine = new WorkflowEngine(null, bus, scriptEngine);
 
 			while (true)
 			{

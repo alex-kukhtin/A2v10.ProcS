@@ -15,15 +15,13 @@ namespace A2v10.ProcS
 	public class WorkflowEngine : IWorkflowEngine
 	{
 		private readonly IServiceBus _serviceBus;
-		private readonly IWorkflowStorage _workflowStorage;
-		private readonly IInstanceStorage _instanceStorage;
+		private readonly IRepository _repository;
 		private readonly IScriptEngine _scriptEngine;
 
-		public WorkflowEngine(IWorkflowStorage workflowStorage, IInstanceStorage instanceStorage, IServiceBus serviceBus, IScriptEngine scriptEngine)
+		public WorkflowEngine(IRepository repository, IServiceBus serviceBus, IScriptEngine scriptEngine)
 		{
 			_serviceBus = serviceBus ?? throw new ArgumentNullException(nameof(serviceBus));
-			_workflowStorage = workflowStorage ?? throw new ArgumentNullException(nameof(workflowStorage));
-			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
+			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
 			_scriptEngine = scriptEngine ?? throw new ArgumentNullException(nameof(scriptEngine));
 		}
 
@@ -38,7 +36,7 @@ namespace A2v10.ProcS
 		#region IWorkflowEngine
 		public async Task<IInstance> CreateInstance(IIdentity identity)
 		{
-			var workflow = await _workflowStorage.WorkflowFromStorage(identity);
+			var workflow = await _repository.WorkflowFromStorage(identity);
 			return CreateInstance(workflow);
 		}
 
@@ -59,10 +57,10 @@ namespace A2v10.ProcS
 
 		public async Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, String result)
 		{
-			var instance = await _instanceStorage.Load(instaceId);
+			var instance = await _repository.Get(instaceId);
 			using (var scriptContext = _scriptEngine.CreateContext())
 			{
-				var context = new ResumeContext(_serviceBus, _instanceStorage, scriptContext, instance)
+				var context = new ResumeContext(_serviceBus, _repository, scriptContext, instance)
 				{
 					Bookmark = bookmark,
 					Result = result
@@ -81,7 +79,7 @@ namespace A2v10.ProcS
 				instance.SetParameters(data);
 			using (var scriptContext = _scriptEngine.CreateContext())
 			{
-				var context = new ExecuteContext(_serviceBus, _instanceStorage, scriptContext, instance);
+				var context = new ExecuteContext(_serviceBus, _repository, scriptContext, instance);
 				await instance.Workflow.Run(context);
 				return instance;
 			}
@@ -94,7 +92,7 @@ namespace A2v10.ProcS
 				instance.SetParameters(data);
 			using (var scriptContext = _scriptEngine.CreateContext())
 			{
-				var context = new ExecuteContext(_serviceBus, _instanceStorage, scriptContext, instance);
+				var context = new ExecuteContext(_serviceBus, _repository, scriptContext, instance);
 				await instance.Workflow.Run(context);
 				return instance;
 			}

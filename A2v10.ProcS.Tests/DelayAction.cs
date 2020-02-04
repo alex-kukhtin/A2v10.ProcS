@@ -16,7 +16,8 @@ namespace A2v10.ProcS.Tests
 			var storage = new FakeStorage();
 			var keeper = new InMemorySagaKeeper();
 			var scriptEngine = new ScriptEngine();
-			var bus = new ServiceBus(keeper, storage, scriptEngine);
+			var repository = new Repository(storage, storage);
+			var bus = new ServiceBus(keeper, repository, scriptEngine);
 
 			var stm = await storage.WorkflowFromStorage(new Identity("delay.json")) as StateMachine;
 
@@ -25,7 +26,7 @@ namespace A2v10.ProcS.Tests
 			var s1 = stm.States["S1"];
 			Assert.IsInstanceOfType(s1.OnEntry, typeof(A2v10.ProcS.Delay));
 
-			var engine = new WorkflowEngine(storage, storage, bus, scriptEngine);
+			var engine = new WorkflowEngine(repository, bus, scriptEngine);
 
 			await engine.Run(stm);
 		}

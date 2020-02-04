@@ -12,21 +12,21 @@ namespace A2v10.ProcS
 	public class HandleContext : IHandleContext
 	{
 		protected readonly IServiceBus _serviceBus;
-		protected readonly IInstanceStorage _instanceStorage;
+		protected readonly IRepository _repository;
 		protected readonly IScriptContext _scriptContext;
 
-		public HandleContext(IServiceBus bus, IInstanceStorage storage, IScriptContext scriptContext)
+		public HandleContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext)
 		{
-			_serviceBus = bus;
-			_instanceStorage = storage;
-			_scriptContext = scriptContext;
+			_serviceBus = bus ?? throw new ArgumentNullException(nameof(bus));
+			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
+			_scriptContext = scriptContext ?? throw new ArgumentNullException(nameof(scriptContext));
 		}
 
 		public IScriptContext ScriptContext => _scriptContext; 
 
 		public Task<IInstance> LoadInstance(Guid id)
 		{
-			return _instanceStorage.Load(id);
+			return _repository.Get(id);
 		}
 
 		public void SendMessage(IMessage message)
@@ -36,7 +36,7 @@ namespace A2v10.ProcS
 
 		public IResumeContext CreateResumeContext(IInstance instance)
 		{
-			return new ResumeContext(_serviceBus, _instanceStorage, _scriptContext, instance);
+			return new ResumeContext(_serviceBus, _repository, _scriptContext, instance);
 		}
 	}
 
@@ -44,8 +44,8 @@ namespace A2v10.ProcS
 	{
 		public IInstance Instance { get; }
 
-		public ExecuteContext(IServiceBus bus, IInstanceStorage storage, IScriptContext scriptContext, IInstance instance)
-			: base(bus, storage, scriptContext)
+		public ExecuteContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext, IInstance instance)
+			: base(bus, repository, scriptContext)
 		{
 			Instance = instance;
 			_scriptContext.SetValue("params", Instance.GetParameters());
@@ -55,7 +55,7 @@ namespace A2v10.ProcS
 
 		public async Task SaveInstance()
 		{
-			await _instanceStorage.Save(Instance);
+			await _repository.Save(Instance);
 		}
 
 		private Regex _regex = null;
@@ -95,8 +95,8 @@ namespace A2v10.ProcS
 		public String Bookmark { get; set; }
 		public String Result { get; set; }
 
-		public ResumeContext(IServiceBus bus, IInstanceStorage storage, IScriptContext scriptContext, IInstance instance)
-			: base(bus, storage, scriptContext, instance)
+		public ResumeContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext, IInstance instance)
+			: base(bus, repository, scriptContext, instance)
 		{
 		}
 	}
