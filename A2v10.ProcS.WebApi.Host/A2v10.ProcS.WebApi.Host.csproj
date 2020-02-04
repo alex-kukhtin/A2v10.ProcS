@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="docs\openapi1.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="docs\openapi1.json" />
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties docs_4openapi1_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+
+
+</Project>

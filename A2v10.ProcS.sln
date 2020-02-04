@@ -22,6 +22,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A2v10.ProcS.Tests", "A2v10.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "@schemas", "@schemas", "{24D60038-B537-4D6C-8D69-77C921FA1F3F}"
 	ProjectSection(SolutionItems) = preProject
+		@schemas\openapi30-schema.json = @schemas\openapi30-schema.json
 		@schemas\statemachine-schema.json = @schemas\statemachine-schema.json
 	EndProjectSection
 EndProject
@@ -43,7 +44,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{2BE122E4-3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "css", "css", "{405F197E-CB79-4ADA-8AF1-4CF01D39E3D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A2v10.ProcS.SqlServer", "A2v10.ProcS.SqlServer\A2v10.ProcS.SqlServer.csproj", "{5572706A-E43B-40BA-A131-3FCC58CA1746}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "A2v10.ProcS.SqlServer", "A2v10.ProcS.SqlServer\A2v10.ProcS.SqlServer.csproj", "{5572706A-E43B-40BA-A131-3FCC58CA1746}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "A2v10.ProcS.WebApi.Host", "A2v10.ProcS.WebApi.Host\A2v10.ProcS.WebApi.Host.csproj", "{1F248378-0124-4B3D-B971-B8045CFD4347}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +74,10 @@ Global
 		{5572706A-E43B-40BA-A131-3FCC58CA1746}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5572706A-E43B-40BA-A131-3FCC58CA1746}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5572706A-E43B-40BA-A131-3FCC58CA1746}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F248378-0124-4B3D-B971-B8045CFD4347}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F248378-0124-4B3D-B971-B8045CFD4347}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F248378-0124-4B3D-B971-B8045CFD4347}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F248378-0124-4B3D-B971-B8045CFD4347}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

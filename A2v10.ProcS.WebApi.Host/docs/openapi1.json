@@ -1,0 +1,57 @@
+{
+	/* see //github.com/OAI/OpenAPI-Specification */
+	"$schema": "../../@schemas/openapi30-schema.json",
+	"openapi": "3.0.2",
+	"info": {
+		"title": "A2v10.ProcS API",
+		"version": "0.0.1",
+	},
+	"servers": [
+		{ "url": "http://localhost:5000/api/1.0" }
+	],
+	"paths": {
+		"/process/start": {
+			"post": {
+				"operationId": "startNewProcess",
+				"parameters": [
+					{
+						"name": "processId",
+						"schema": { "type": "string" },
+						"in": "query",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "a new instance id",
+						"content": {
+							"application/json": {
+
+							}
+						}
+					}
+				}
+			}
+		},
+		"/process/resume": {
+			"post": {
+				"operationId": "resumeProcess",
+				"responses": {
+					"200": {
+
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"instance": {
+				"type": "object",
+				"properties": {
+					"id": {"type": "string"}
+				}
+			}
+		}
+	}
+}
