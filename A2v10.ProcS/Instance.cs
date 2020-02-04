@@ -39,6 +39,11 @@ namespace A2v10.ProcS
 		{
 			return Data;
 		}
+
+		public IDynamicObject GetResult()
+		{
+			return Result;
+		}
 		#endregion
 
 		public Boolean IsComplete { get; set; }
@@ -48,10 +53,12 @@ namespace A2v10.ProcS
 			Data = new DynamicObject();
 			Parameters = new DynamicObject();
 			Environment = new DynamicObject();
+			Result = new DynamicObject();
 		}
 
 		public IDynamicObject Data { get; set; }
 		public IDynamicObject Parameters { get; set; }
 		public IDynamicObject Environment { get; set; }
+		public IDynamicObject Result { get; }
 	}
 }

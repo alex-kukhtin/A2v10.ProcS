@@ -8,6 +8,7 @@ namespace A2v10.ProcS.Interfaces
 {
 	public interface IDynamicObject
 	{
+		T Eval<T>(String expression, T fallback = default(T), Boolean throwIfError = false);
 		Object RawValue { get; }
 	}
 }

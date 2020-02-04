@@ -1,0 +1,13 @@
+{
+	"$schema": "../../@schemas/statemachine-schema.json",
+	"Description": "Simple result",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"OnEntry": {
+				"$type": "A2v10.ProcS.CodeAction, A2v10.ProcS",
+				"Code": "result.value = 42;\nresult.array = [{x:'x'}, {y:'y'}]"
+			}
+		}
+	}
+}

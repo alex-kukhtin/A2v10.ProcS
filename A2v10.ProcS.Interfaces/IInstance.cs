@@ -18,5 +18,6 @@ namespace A2v10.ProcS.Interfaces
 		void SetEnvironment(IDynamicObject data);
 
 		IDynamicObject GetData();
+		IDynamicObject GetResult();
 	}
 }

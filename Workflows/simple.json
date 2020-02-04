@@ -22,8 +22,7 @@
 			}
 		},
 		"End": {
-			"Description":  "State End",
-			"Result": "OK"
+			"Description":  "State End"
 		}
 	}
 }

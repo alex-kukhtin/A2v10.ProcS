@@ -36,7 +36,8 @@
 										"Description": { "type": "string" },
 										"Action": { "$ref": "#/definitions/action" }
 									},
-									"additionalProperties": false
+									"additionalProperties": false,
+									"required": ["To"]
 								}
 							}
 						}
@@ -47,5 +48,6 @@
 			"additionalProperties": false
 		}
 	},
-	"additionalProperties": false
+	"additionalProperties": false,
+	"required": ["InitialState"]
 }
