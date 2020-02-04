@@ -1,5 +1,5 @@
 {
-	"$schema": "../@schemas/statemachine-schema.json",
+	"$schema": "../../@schemas/statemachine-schema.json",
 	"Description": "Transitions",
 	"InitialState": "S1",
 	"States": {
@@ -15,12 +15,14 @@
 				}
 			},
 			"OnExit": {
-				"$type": "A2v10.ProcS.CodeAction, A2v10.ProcS",
 				"Code": "params.counter -= 1"
 			}
 		},
 		"End": {
-			"Description": "State End"
+			"Description": "State End",
+			"OnEntry": {
+				"Code": "result.counter = params.counter"
+			}
 		}
 	}
 }

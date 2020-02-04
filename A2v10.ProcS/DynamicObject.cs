@@ -39,7 +39,7 @@ namespace A2v10.ProcS
 			return default;
 		}
 
-		public T Eval<T>(String expression, T fallback = default(T), Boolean throwIfError = false)
+		public T Eval<T>(String expression, T fallback = default, Boolean throwIfError = false)
 		{
 			if (expression == null)
 				return fallback;
@@ -49,7 +49,7 @@ namespace A2v10.ProcS
 			return (T) Convert.ChangeType(result, typeof(T));
 		}
 
-		static Regex _arrFind = new Regex(@"(\w+)\[(\d+)\]{1}", RegexOptions.Compiled);
+		static readonly Regex _arrFind = new Regex(@"(\w+)\[(\d+)\]{1}", RegexOptions.Compiled);
 
 		Object EvalExpression(String expression, Boolean throwIfError = false)
 		{

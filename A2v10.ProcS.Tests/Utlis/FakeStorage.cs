@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using A2v10.ProcS.Interfaces;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Newtonsoft.Json.Serialization;
 
 namespace A2v10.ProcS.Tests
 {
@@ -58,11 +59,24 @@ namespace A2v10.ProcS.Tests
 			String json = File.ReadAllText($"..//..//..//Workflows//{identity.ProcessId}");
 			var result = JsonConvert.DeserializeObject<StateMachine>(json, new JsonSerializerSettings()
 			{
-				TypeNameHandling = TypeNameHandling.Auto
+				TypeNameHandling = TypeNameHandling.Auto,
+				ContractResolver = new ActualContractResolver()
 			}) as IWorkflowDefinition;
 			result.SetIdentity(identity);
 			return Task.FromResult(result);
 		}
 		#endregion
+	}
+
+	public class ActualContractResolver : DefaultContractResolver
+	{
+		public override JsonContract ResolveContract(Type type)
+		{
+			if (type == typeof(IWorkflowAction))
+			{
+				return base.ResolveContract(typeof(CodeAction));
+			}
+			return base.ResolveContract(type);
+		}
 	}
 }

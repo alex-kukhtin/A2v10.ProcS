@@ -9,10 +9,11 @@ namespace A2v10.ProcS.Run
 {
 	class Program
 	{
-		static void Main(String[] args)
+		static void Main()
 		{
-			var bus = new ServiceBus(new InMemorySagaKeeper(), null);
-			var engine = new WorkflowEngine(null, null, bus);
+			var scriptEngine = new ScriptEngine();
+			var bus = new ServiceBus(new InMemorySagaKeeper(), null, scriptEngine);
+			var engine = new WorkflowEngine(null, null, bus, scriptEngine);
 
 			while (true)
 			{
@@ -23,7 +24,7 @@ namespace A2v10.ProcS.Run
 						Console.WriteLine($"Instance created. Id={instance.Id}");
 						break;
 					case 'l':
-						PrintList(engine);
+						PrintList();
 						break;
 					case 't':
 						break;
@@ -33,7 +34,7 @@ namespace A2v10.ProcS.Run
 			}
 		}
 
-		static void PrintList(WorkflowEngine engine)
+		static void PrintList()
 		{
 
 		}

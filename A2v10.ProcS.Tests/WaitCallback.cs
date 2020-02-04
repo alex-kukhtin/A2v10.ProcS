@@ -18,8 +18,9 @@ namespace A2v10.ProcS.Tests
 		{
 			var storage = new FakeStorage();
 			var keeper = new InMemorySagaKeeper();
-			var bus = new ServiceBus(keeper, storage);
-			var engine = new WorkflowEngine(storage, storage, bus);
+			var scriptEngine = new ScriptEngine();
+			var bus = new ServiceBus(keeper, storage, scriptEngine);
+			var engine = new WorkflowEngine(storage, storage, bus, scriptEngine);
 
 			var data = new DynamicObject();
 			var instance = await engine.StartWorkflow(new Identity("callback.json"), data);
