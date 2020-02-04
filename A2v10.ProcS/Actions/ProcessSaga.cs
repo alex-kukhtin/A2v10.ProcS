@@ -39,7 +39,7 @@ namespace A2v10.ProcS
 		}
 		#endregion
 
-		public async Task HandleResume(IHandleContext context, ResumeProcess message)
+		public static async Task HandleResume(IHandleContext context, ResumeProcess message)
 		{
 			var instance = await context.LoadInstance(message.Id);
 			var resumeContext = context.CreateResumeContext(instance);

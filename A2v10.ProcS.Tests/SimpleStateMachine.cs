@@ -45,7 +45,7 @@ namespace A2v10.ProcS.Tests
 			var bus = new ServiceBus(keeper, storage);
 			var engine = new WorkflowEngine(storage, storage, bus);
 
-			var instance = await engine.StartWorkflow(new Identity("simple.json"));
+			await engine.StartWorkflow(new Identity("simple.json"));
 		}
 	}
 }

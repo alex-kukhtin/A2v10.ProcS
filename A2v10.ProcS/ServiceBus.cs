@@ -25,9 +25,9 @@ namespace A2v10.ProcS
 
 		public Boolean Equals(ICorrelationId other)
 		{
-			var tt = other as CorrelationId<T>;
-			if (tt == null) return false;
-			return Equals(tt);
+			if (other is CorrelationId<T> tt)
+				return Equals(tt);
+			return false;
 		}
 
 		public override Int32 GetHashCode()
