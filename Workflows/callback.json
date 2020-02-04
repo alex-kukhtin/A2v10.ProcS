@@ -1,0 +1,24 @@
+{
+	"$schema": "../@schemas/statemachine-schema.json",
+	"Description": "Callback",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"OnEntry": {
+				"$type": "A2v10.ProcS.WaitApiCallback, A2v10.ProcS",
+				"Tag": "pseudopay",
+				"CorrelationValue": "123",
+				"CorrelationExpression": "result.paymentId"
+			},
+			"Transitions": {
+				"S1->End": {
+					"Description": "From S1 to End",
+					"To": "End"
+				}
+			}
+		},
+		"End": {
+			"Description": "State End"
+		}
+	}
+}
