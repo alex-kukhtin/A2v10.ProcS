@@ -11,7 +11,7 @@ namespace A2v10.ProcS.Run
 	{
 		static void Main(String[] args)
 		{
-			var bus = new ServiceBus(null);
+			var bus = new ServiceBus(new InMemorySagaKeeper(), null);
 			var engine = new WorkflowEngine(null, null, bus);
 
 			while (true)

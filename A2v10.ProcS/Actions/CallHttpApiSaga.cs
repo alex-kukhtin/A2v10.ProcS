@@ -8,45 +8,49 @@ using A2v10.ProcS.Interfaces;
 namespace A2v10.ProcS
 {
 
-	public class CallApiRequest : IMessage
+	public class CallApiRequest : MessageBase<String>
 	{
 		public Guid Id { get; set; }
-		public String CorrelationId { get; set; }
 		public String Method { get; set; }
 		public String Url { get; set; }
 	}
 
-	public class CallApiResponse : IMessage
+	public class CallApiResponse : MessageBase<String>
 	{
-		public String CorrelationId { get; set; }
+		public CallApiResponse(String correlationId)
+		{
+			CorrelationId.Value = correlationId;
+		}
+
 		public String Result { get; set; }
 	}
 
 
-	public class CallHttpApiSaga : ISaga
+	public class CallHttpApiSaga : SagaBase<String>
 	{
 		private static readonly HttpClient _httpClient = new HttpClient();
-
-		public Boolean IsComplete { get; set; }
 
 		// serializable
 		private Guid _id;
 
 		#region dispatch
-		public Task<String> Handle(IHandleContext context, IMessage message)
+		public override async Task Handle(IHandleContext context, IMessage message)
 		{
 			switch (message)
 			{
 				case CallApiRequest apiRequest:
-					return HandleRequest(context, apiRequest);
+					await HandleRequest(context, apiRequest);
+					break;
 				case CallApiResponse apiResponse:;
-					return HandleResponse(context, apiResponse);
+					await HandleResponse(context, apiResponse);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(message.GetType().FullName);
 			}
-			throw new ArgumentOutOfRangeException(message.GetType().FullName);
 		}
 		#endregion
 
-		public Task<String> HandleRequest(IHandleContext context, CallApiRequest message)
+		public async Task HandleRequest(IHandleContext context, CallApiRequest message)
 		{
 			var method = message.Method?.Trim()?.ToLowerInvariant();
 			if (String.IsNullOrEmpty(method))
@@ -54,11 +58,14 @@ namespace A2v10.ProcS
 			switch (method)
 			{
 				case "get":
-					return ExecuteGet(context, message);
+					CorrelationId.Value = await ExecuteGet(context, message);
+					break;
 				case "post":
-					return ExecutePost(context, message);
+					CorrelationId.Value = await ExecutePost(context, message);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException($"invalid method");
 			}
-			throw new ArgumentOutOfRangeException($"invalid method");
 		}
 
 		async Task<String> ExecuteGet(IHandleContext context, CallApiRequest message)
@@ -74,8 +81,7 @@ namespace A2v10.ProcS
 
 					var json = await response.Content.ReadAsStringAsync();
 
-					var responseMessage = new CallApiResponse() {
-						CorrelationId = "CorrelationId",
+					var responseMessage = new CallApiResponse("CorrelationId") {
 						Result = json
 					};
 					context.SendMessage(responseMessage);
@@ -99,8 +105,8 @@ namespace A2v10.ProcS
 
 		public static void Register()
 		{
-			ServiceBus.RegisterSaga<CallApiRequest, CallHttpApiSaga>();
-			ServiceBus.RegisterSaga<CallApiResponse, CallHttpApiSaga>();
+			InMemorySagaKeeper.RegisterMessageType<CallApiRequest, CallHttpApiSaga>();
+			InMemorySagaKeeper.RegisterMessageType<CallApiResponse, CallHttpApiSaga>();
 		}
 	}
 }
