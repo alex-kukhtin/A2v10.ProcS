@@ -71,6 +71,7 @@ namespace A2v10.ProcS
 		async Task<String> ExecuteGet(IHandleContext context, CallApiRequest message)
 		{
 			_id = message.Id;
+			String correlationId = Guid.NewGuid().ToString();
 			using (var response = await _httpClient.GetAsync(message.Url))
 			{
 				if (response.IsSuccessStatusCode)
@@ -81,13 +82,13 @@ namespace A2v10.ProcS
 
 					var json = await response.Content.ReadAsStringAsync();
 
-					var responseMessage = new CallApiResponse("CorrelationId") {
+					var responseMessage = new CallApiResponse(correlationId) {
 						Result = json
 					};
 					context.SendMessage(responseMessage);
 				}
 			}
-			return "CorrelationId";
+			return correlationId;
 		}
 
 		public Task<String> HandleResponse(IHandleContext context, CallApiResponse message)

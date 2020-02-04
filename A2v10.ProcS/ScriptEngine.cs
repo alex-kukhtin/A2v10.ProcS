@@ -32,7 +32,8 @@ namespace A2v10.ProcS
 
 		public T Eval<T>(String expression)
 		{
-
+			if (expression == null)
+				return default;
 			var val = _engine.Execute(expression).GetCompletionValue();
 			var vo = val.ToObject();
 			return (T) Convert.ChangeType(vo, typeof(T));
@@ -40,7 +41,8 @@ namespace A2v10.ProcS
 
 		public void Execute(String code)
 		{
-			_engine.Execute(code);
+			if (code != null)
+				_engine.Execute(code);
 		}
 
 		public void SetValue(String name, IDynamicObject val)
