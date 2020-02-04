@@ -1,5 +1,5 @@
 {
-	"$schema": "../@schemas/statemachine-schema.json",
+	"$schema": "../../@schemas/statemachine-schema.json",
 	"Description": "Transitions",
 	"InitialState": "S1",
 	"States": {

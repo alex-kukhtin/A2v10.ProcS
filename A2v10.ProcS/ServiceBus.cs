@@ -15,7 +15,7 @@ namespace A2v10.ProcS
 
 		public CorrelationId()
 		{
-			Value = default(T);
+			Value = default;
 		}
 
 		public CorrelationId(T value)
@@ -23,19 +23,19 @@ namespace A2v10.ProcS
 			Value = value;
 		}
 
-		public bool Equals(ICorrelationId other)
+		public Boolean Equals(ICorrelationId other)
 		{
 			var tt = other as CorrelationId<T>;
 			if (tt == null) return false;
 			return Equals(tt);
 		}
 
-		public override int GetHashCode()
+		public override Int32 GetHashCode()
 		{
 			return Value?.GetHashCode() ?? 0;
 		}
 
-		public bool Equals(CorrelationId<T> other)
+		public Boolean Equals(CorrelationId<T> other)
 		{
 			if (Value == null) return other.Value == null;
 			return Value.Equals(other.Value);
@@ -52,7 +52,7 @@ namespace A2v10.ProcS
 	public class ServiceBus : IServiceBus
 	{
 		private readonly ISagaKeeper _sagaKeeper;
-		ConcurrentQueue<IMessage> _messages = new ConcurrentQueue<IMessage>();
+		private readonly ConcurrentQueue<IMessage> _messages = new ConcurrentQueue<IMessage>();
 
 
 		private readonly IInstanceStorage _instanceStorage;
@@ -83,7 +83,7 @@ namespace A2v10.ProcS
 
 		async Task ProcessMessage(IMessage message)
 		{
-			var saga = _sagaKeeper.GetSagaForMessage(message, out ISagaKeeperKey key, out bool isNew);
+			var saga = _sagaKeeper.GetSagaForMessage(message, out ISagaKeeperKey key, out Boolean isNew);
 
 			var hc = CreateHandleContext();
 			await saga.Handle(hc, message);

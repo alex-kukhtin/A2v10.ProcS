@@ -37,17 +37,17 @@ namespace A2v10.ProcS
 			CorrelationId = saga.CorrelationId;
 		}
 
-		public override int GetHashCode()
+		public override Int32 GetHashCode()
 		{
 			return SagaType.GetHashCode() + 17 * (CorrelationId?.GetHashCode() ?? 0);
 		}
 
-		public override string ToString()
+		public override String ToString()
 		{
 			return SagaType.Name + ":" + (CorrelationId?.ToString() ?? "{null}");
 		}
 
-		public bool Equals(ISagaKeeperKey other)
+		public Boolean Equals(ISagaKeeperKey other)
 		{
 			return SagaType.Equals(other.SagaType) && CorrelationId.Equals(other.CorrelationId);
 		}
@@ -63,7 +63,7 @@ namespace A2v10.ProcS
 			_messagesMap.Add(typeof(TMessage), typeof(TSaga));
 		}
 
-		public ISaga GetSagaForMessage(IMessage message, out ISagaKeeperKey key, out bool isNew)
+		public ISaga GetSagaForMessage(IMessage message, out ISagaKeeperKey key, out Boolean isNew)
 		{
 			var sagaType = _messagesMap[message.GetType()];
 			key = new InMemorySagaKeeperKey(sagaType, message.CorrelationId);
