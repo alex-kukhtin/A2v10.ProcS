@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 namespace A2v10.ProcS.Tests
 {
 	[TestClass]
-	public class CallApi
+	public class CallApiTest
 	{
 		[TestMethod]
 		public async Task OpenWeatherApi()
 		{
 			var engine = ProcessEngine.CreateEngine();
+
 			var prms = new DynamicObject();
 			prms.Set("city", "London");
 			var instance = await engine.StartWorkflow(new Identity("callapi/openweather.json"), prms);

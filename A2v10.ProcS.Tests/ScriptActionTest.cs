@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace A2v10.ProcS.Tests
 {
 	[TestClass]
-	public class ScriptAction
+	public class ScriptActionTest
 	{
 		IWorkflowEngine CreateEngine()
 		{

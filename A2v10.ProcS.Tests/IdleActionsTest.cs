@@ -10,7 +10,7 @@ using A2v10.ProcS.Interfaces;
 namespace A2v10.ProcS.Tests
 {
 	[TestClass]
-	public class IdleActions
+	public class IdleActionTest
 	{
 		[TestMethod]
 		public async Task SimpleCallApi()
