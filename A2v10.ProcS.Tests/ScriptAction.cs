@@ -15,7 +15,8 @@ namespace A2v10.ProcS.Tests
 		IWorkflowEngine CreateEngine()
 		{
 			var storage = new FakeStorage();
-			var bus = new ServiceBus(storage);
+			var keeper = new InMemorySagaKeeper();
+			var bus = new ServiceBus(keeper, storage);
 			return new WorkflowEngine(storage, storage, bus);
 		}
 

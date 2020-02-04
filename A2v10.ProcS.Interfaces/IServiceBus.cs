@@ -5,15 +5,22 @@ using System.Threading.Tasks;
 
 namespace A2v10.ProcS.Interfaces
 {
+	public interface ICorrelationId : IEquatable<ICorrelationId>
+	{
+		
+	}
+
+
 	public interface IMessage
 	{
-		String CorrelationId { get; }
+		ICorrelationId CorrelationId { get; }
 	}
 
 	public interface ISaga
 	{
 		Boolean IsComplete { get; }
-		Task<String> Handle(IHandleContext context, IMessage message);
+		ICorrelationId CorrelationId { get; }
+		Task Handle(IHandleContext context, IMessage message);
 	}
 
 

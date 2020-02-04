@@ -38,10 +38,11 @@ namespace A2v10.ProcS.Tests
 		public async Task SimpleRunStateMachine()
 		{
 			var storage = new FakeStorage();
+			var keeper = new InMemorySagaKeeper();
 
 			//var stm = await storage.WorkflowFromStorage(new Identity("simple.json"));
 
-			var bus = new ServiceBus(storage);
+			var bus = new ServiceBus(keeper, storage);
 			var engine = new WorkflowEngine(storage, storage, bus);
 
 			var instance = await engine.StartWorkflow(new Identity("simple.json"));

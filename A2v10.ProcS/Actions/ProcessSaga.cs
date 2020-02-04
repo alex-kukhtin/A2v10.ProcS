@@ -6,10 +6,8 @@ using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
-	public class ResumeProcess : IMessage
+	public class ResumeProcess : MessageBase<String>
 	{
-		public String CorrelationId { get; }
-
 		public Guid Id { get; }
 		public String Result { get; }
 
@@ -20,34 +18,33 @@ namespace A2v10.ProcS
 		}
 	}
 
-	public class ProcessSaga : ISaga
+	public class ProcessSaga : SagaBase<String>
 	{
-		public Boolean IsComplete => false;
-
 		public static void Register()
 		{
-			ServiceBus.RegisterSaga<ResumeProcess, ProcessSaga>();
+			InMemorySagaKeeper.RegisterMessageType<ResumeProcess, ProcessSaga>();
 		}
 
 		#region dispatch
-		public Task<String> Handle(IHandleContext context, IMessage message)
+		public override async Task Handle(IHandleContext context, IMessage message)
 		{
 			switch (message)
 			{
 				case ResumeProcess resumeProcess:
-					return HandleResume(context, resumeProcess);
+					await HandleResume(context, resumeProcess);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(message.GetType().FullName);
 			}
-			return Task.FromResult<String>(null);
 		}
 		#endregion
 
-		public async Task<String> HandleResume(IHandleContext context, ResumeProcess message)
+		public async Task HandleResume(IHandleContext context, ResumeProcess message)
 		{
 			var instance = await context.LoadInstance(message.Id);
 			var resumeContext = context.CreateResumeContext(instance);
 			resumeContext.Result = message.Result;
 			await instance.Workflow.Resume(resumeContext);
-			return null;
 		}
 	}
 }
