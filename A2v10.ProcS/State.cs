@@ -1,4 +1,5 @@
-﻿
+﻿// Copyright © 2020 Alex Kukhtin. All rights reserved.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +37,7 @@ namespace A2v10.ProcS
 
 		public async Task ContinueStep(IResumeContext context)
 		{
-			// process context.Result
+			context.ScriptContext.SetValue("reply", new DynamicObject(context.Result));
 			await DoContinue(context);
 		}
 

@@ -58,6 +58,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CallApi.cs" />
+    <Compile Include="Utlis\ProcessEngine.cs" />
     <Compile Include="WaitCallback.cs" />
     <Compile Include="ScriptAction.cs" />
     <Compile Include="DelayAction.cs" />

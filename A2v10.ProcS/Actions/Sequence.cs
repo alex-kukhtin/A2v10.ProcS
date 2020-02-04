@@ -17,7 +17,7 @@ namespace A2v10.ProcS.Actions
 				throw new ArgumentOutOfRangeException("There are no actions in sequence");
 			foreach (var a in Actions)
 			{
-				var result = await a.Execute(context);
+				var execResult = await a.Execute(context);
 			}
 			return ActionResult.Idle;
 		}

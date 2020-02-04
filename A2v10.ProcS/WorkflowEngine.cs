@@ -99,5 +99,10 @@ namespace A2v10.ProcS
 				return instance;
 			}
 		}
+
+		public Task RunServiceBus()
+		{
+			return _serviceBus.Run();
+		}
 	}
 }

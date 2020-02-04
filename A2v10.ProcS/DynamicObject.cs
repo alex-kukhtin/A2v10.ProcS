@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Text.RegularExpressions;
 using A2v10.ProcS.Interfaces;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace A2v10.ProcS
 {
@@ -17,6 +19,14 @@ namespace A2v10.ProcS
 		public DynamicObject()
 		{
 			_object = new ExpandoObject();
+		}
+
+		public DynamicObject(String json)
+		{
+			if (String.IsNullOrEmpty(json))
+				_object = new ExpandoObject();
+			else
+				_object = JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter());
 		}
 
 		public void Set(String name, Object val)

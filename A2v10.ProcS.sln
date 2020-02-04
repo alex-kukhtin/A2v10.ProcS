@@ -15,7 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{
 		Workflows\callback.json = Workflows\callback.json
 		Workflows\delay.json = Workflows\delay.json
 		Workflows\demo.json = Workflows\demo.json
-		Workflows\openweather.json = Workflows\openweather.json
 		Workflows\simple.json = Workflows\simple.json
 	EndProjectSection
 EndProject
@@ -30,6 +29,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{5F42
 	ProjectSection(SolutionItems) = preProject
 		Workflows\scripts\counter.json = Workflows\scripts\counter.json
 		Workflows\scripts\result.json = Workflows\scripts\result.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "callapi", "callapi", "{D29E70D9-663E-448A-BFE9-5B352F9A1848}"
+	ProjectSection(SolutionItems) = preProject
+		Workflows\callapi\openweather.json = Workflows\callapi\openweather.json
 	EndProjectSection
 EndProject
 Global
@@ -60,6 +64,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5F42B863-3E0C-4199-808E-33A40565ED79} = {DC046347-1F11-47B5-817F-0627AFD7E5B5}
+		{D29E70D9-663E-448A-BFE9-5B352F9A1848} = {DC046347-1F11-47B5-817F-0627AFD7E5B5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B5EA97A5-CA19-4BCC-BC05-3B5A09F89A62}

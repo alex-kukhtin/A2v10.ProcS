@@ -10,11 +10,12 @@ namespace A2v10.ProcS
 	{
 		public String Url { get; set; }
 		public String Method { get; set; }
+		public String ResultExpression { get; set; }
 
 		async public Task<ActionResult> Execute(IExecuteContext context)
 		{
 			await context.SaveInstance();
-			var request = new CallApiRequest()
+			var request = new CallApiRequestMessage()
 			{
 				Id = context.Instance.Id,
 				Url = context.Resolve(Url),

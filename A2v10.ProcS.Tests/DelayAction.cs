@@ -17,6 +17,7 @@ namespace A2v10.ProcS.Tests
 			var keeper = new InMemorySagaKeeper();
 			var scriptEngine = new ScriptEngine();
 			var bus = new ServiceBus(keeper, storage, scriptEngine);
+
 			var stm = await storage.WorkflowFromStorage(new Identity("delay.json")) as StateMachine;
 
 			Assert.AreEqual("S1", stm.InitialState);

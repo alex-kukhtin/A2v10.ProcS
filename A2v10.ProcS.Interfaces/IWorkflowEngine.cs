@@ -12,5 +12,7 @@ namespace A2v10.ProcS.Interfaces
 
 		Task<IInstance> CreateInstance(IIdentity identity);
 		IInstance CreateInstance(IWorkflowDefinition workflow);
+
+		Task RunServiceBus();
 	}
 }

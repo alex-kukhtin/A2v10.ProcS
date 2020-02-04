@@ -7,7 +7,8 @@
 			"OnEntry": {
 				"$type": "A2v10.ProcS.CallHttpApi, A2v10.ProcS",
 				"Url": "https://samples.openweathermap.org/data/2.5/weather?q=London&appid=b6907d289e10d714a6e88b30761fae22",
-				"Method": "Get" /* todo: enum */
+				"Method": "Get" /* todo: enum */,
+				"SetResult": "data.result.temp = result.main.temp;\ndata.result.id = result.sys.id;"
 			},
 			"Description": "Call",
 			"Transitions": {
@@ -17,9 +18,13 @@
 				}
 			},
 			"OnExit": {
+				"Code": "data.result = {temp: reply.main.temp, id: reply.sys.id}"
 			}
 		},
 		"End": {
+			"OnEntry": {
+				"Code": "result.temp = data.result.temp"
+			},
 			"Description": "State End"
 		}
 	}

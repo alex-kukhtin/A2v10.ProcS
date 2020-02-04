@@ -8,9 +8,9 @@ using A2v10.ProcS.Interfaces;
 namespace A2v10.ProcS
 {
 
-	public class CallApiRequest : MessageBase<String>
+	public class CallApiRequestMessage : MessageBase<String>
 	{
-		public CallApiRequest() : base(null)
+		public CallApiRequestMessage() : base(null)
 		{
 
 		}
@@ -43,7 +43,7 @@ namespace A2v10.ProcS
 		{
 			switch (message)
 			{
-				case CallApiRequest apiRequest:
+				case CallApiRequestMessage apiRequest:
 					await HandleRequest(context, apiRequest);
 					break;
 				case CallApiResponse apiResponse:;
@@ -55,7 +55,7 @@ namespace A2v10.ProcS
 		}
 		#endregion
 
-		public async Task HandleRequest(IHandleContext context, CallApiRequest message)
+		public async Task HandleRequest(IHandleContext context, CallApiRequestMessage message)
 		{
 			var method = message.Method?.Trim()?.ToLowerInvariant();
 			if (String.IsNullOrEmpty(method))
@@ -73,7 +73,7 @@ namespace A2v10.ProcS
 			}
 		}
 
-		async Task<String> ExecuteGet(IHandleContext context, CallApiRequest message)
+		async Task<String> ExecuteGet(IHandleContext context, CallApiRequestMessage message)
 		{
 			_id = message.Id;
 			String correlationId = Guid.NewGuid().ToString();
@@ -104,14 +104,14 @@ namespace A2v10.ProcS
 			return Task.FromResult<String>(null);
 		}
 
-		Task<String> ExecutePost(IHandleContext context, CallApiRequest message)
+		Task<String> ExecutePost(IHandleContext context, CallApiRequestMessage message)
 		{
 			throw new NotImplementedException(nameof(ExecutePost));
 		}
 
 		public static void Register()
 		{
-			InMemorySagaKeeper.RegisterMessageType<CallApiRequest, CallHttpApiSaga>();
+			InMemorySagaKeeper.RegisterMessageType<CallApiRequestMessage, CallHttpApiSaga>();
 			InMemorySagaKeeper.RegisterMessageType<CallApiResponse, CallHttpApiSaga>();
 		}
 	}
