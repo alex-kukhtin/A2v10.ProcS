@@ -29,6 +29,8 @@ namespace A2v10.ProcS
 		{
 			ProcessSaga.Register();
 			CallHttpApiSaga.Register();
+			WaitApiCallbackSaga.Register();
+			WaitApiCallbackProcessSaga.Register();
 		}
 
 		#region IWorkflowEngine

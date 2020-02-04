@@ -11,7 +11,7 @@ namespace A2v10.ProcS
 {
 	public abstract class SagaBase<CorrelationT> : ISaga where CorrelationT : IEquatable<CorrelationT>
 	{
-		public CorrelationId<CorrelationT> CorrelationId { get; } = new CorrelationId<CorrelationT>();
+		public CorrelationId<CorrelationT> CorrelationId { get; } = new CorrelationId<CorrelationT>(default(CorrelationT));
 
 		ICorrelationId ISaga.CorrelationId => CorrelationId;
 

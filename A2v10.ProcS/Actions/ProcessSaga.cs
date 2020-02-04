@@ -11,7 +11,7 @@ namespace A2v10.ProcS
 		public Guid Id { get; }
 		public String Result { get; }
 
-		public ResumeProcess(Guid id, String result)
+		public ResumeProcess(Guid id, String result) : base(null)
 		{
 			Id = id;
 			Result = result;
