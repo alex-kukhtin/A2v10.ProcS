@@ -31,31 +31,14 @@ namespace A2v10.ProcS
 	}
 
 
-	public class CallHttpApiSaga : SagaBase<String>
+	public class CallHttpApiSaga : SagaBaseDispatched<String, CallApiRequestMessage, CallApiResponse>
 	{
 		private static readonly HttpClient _httpClient = new HttpClient();
 
 		// serializable
 		private Guid _id;
 
-		#region dispatch
-		public override async Task Handle(IHandleContext context, IMessage message)
-		{
-			switch (message)
-			{
-				case CallApiRequestMessage apiRequest:
-					await HandleRequest(context, apiRequest);
-					break;
-				case CallApiResponse apiResponse:;
-					await HandleResponse(context, apiResponse);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(message.GetType().FullName);
-			}
-		}
-		#endregion
-
-		public async Task HandleRequest(IHandleContext context, CallApiRequestMessage message)
+		protected override async Task Handle(IHandleContext context, CallApiRequestMessage message)
 		{
 			var method = message.Method?.Trim()?.ToLowerInvariant();
 			if (String.IsNullOrEmpty(method))
@@ -96,17 +79,17 @@ namespace A2v10.ProcS
 			return correlationId;
 		}
 
-		public Task<String> HandleResponse(IHandleContext context, CallApiResponse message)
+		Task<String> ExecutePost(IHandleContext context, CallApiRequestMessage message)
+		{
+			throw new NotImplementedException(nameof(ExecutePost));
+		}
+
+		protected override Task Handle(IHandleContext context, CallApiResponse message)
 		{
 			var resumeProcess = new ResumeProcess(_id, message.Result);
 			context.SendMessage(resumeProcess);
 			IsComplete = true;
-			return Task.FromResult<String>(null);
-		}
-
-		Task<String> ExecutePost(IHandleContext context, CallApiRequestMessage message)
-		{
-			throw new NotImplementedException(nameof(ExecutePost));
+			return Task.CompletedTask;
 		}
 
 		public static void Register()
