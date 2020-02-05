@@ -77,6 +77,112 @@ namespace A2v10.ProcS.Interfaces
 		public abstract Task Handle(IHandleContext context, IMessage message);
 	}
 
+	public abstract class SagaBaseDispatched<CorrelationT, MessageT1> : SagaBase<CorrelationT>
+		where CorrelationT : IEquatable<CorrelationT>
+		where MessageT1 : IMessage
+	{
+		public async override Task Handle(IHandleContext context, IMessage message)
+		{
+			switch (message)
+			{
+				case MessageT1 msg:
+					await Handle(context, msg);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(message.GetType().FullName);
+			}
+		}
+
+		protected abstract Task Handle(IHandleContext context, MessageT1 message);
+	}
+
+	public abstract class SagaBaseDispatched<CorrelationT, MessageT1, MessageT2> : SagaBase<CorrelationT>
+		where CorrelationT : IEquatable<CorrelationT>
+		where MessageT1 : IMessage
+		where MessageT2 : IMessage
+	{
+		public async override Task Handle(IHandleContext context, IMessage message)
+		{
+			switch (message)
+			{
+				case MessageT1 msg:
+					await Handle(context, msg);
+					break;
+				case MessageT2 msg:
+					await Handle(context, msg);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(message.GetType().FullName);
+			}
+		}
+
+		protected abstract Task Handle(IHandleContext context, MessageT1 message);
+		protected abstract Task Handle(IHandleContext context, MessageT2 message);
+	}
+
+	public abstract class SagaBaseDispatched<CorrelationT, MessageT1, MessageT2, MessageT3> : SagaBase<CorrelationT>
+		where CorrelationT : IEquatable<CorrelationT>
+		where MessageT1 : IMessage
+		where MessageT2 : IMessage
+		where MessageT3 : IMessage
+	{
+		public async override Task Handle(IHandleContext context, IMessage message)
+		{
+			switch (message)
+			{
+				case MessageT1 msg:
+					await Handle(context, msg);
+					break;
+				case MessageT2 msg:
+					await Handle(context, msg);
+					break;
+				case MessageT3 msg:
+					await Handle(context, msg);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(message.GetType().FullName);
+			}
+		}
+
+		protected abstract Task Handle(IHandleContext context, MessageT1 message);
+		protected abstract Task Handle(IHandleContext context, MessageT2 message);
+		protected abstract Task Handle(IHandleContext context, MessageT3 message);
+	}
+
+	public abstract class SagaBaseDispatched<CorrelationT, MessageT1, MessageT2, MessageT3, MessageT4> : SagaBase<CorrelationT>
+		where CorrelationT : IEquatable<CorrelationT>
+		where MessageT1 : IMessage
+		where MessageT2 : IMessage
+		where MessageT3 : IMessage
+		where MessageT4 : IMessage
+	{
+		public async override Task Handle(IHandleContext context, IMessage message)
+		{
+			switch (message)
+			{
+				case MessageT1 msg:
+					await Handle(context, msg);
+					break;
+				case MessageT2 msg:
+					await Handle(context, msg);
+					break;
+				case MessageT3 msg:
+					await Handle(context, msg);
+					break;
+				case MessageT4 msg:
+					await Handle(context, msg);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(message.GetType().FullName);
+			}
+		}
+
+		protected abstract Task Handle(IHandleContext context, MessageT1 message);
+		protected abstract Task Handle(IHandleContext context, MessageT2 message);
+		protected abstract Task Handle(IHandleContext context, MessageT3 message);
+		protected abstract Task Handle(IHandleContext context, MessageT4 message);
+	}
+
 	public interface IServiceBus
 	{
 		void Send(IMessage message);
