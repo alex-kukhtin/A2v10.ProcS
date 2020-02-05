@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\moshkola\Documents\VSP\A2v10.ProcS\A2v10.ProcS\externals\ChatBotCore\ChatBotCore\ChatBotCore.csproj" />
+  </ItemGroup>
+
+</Project>

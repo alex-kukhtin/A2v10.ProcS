@@ -1,0 +1,4 @@
+[submodule "externals/ChatBotCore"]
+	path = externals/ChatBotCore
+	url = git@github.com:ar2rmo/ChatBotCore.git
+	branch = master
