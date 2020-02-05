@@ -9,16 +9,6 @@ using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
-	public abstract class SagaBase<CorrelationT> : ISaga where CorrelationT : IEquatable<CorrelationT>
-	{
-		public CorrelationId<CorrelationT> CorrelationId { get; } = new CorrelationId<CorrelationT>(default);
-
-		ICorrelationId ISaga.CorrelationId => CorrelationId;
-
-		public Boolean IsComplete { get; set; }
-		public abstract Task Handle(IHandleContext context, IMessage message);
-	}
-
 	public class InMemorySagaKeeperKey : ISagaKeeperKey
 	{
 		public Type SagaType { get; private set; }
