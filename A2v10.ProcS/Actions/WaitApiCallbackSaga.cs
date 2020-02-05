@@ -88,7 +88,7 @@ namespace A2v10.ProcS
 
 		public Task Handle(IHandleContext context, CallbackMessage message)
 		{
-			var cval = context.ScriptContext.GetValueFromJson<String>(message.Result, correlationExpression);
+			var cval = context.ScriptContext.GetValueFromObject<String>(new DynamicObject(message.Result), correlationExpression);
 
 			context.SendMessage(new CallbackMessageResume(tag, cval)
 			{

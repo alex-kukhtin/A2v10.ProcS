@@ -14,6 +14,6 @@ namespace A2v10.ProcS.Interfaces
 		T Eval<T>(String expression);
 		void Execute(String code);
 		void SetValue(String name, IDynamicObject value);
-		T GetValueFromJson<T>(String json, String expression);
+		T GetValueFromObject<T>(IDynamicObject obj, String expression);
 	}
 }

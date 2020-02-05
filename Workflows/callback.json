@@ -8,7 +8,7 @@
 				"$type": "A2v10.ProcS.WaitApiCallback, A2v10.ProcS",
 				"Tag": "pseudopay",
 				"CorrelationValue": "123",
-				"CorrelationExpression": "result.paymentId"
+				"CorrelationExpression": "reply.paymentId"
 			},
 			"Transitions": {
 				"S1->End": {
