@@ -7,7 +7,6 @@ namespace A2v10.ProcS.Interfaces
 {
 	public interface IInstanceStorage
 	{
-		IInstance Create(Guid processId);
 		Task<IInstance> Load(Guid instanceId);
 		Task Save(IInstance instance);
 	}

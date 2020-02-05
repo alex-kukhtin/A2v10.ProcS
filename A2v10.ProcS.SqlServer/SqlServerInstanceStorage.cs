@@ -8,11 +8,23 @@ using System.Data;
 
 namespace A2v10.ProcS.SqlServer
 {
+	public interface IInstanceFactory
+	{
+		IInstance CreateInstance(Guid id, IIdentity identity);
+	}
+
 	public class SqlServerInstanceStorage : IInstanceStorage
 	{
-		public IInstance Create(Guid processId)
+		private readonly IInstanceFactory _factory;
+
+		public SqlServerInstanceStorage(IInstanceFactory factory)
 		{
-			throw new NotImplementedException();
+			_factory = factory ?? throw new ArgumentNullException(nameof(factory));
+		}
+
+		public IInstance Create(Guid id, IIdentity identity)
+		{
+			return _factory.CreateInstance(id, identity);
 		}
 
 		public async Task<IInstance> Load(Guid instanceId)
@@ -26,7 +38,6 @@ namespace A2v10.ProcS.SqlServer
 					using (var rdr = await cmd.ExecuteReaderAsync(CommandBehavior.SingleRow))
 					{
 						if (await rdr.ReadAsync()) {
-
 						}
 					}
 				}

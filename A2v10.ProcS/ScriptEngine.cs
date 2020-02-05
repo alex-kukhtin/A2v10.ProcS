@@ -46,32 +46,17 @@ namespace A2v10.ProcS
 			_engine.Execute(code);
 		}
 
-		public void Execute(String code, String resultArg)
-		{
-			if (code == null)
-				return;
-			if (resultArg == null)
-				_engine.Execute(code);
-			else
-			{
-				var funcCode = $"(result) => {{{code};}}";
-				var func = _engine.Execute(funcCode).GetCompletionValue();
-				var val = new Jint.Native.Json.JsonParser(_engine).Parse(resultArg);
-				func.Invoke(val);
-			}
-		}
-
 		public void SetValue(String name, IDynamicObject val)
 		{
 			_engine.SetValue(name, val.RawValue);
 		}
 
-		public T GetValueFromJson<T>(String json, String expression)
+		public T GetValueFromObject<T>(IDynamicObject obj, String expression)
 		{
-			if (json == null || expression == null)
+			if (obj == null || expression == null)
 				return default;
-			var val = new Jint.Native.Json.JsonParser(_engine).Parse(json);
-			var func = _engine.Execute($"(result) => ({expression})").GetCompletionValue();
+			var val = Jint.Native.JsValue.FromObject(_engine, obj.RawValue);
+			var func = _engine.Execute($"(reply) => ({expression})").GetCompletionValue();
 			var result = func.Invoke(val).ToObject();
 			if (result is T)
 				return (T)result;

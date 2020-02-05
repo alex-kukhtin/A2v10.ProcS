@@ -4,7 +4,7 @@
 	"openapi": "3.0.2",
 	"info": {
 		"title": "A2v10.ProcS API",
-		"version": "0.0.1",
+		"version": "0.0.1"
 	},
 	"servers": [
 		{ "url": "http://localhost:5000/api/1.0" }

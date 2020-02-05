@@ -19,5 +19,8 @@ namespace A2v10.ProcS.Interfaces
 
 		IDynamicObject GetData();
 		IDynamicObject GetResult();
+
+		//IDynamicObject GetData();
+		//void SetData(IDynamicObject data);
 	}
 }
