@@ -15,7 +15,7 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleCounter()
 		{
-			var engine = ProcessEngine.CreateEngine();
+			var engine = ProcessEngine.CreateEngine().Item1;
 
 			var data = new DynamicObject();
 			data.Set("counter", 10);
@@ -29,7 +29,7 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleResult()
 		{
-			var engine = ProcessEngine.CreateEngine();
+			var engine = ProcessEngine.CreateEngine().Item1;
 
 			var instance = await engine.StartWorkflow(new Identity("scripts/result.json"));
 

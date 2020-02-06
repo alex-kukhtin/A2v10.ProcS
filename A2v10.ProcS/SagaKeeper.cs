@@ -8,55 +8,56 @@ using A2v10.ProcS.Interfaces;
 
 namespace A2v10.ProcS
 {
-	public class InMemorySagaKeeperKey : ISagaKeeperKey
+	public class SagaKeeperKey : ISagaKeeperKey
 	{
-		public Type SagaType { get; private set; }
+		public String SagaKind { get; private set; }
 		public ICorrelationId CorrelationId { get; private set; }
 
 
-		public InMemorySagaKeeperKey(Type sagaType, ICorrelationId correlationId)
+		public SagaKeeperKey(String sagaKind, ICorrelationId correlationId)
 		{
-			SagaType = sagaType;
+			SagaKind = sagaKind;
 			CorrelationId = correlationId;
 		}
 
-		public InMemorySagaKeeperKey(ISaga saga)
+		public SagaKeeperKey(ISaga saga)
 		{
-			SagaType = saga.GetType();
+			SagaKind = saga.Kind;
 			CorrelationId = saga.CorrelationId;
 		}
 
 		public override Int32 GetHashCode()
 		{
-			return SagaType.GetHashCode() + 17 * (CorrelationId?.GetHashCode() ?? 0);
+			return SagaKind.GetHashCode() + 17 * (CorrelationId?.GetHashCode() ?? 0);
 		}
 
 		public override String ToString()
 		{
-			return SagaType.Name + ":" + (CorrelationId?.ToString() ?? "{null}");
+			return SagaKind + ":" + (CorrelationId?.ToString() ?? "{null}");
 		}
 
 		public Boolean Equals(ISagaKeeperKey other)
 		{
-			return SagaType.Equals(other.SagaType) && CorrelationId.Equals(other.CorrelationId);
+			return SagaKind.Equals(other.SagaKind) && CorrelationId.Equals(other.CorrelationId);
 		}
 	}
 
 	public class InMemorySagaKeeper : ISagaKeeper
 	{
-		private static readonly Dictionary<Type, Type> _messagesMap = new Dictionary<Type, Type>();
-		private readonly ConcurrentDictionary<ISagaKeeperKey, ISaga> _sagas = new ConcurrentDictionary<ISagaKeeperKey, ISaga>();
-		
-		public static void RegisterMessageType<TMessage, TSaga>() where TMessage : IMessage where TSaga : ISaga
+		private readonly SagaManager sagaManager;
+		private readonly ConcurrentDictionary<ISagaKeeperKey, ISaga> sagas;
+
+		public InMemorySagaKeeper(SagaManager sagaManager)
 		{
-			_messagesMap.Add(typeof(TMessage), typeof(TSaga));
+			sagas = new ConcurrentDictionary<ISagaKeeperKey, ISaga>();
+			this.sagaManager = sagaManager;
 		}
 
 		public ISaga GetSagaForMessage(IMessage message, out ISagaKeeperKey key, out Boolean isNew)
 		{
-			var sagaType = _messagesMap[message.GetType()];
-			key = new InMemorySagaKeeperKey(sagaType, message.CorrelationId);
-			if (message.CorrelationId != null && _sagas.TryGetValue(key, out ISaga saga))
+			var sagaFactory = sagaManager.GetSagaFactory(message.GetType());
+			key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
+			if (message.CorrelationId != null && sagas.TryGetValue(key, out ISaga saga))
 			{
 				isNew = false;
 				return saga;
@@ -64,7 +65,7 @@ namespace A2v10.ProcS
 			else 
 			{
 				isNew = true;
-				return System.Activator.CreateInstance(sagaType) as ISaga;
+				return sagaFactory.CreateSaga();
 			}
 		}
 
@@ -72,11 +73,11 @@ namespace A2v10.ProcS
 		{
 			if (saga.IsComplete || saga.CorrelationId == null || !saga.CorrelationId.Equals(key.CorrelationId))
 			{
-				_sagas.TryRemove(key, out ISaga removed);
+				sagas.TryRemove(key, out ISaga removed);
 			}
 			if (!saga.IsComplete)
 			{
-				_sagas.AddOrUpdate(new InMemorySagaKeeperKey(saga), saga, (k, s) => saga);
+				sagas.AddOrUpdate(new SagaKeeperKey(saga), saga, (k, s) => saga);
 			}
 		}
 	}

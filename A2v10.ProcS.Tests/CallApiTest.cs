@@ -13,7 +13,7 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task OpenWeatherApi()
 		{
-			var engine = ProcessEngine.CreateEngine();
+			var engine = ProcessEngine.CreateEngine().Item1;
 
 			var prms = new DynamicObject();
 			prms.Set("city", "London");

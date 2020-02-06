@@ -20,9 +20,9 @@ namespace A2v10.ProcS
 
 	public class ProcessSaga : SagaBaseDispatched<String, ResumeProcess>
 	{
-		public static void Register()
+		public ProcessSaga() : base(nameof(ProcessSaga))
 		{
-			InMemorySagaKeeper.RegisterMessageType<ResumeProcess, ProcessSaga>();
+
 		}
 
 		protected override async Task Handle(IHandleContext context, ResumeProcess message)

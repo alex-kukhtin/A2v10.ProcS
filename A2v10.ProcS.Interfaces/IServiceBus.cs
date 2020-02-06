@@ -62,6 +62,7 @@ namespace A2v10.ProcS.Interfaces
 
 	public interface ISaga
 	{
+		String Kind { get; }
 		Boolean IsComplete { get; }
 		ICorrelationId CorrelationId { get; }
 		Task Handle(IHandleContext context, IMessage message);
@@ -69,6 +70,12 @@ namespace A2v10.ProcS.Interfaces
 
 	public abstract class SagaBase<CorrelationT> : ISaga where CorrelationT : IEquatable<CorrelationT>
 	{
+		protected SagaBase(String kind) 
+		{
+			Kind = kind;
+		}
+		public String Kind { get; private set; }
+		
 		public CorrelationId<CorrelationT> CorrelationId { get; } = new CorrelationId<CorrelationT>(default);
 
 		ICorrelationId ISaga.CorrelationId => CorrelationId;
@@ -81,6 +88,11 @@ namespace A2v10.ProcS.Interfaces
 		where CorrelationT : IEquatable<CorrelationT>
 		where MessageT1 : IMessage
 	{
+		public SagaBaseDispatched(String kind) : base(kind)
+		{
+
+		}
+
 		public async override Task Handle(IHandleContext context, IMessage message)
 		{
 			switch (message)
@@ -101,6 +113,11 @@ namespace A2v10.ProcS.Interfaces
 		where MessageT1 : IMessage
 		where MessageT2 : IMessage
 	{
+		public SagaBaseDispatched(String kind) : base(kind)
+		{
+
+		}
+
 		public async override Task Handle(IHandleContext context, IMessage message)
 		{
 			switch (message)
@@ -126,6 +143,11 @@ namespace A2v10.ProcS.Interfaces
 		where MessageT2 : IMessage
 		where MessageT3 : IMessage
 	{
+		public SagaBaseDispatched(String kind) : base(kind)
+		{
+
+		}
+
 		public async override Task Handle(IHandleContext context, IMessage message)
 		{
 			switch (message)
@@ -156,6 +178,11 @@ namespace A2v10.ProcS.Interfaces
 		where MessageT3 : IMessage
 		where MessageT4 : IMessage
 	{
+		public SagaBaseDispatched(String kind) : base(kind)
+		{
+
+		}
+
 		public async override Task Handle(IHandleContext context, IMessage message)
 		{
 			switch (message)

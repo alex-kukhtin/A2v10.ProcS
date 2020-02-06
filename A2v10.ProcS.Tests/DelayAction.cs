@@ -13,20 +13,14 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleRun()
 		{
-			var storage = new FakeStorage();
-			var keeper = new InMemorySagaKeeper();
-			var scriptEngine = new ScriptEngine();
-			var repository = new Repository(storage, storage);
-			var bus = new ServiceBus(keeper, repository, scriptEngine);
+			(WorkflowEngine engine, IWorkflowStorage storage, IServiceBus bus) = ProcessEngine.CreateEngine();
 
-			var stm = await storage.WorkflowFromStorage(new Identity("delay.json")) as StateMachine;
+			var stm = (await storage.WorkflowFromStorage(new Identity("delay.json"))) as StateMachine;
 
 			Assert.AreEqual("S1", stm.InitialState);
 			Assert.AreEqual("Delay Test", stm.Description);
 			var s1 = stm.States["S1"];
 			Assert.IsInstanceOfType(s1.OnEntry, typeof(A2v10.ProcS.Delay));
-
-			var engine = new WorkflowEngine(repository, bus, scriptEngine);
 
 			await engine.Run(stm);
 		}

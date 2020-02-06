@@ -33,7 +33,12 @@ namespace A2v10.ProcS
 
 	public class CallHttpApiSaga : SagaBaseDispatched<String, CallApiRequestMessage, CallApiResponse>
 	{
-		private static readonly HttpClient _httpClient = new HttpClient();
+		public CallHttpApiSaga() : base(nameof(CallHttpApiSaga))
+		{
+
+		}
+
+		private readonly HttpClient _httpClient = new HttpClient();
 
 		// serializable
 		private Guid _id;
@@ -90,12 +95,6 @@ namespace A2v10.ProcS
 			context.SendMessage(resumeProcess);
 			IsComplete = true;
 			return Task.CompletedTask;
-		}
-
-		public static void Register()
-		{
-			InMemorySagaKeeper.RegisterMessageType<CallApiRequestMessage, CallHttpApiSaga>();
-			InMemorySagaKeeper.RegisterMessageType<CallApiResponse, CallHttpApiSaga>();
 		}
 	}
 }

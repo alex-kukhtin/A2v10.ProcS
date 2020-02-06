@@ -25,14 +25,6 @@ namespace A2v10.ProcS
 			_scriptEngine = scriptEngine ?? throw new ArgumentNullException(nameof(scriptEngine));
 		}
 
-		public static void RegisterSagas()
-		{
-			ProcessSaga.Register();
-			CallHttpApiSaga.Register();
-			WaitApiCallbackSaga.Register();
-			WaitApiCallbackProcessSaga.Register();
-		}
-
 		#region IWorkflowEngine
 		public async Task<IInstance> CreateInstance(IIdentity identity)
 		{

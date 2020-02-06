@@ -9,7 +9,6 @@
     <Product>A2v10</Product>
     <Copyright>Copyright © 2020 Alex Kukhtin</Copyright>
     <SignAssembly>true</SignAssembly>
-    <DelaySign>false</DelaySign>
   </PropertyGroup>
 
   <ItemGroup>

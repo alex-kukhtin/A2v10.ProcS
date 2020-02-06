@@ -7,7 +7,7 @@ namespace A2v10.ProcS.Interfaces
 {
 	public interface ISagaKeeperKey : IEquatable<ISagaKeeperKey>
 	{
-		Type SagaType { get; }
+		String SagaKind { get; }
 		ICorrelationId CorrelationId { get; }
 	}
 
