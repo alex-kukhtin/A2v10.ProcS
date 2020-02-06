@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-using A2v10.ProcS.Interfaces;
+using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
@@ -14,7 +14,7 @@ namespace A2v10.ProcS
 		private readonly IWorkflowStorage _workflowStorage;
 		private readonly IInstanceStorage _instanceStorage;
 
-		private Dictionary<Guid, IInstance> _instanceCache = new Dictionary<Guid, IInstance>();
+		private readonly Dictionary<Guid, IInstance> _instanceCache = new Dictionary<Guid, IInstance>();
 
 		public Repository(IWorkflowStorage workflowStorage, IInstanceStorage instanceStorage)
 		{

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using A2v10.ProcS.Interfaces;
+using A2v10.ProcS.Infrastructure;
 
 /*
  */

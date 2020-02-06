@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Text.RegularExpressions;
-using A2v10.ProcS.Interfaces;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {

@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\A2v10.ProcS.Interfaces\A2v10.ProcS.Interfaces.csproj" />
+    <ProjectReference Include="..\A2v10.ProcS.Infrastructure\A2v10.ProcS.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

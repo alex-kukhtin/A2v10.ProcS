@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Threading.Tasks;
-using A2v10.ProcS.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using A2v10.ProcS.Infrastructure;
 
 
 namespace A2v10.ProcS.Tests

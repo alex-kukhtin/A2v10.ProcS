@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using Newtonsoft.Json;
 
-using A2v10.ProcS.Interfaces;
+using A2v10.ProcS.Infrastructure;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json.Serialization;

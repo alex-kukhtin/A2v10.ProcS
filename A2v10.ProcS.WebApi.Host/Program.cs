@@ -12,7 +12,7 @@ namespace A2v10.ProcS.WebApi.Host
 {
 	using Host = Microsoft.Extensions.Hosting.Host;
 
-	public class Program
+	public static class Program
 	{
 
 		public static void Main(string[] args)

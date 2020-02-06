@@ -1,7 +1,7 @@
 ﻿
 using System;
 using System.Threading.Tasks;
-using A2v10.ProcS.Interfaces;
+using A2v10.ProcS.Infrastructure;
 
 using System.Data.SqlClient;
 using System.Data;

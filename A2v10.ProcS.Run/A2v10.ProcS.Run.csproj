@@ -46,9 +46,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\A2v10.ProcS.Interfaces\A2v10.ProcS.Interfaces.csproj">
-      <Project>{da421efd-e50b-4170-8c93-8d1ac09913b5}</Project>
-      <Name>A2v10.ProcS.Interfaces</Name>
+    <ProjectReference Include="..\A2v10.ProcS.Infrastructure\A2v10.ProcS.Infrastructure.csproj">
+      <Project>{52c8f4e4-4bca-4c5f-adb2-e61ae1e478fd}</Project>
+      <Name>A2v10.ProcS.Infrastructure</Name>
     </ProjectReference>
     <ProjectReference Include="..\A2v10.ProcS\A2v10.ProcS.csproj">
       <Project>{29ad063e-c56b-43fd-8441-d2a1d63feaa4}</Project>

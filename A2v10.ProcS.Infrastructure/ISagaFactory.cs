@@ -3,7 +3,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace A2v10.ProcS.Interfaces
+namespace A2v10.ProcS.Infrastructure
 {
 	public interface ISagaFactory
 	{

@@ -1,7 +1,7 @@
 ﻿// Copyright © 2020 Alex Kukhtin. All rights reserved.
 
 using System;
-using A2v10.ProcS.Interfaces;
+using A2v10.ProcS.Infrastructure;
 using Jint;
 
 namespace A2v10.ProcS

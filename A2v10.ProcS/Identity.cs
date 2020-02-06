@@ -1,6 +1,6 @@
 ﻿
 using System;
-using A2v10.ProcS.Interfaces;
+using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {

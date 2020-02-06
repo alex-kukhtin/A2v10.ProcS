@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace A2v10.ProcS.Interfaces
+namespace A2v10.ProcS.Infrastructure
 {
 	public interface IDynamicObject
 	{

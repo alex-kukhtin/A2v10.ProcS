@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-using A2v10.ProcS.Interfaces;
+using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {

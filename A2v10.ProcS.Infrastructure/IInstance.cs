@@ -2,7 +2,7 @@
 
 using System;
 
-namespace A2v10.ProcS.Interfaces
+namespace A2v10.ProcS.Infrastructure
 {
 	public interface IInstance
 	{
