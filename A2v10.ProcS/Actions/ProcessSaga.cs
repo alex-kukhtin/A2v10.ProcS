@@ -20,9 +20,9 @@ namespace A2v10.ProcS
 
 	public class ProcessSaga : SagaBase<String>
 	{
-		public static void Register()
+		public ProcessSaga() : base(nameof(ProcessSaga))
 		{
-			InMemorySagaKeeper.RegisterMessageType<ResumeProcess, ProcessSaga>();
+
 		}
 
 		#region dispatch

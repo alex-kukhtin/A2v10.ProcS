@@ -16,12 +16,7 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleWait()
 		{
-			var storage = new FakeStorage();
-			var keeper = new InMemorySagaKeeper();
-			var scriptEngine = new ScriptEngine();
-			var repository = new Repository(storage, storage);
-			var bus = new ServiceBus(keeper, repository, scriptEngine);
-			var engine = new WorkflowEngine(repository, bus, scriptEngine);
+			(WorkflowEngine engine, IWorkflowStorage storage, IServiceBus bus) = ProcessEngine.CreateEngine();
 
 			var data = new DynamicObject();
 			var instance = await engine.StartWorkflow(new Identity("callback.json"), data);

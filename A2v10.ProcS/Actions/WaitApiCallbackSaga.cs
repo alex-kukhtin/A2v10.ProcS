@@ -57,6 +57,11 @@ namespace A2v10.ProcS
 
 	public class WaitApiCallbackSaga : SagaBase<String>
 	{
+		public WaitApiCallbackSaga() : base(nameof(WaitApiCallbackSaga))
+		{
+
+		}
+
 		// serializable
 		private String tag;
 		private String correlationExpression;
@@ -96,16 +101,15 @@ namespace A2v10.ProcS
 			});
 			return Task.CompletedTask;
 		}
-
-		public static void Register()
-		{
-			InMemorySagaKeeper.RegisterMessageType<WaitCallbackMessage, WaitApiCallbackSaga>();
-			InMemorySagaKeeper.RegisterMessageType<CallbackMessage, WaitApiCallbackSaga>();
-		}
 	}
 
 	public class WaitApiCallbackProcessSaga : SagaBase<String>
 	{
+		public WaitApiCallbackProcessSaga() : base(nameof(WaitApiCallbackProcessSaga))
+		{
+
+		}
+
 		// serializable
 		private Guid _id;
 
@@ -139,12 +143,6 @@ namespace A2v10.ProcS
 			context.SendMessage(resumeProcess);
 			IsComplete = true;
 			return Task.CompletedTask;
-		}
-
-		public static void Register()
-		{
-			InMemorySagaKeeper.RegisterMessageType<WaitCallbackMessageProcess, WaitApiCallbackProcessSaga>();
-			InMemorySagaKeeper.RegisterMessageType<CallbackMessageResume, WaitApiCallbackProcessSaga>();
 		}
 	}
 }

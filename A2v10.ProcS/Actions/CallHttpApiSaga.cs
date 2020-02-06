@@ -33,7 +33,12 @@ namespace A2v10.ProcS
 
 	public class CallHttpApiSaga : SagaBase<String>
 	{
-		private static readonly HttpClient _httpClient = new HttpClient();
+		public CallHttpApiSaga() : base(nameof(CallHttpApiSaga))
+		{
+
+		}
+
+		private readonly HttpClient _httpClient = new HttpClient();
 
 		// serializable
 		private Guid _id;
@@ -107,12 +112,6 @@ namespace A2v10.ProcS
 		Task<String> ExecutePost(IHandleContext context, CallApiRequestMessage message)
 		{
 			throw new NotImplementedException(nameof(ExecutePost));
-		}
-
-		public static void Register()
-		{
-			InMemorySagaKeeper.RegisterMessageType<CallApiRequestMessage, CallHttpApiSaga>();
-			InMemorySagaKeeper.RegisterMessageType<CallApiResponse, CallHttpApiSaga>();
 		}
 	}
 }
