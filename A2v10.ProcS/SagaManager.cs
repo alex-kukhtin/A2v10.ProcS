@@ -43,7 +43,7 @@ namespace A2v10.ProcS
 
 		public void RegisterSagaFactory(ISagaFactory factory, params Type[] types)
 		{
-			RegisterSagaFactory(factory, types);
+			RegisterSagaFactory(factory, types as IEnumerable<Type>);
 		}
 
 		public void RegisterSagaFactory(ISagaFactory factory, IEnumerable<Type> types)
