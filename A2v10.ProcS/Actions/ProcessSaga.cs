@@ -18,28 +18,14 @@ namespace A2v10.ProcS
 		}
 	}
 
-	public class ProcessSaga : SagaBase<String>
+	public class ProcessSaga : SagaBaseDispatched<String, ResumeProcess>
 	{
 		public ProcessSaga() : base(nameof(ProcessSaga))
 		{
 
 		}
 
-		#region dispatch
-		public override async Task Handle(IHandleContext context, IMessage message)
-		{
-			switch (message)
-			{
-				case ResumeProcess resumeProcess:
-					await HandleResume(context, resumeProcess);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(message.GetType().FullName);
-			}
-		}
-		#endregion
-
-		public static async Task HandleResume(IHandleContext context, ResumeProcess message)
+		protected override async Task Handle(IHandleContext context, ResumeProcess message)
 		{
 			var instance = await context.LoadInstance(message.Id);
 			var resumeContext = context.CreateResumeContext(instance);

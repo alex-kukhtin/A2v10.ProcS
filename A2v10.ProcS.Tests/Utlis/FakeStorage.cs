@@ -56,7 +56,7 @@ namespace A2v10.ProcS.Tests
 
 		public Task<IWorkflowDefinition> WorkflowFromStorage(IIdentity identity)
 		{
-			String json = File.ReadAllText($"..//..//..//Workflows//{identity.ProcessId}");
+			String json = File.ReadAllText($"..//..//..//..//Workflows//{identity.ProcessId}");
 			var result = JsonConvert.DeserializeObject<StateMachine>(json, new JsonSerializerSettings()
 			{
 				TypeNameHandling = TypeNameHandling.Auto,

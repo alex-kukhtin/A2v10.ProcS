@@ -55,7 +55,7 @@ namespace A2v10.ProcS
 		public String Result { get; set; }
 	}
 
-	public class WaitApiCallbackSaga : SagaBase<String>
+	public class WaitApiCallbackSaga : SagaBaseDispatched<String, WaitCallbackMessage, CallbackMessage>
 	{
 		public WaitApiCallbackSaga() : base(nameof(WaitApiCallbackSaga))
 		{
@@ -66,24 +66,7 @@ namespace A2v10.ProcS
 		private String tag;
 		private String correlationExpression;
 
-		#region dispatch
-		public override async Task Handle(IHandleContext context, IMessage message)
-		{
-			switch (message)
-			{
-				case WaitCallbackMessage wait:
-					await Handle(context, wait);
-					break;
-				case CallbackMessage callback:
-					await Handle(context, callback);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(message.GetType().FullName);
-			}
-		}
-		#endregion
-
-		public Task Handle(IHandleContext context, WaitCallbackMessage message)
+		protected override Task Handle(IHandleContext context, WaitCallbackMessage message)
 		{
 			correlationExpression = message.CorrelationExpression;
 			tag = message.Tag;
@@ -91,7 +74,7 @@ namespace A2v10.ProcS
 			return Task.CompletedTask;
 		}
 
-		public Task Handle(IHandleContext context, CallbackMessage message)
+		protected override Task Handle(IHandleContext context, CallbackMessage message)
 		{
 			var cval = context.ScriptContext.GetValueFromObject<String>(new DynamicObject(message.Result), correlationExpression);
 
