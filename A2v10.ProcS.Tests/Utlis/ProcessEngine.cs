@@ -38,10 +38,11 @@ namespace A2v10.ProcS.Tests
 			var pathes = path.Split(Path.DirectorySeparatorChar);
 			var debugRelease = pathes[^3];
 			var newPathes = pathes.Take(pathes.Length - 5).ToList();
-			newPathes.Add($"A2v10.ProcS.Plugin{Path.DirectorySeparatorChar}bin");
+			newPathes.Add($"A2v10.ProcS.Plugin");
+			newPathes.Add($"bin");
 			newPathes.Add(debugRelease);
 			newPathes.Add("netstandard2.0");
-			return Path.Combine(newPathes.ToArray());
+			return (newPathes[0] == "" ? new string(new char[] { Path.DirectorySeparatorChar }) : "") + Path.Combine(newPathes.ToArray());
 		}
 	}
 }
