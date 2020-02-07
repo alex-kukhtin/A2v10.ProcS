@@ -1,6 +1,7 @@
 ﻿// Copyright © 2020 Alex Kukhtin. All rights reserved.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace A2v10.ProcS.Infrastructure
@@ -30,6 +31,11 @@ namespace A2v10.ProcS.Infrastructure
 
 		}
 
+		public static IEnumerable<Type> GetHandledTypes()
+		{
+			yield return typeof(MessageT1);
+		}
+
 		public async override Task Handle(IHandleContext context, IMessage message)
 		{
 			switch (message)
@@ -53,6 +59,12 @@ namespace A2v10.ProcS.Infrastructure
 		protected SagaBaseDispatched(String kind) : base(kind)
 		{
 
+		}
+
+		public static IEnumerable<Type> GetHandledTypes()
+		{
+			yield return typeof(MessageT1);
+			yield return typeof(MessageT2);
 		}
 
 		public async override Task Handle(IHandleContext context, IMessage message)
@@ -83,6 +95,13 @@ namespace A2v10.ProcS.Infrastructure
 		protected SagaBaseDispatched(String kind) : base(kind)
 		{
 
+		}
+
+		public static IEnumerable<Type> GetHandledTypes()
+		{
+			yield return typeof(MessageT1);
+			yield return typeof(MessageT2);
+			yield return typeof(MessageT3);
 		}
 
 		public async override Task Handle(IHandleContext context, IMessage message)
@@ -118,6 +137,14 @@ namespace A2v10.ProcS.Infrastructure
 		protected SagaBaseDispatched(String kind) : base(kind)
 		{
 
+		}
+
+		public static IEnumerable<Type> GetHandledTypes()
+		{
+			yield return typeof(MessageT1);
+			yield return typeof(MessageT2);
+			yield return typeof(MessageT3);
+			yield return typeof(MessageT4);
 		}
 
 		public async override Task Handle(IHandleContext context, IMessage message)
