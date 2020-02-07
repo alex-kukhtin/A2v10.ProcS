@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
@@ -18,7 +20,7 @@ namespace A2v10.ProcS.Tests
 			mgr.RegisterSagaFactory<WaitCallbackMessage, CallbackMessage>(new ConstructSagaFactory<WaitApiCallbackSaga>(nameof(WaitApiCallbackSaga)));
 			mgr.RegisterSagaFactory<WaitCallbackMessageProcess, CallbackMessageResume>(new ConstructSagaFactory<WaitApiCallbackProcessSaga>(nameof(WaitApiCallbackProcessSaga)));
 
-			String pluginPath = @"D:\Git\A2v10.ProcS\A2v10.ProcS.Plugin\bin\Debug\netstandard2.0";
+			String pluginPath = GetPluginPath();
 
 			mgr.LoadPlugins(pluginPath);
 
@@ -30,5 +32,16 @@ namespace A2v10.ProcS.Tests
 			return (engine, storage, bus);
 		}
 
+		static String GetPluginPath()
+		{
+			var path = new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath;
+			var pathes = path.Split(Path.DirectorySeparatorChar);
+			var debugRelease = pathes[pathes.Length - 3];
+			var newPathes = pathes.Take(pathes.Length - 5).ToList();
+			newPathes.Add($"A2v10.ProcS.Plugin{Path.DirectorySeparatorChar}bin");
+			newPathes.Add(debugRelease);
+			newPathes.Add("netstandard2.0");
+			return Path.Combine(newPathes.ToArray());
+		}
 	}
 }

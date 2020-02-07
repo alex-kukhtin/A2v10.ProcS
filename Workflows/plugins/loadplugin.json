@@ -12,7 +12,7 @@
 				}
 			},
 			"OnExit": {
-				"Code": "result = reply.result"
+				"Code": "result.value = reply.result"
 			}
 		},
 		"End": {
