@@ -38,6 +38,13 @@ namespace A2v10.ProcS
 		{
 			return new ResumeContext(_serviceBus, _repository, _scriptContext, instance);
 		}
+
+		public Task ResumeProcess(Guid id, String result)
+		{
+			var resumeProcess = new ResumeProcess(id, result);
+			SendMessage(resumeProcess);
+			return Task.CompletedTask;
+		}
 	}
 
 	public class ExecuteContext : HandleContext, IExecuteContext

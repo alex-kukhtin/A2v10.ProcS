@@ -29,7 +29,7 @@ namespace A2v10.ProcS.Tests
 				instance.Workflow = workflow;
 				return instance;
 			}
-			throw new ArgumentOutOfRangeException(nameof(instanceId));
+			throw new ArgumentOutOfRangeException(instanceId.ToString());
 		}
 
 		public Task Save(IInstance instance)

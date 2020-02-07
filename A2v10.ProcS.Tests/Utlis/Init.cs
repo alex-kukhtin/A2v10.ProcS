@@ -13,7 +13,6 @@ namespace A2v10.ProcS.Tests
 		[AssemblyInitialize]
 		public static void AssemblyInitialize(TestContext context)
 		{
-			
 		}
 
 		[AssemblyCleanup]

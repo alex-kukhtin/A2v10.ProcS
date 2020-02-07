@@ -1,0 +1,22 @@
+{
+	"Description": "Delay Test",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"OnEntry": {
+				"$type": "A2v10.ProcS.Plugin.TestPluginAction, A2v10.ProcS.Plugin"
+			},
+			"Transitions": {
+				"S1->End": {
+					"To": "End"
+				}
+			},
+			"OnExit": {
+				"Code": "result = reply.result"
+			}
+		},
+		"End": {
+			"Description": "State End"
+		}
+	}
+}

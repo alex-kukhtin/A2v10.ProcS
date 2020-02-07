@@ -15,7 +15,7 @@ namespace A2v10.ProcS.WebApi.Host
 	public static class Program
 	{
 
-		public static void Main(string[] args)
+		public static void Main(String[] args)
 		{
 			CreateHostBuilder(args).Build().Run();
 		}

@@ -37,7 +37,7 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleRunStateMachine()
 		{
-			(WorkflowEngine engine, IWorkflowStorage storage, IServiceBus bus) = ProcessEngine.CreateEngine();
+			(WorkflowEngine engine, _, _) = ProcessEngine.CreateEngine();
 
 			//var stm = await storage.WorkflowFromStorage(new Identity("simple.json"));
 

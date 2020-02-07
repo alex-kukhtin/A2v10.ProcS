@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1000
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "A2v10.ProcS", "A2v10.ProcS\A2v10.ProcS.csproj", "{29AD063E-C56B-43FD-8441-D2A1D63FEAA4}"
 EndProject
@@ -48,6 +48,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "A2v10.ProcS.Tests", "A2v10.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "A2v10.ProcS.Infrastructure", "A2v10.ProcS.Infrastructure\A2v10.ProcS.Infrastructure.csproj", "{52C8F4E4-4BCA-4C5F-ADB2-E61AE1E478FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A2v10.ProcS.Plugin", "A2v10.ProcS.Plugin\A2v10.ProcS.Plugin.csproj", "{DBA2FB53-7442-4DD1-98C9-83A626E466AA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plugins", "plugins", "{6B328BD1-F16E-46EA-9C60-613F1753DA99}"
+	ProjectSection(SolutionItems) = preProject
+		Workflows\plugins\loadplugin.json = Workflows\plugins\loadplugin.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +85,10 @@ Global
 		{52C8F4E4-4BCA-4C5F-ADB2-E61AE1E478FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52C8F4E4-4BCA-4C5F-ADB2-E61AE1E478FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52C8F4E4-4BCA-4C5F-ADB2-E61AE1E478FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBA2FB53-7442-4DD1-98C9-83A626E466AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBA2FB53-7442-4DD1-98C9-83A626E466AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBA2FB53-7442-4DD1-98C9-83A626E466AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBA2FB53-7442-4DD1-98C9-83A626E466AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -86,6 +97,7 @@ Global
 		{5F42B863-3E0C-4199-808E-33A40565ED79} = {DC046347-1F11-47B5-817F-0627AFD7E5B5}
 		{D29E70D9-663E-448A-BFE9-5B352F9A1848} = {DC046347-1F11-47B5-817F-0627AFD7E5B5}
 		{405F197E-CB79-4ADA-8AF1-4CF01D39E3D9} = {2BE122E4-347D-4BB3-B0C1-0AFB56747B42}
+		{6B328BD1-F16E-46EA-9C60-613F1753DA99} = {DC046347-1F11-47B5-817F-0627AFD7E5B5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B5EA97A5-CA19-4BCC-BC05-3B5A09F89A62}

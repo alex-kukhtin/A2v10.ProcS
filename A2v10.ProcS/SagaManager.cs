@@ -3,15 +3,19 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
-	public class SagaManager
+	public class SagaManager : ISagaManager
 	{
 		private readonly Dictionary<Type, ISagaFactory> _messagesMap = new Dictionary<Type, ISagaFactory>();
+
+
 		public void RegisterSagaFactory<TMessage>(ISagaFactory factory) where TMessage : IMessage
 		{
 			RegisterSagaFactory(factory, typeof(TMessage));
@@ -67,6 +71,34 @@ namespace A2v10.ProcS
 		public ISagaFactory GetSagaFactory<TMessage>() where TMessage : IMessage
 		{
 			return GetSagaFactory(typeof(TMessage));
+		}
+
+		public void LoadPlugins(String path)
+		{
+			List<(Assembly assembly, ProcSPluginAttribute attr)> _assemblies = new List<(Assembly, ProcSPluginAttribute)>();
+
+			foreach (var file in Directory.GetFiles(path, "*.dll"))
+			{
+				var assembly = Assembly.LoadFrom(file);
+				var attr = assembly.GetCustomAttribute<ProcSPluginAttribute>();
+				if (attr != null)
+					_assemblies.Add((assembly, attr));
+			}
+			foreach (var (assembly, attr) in _assemblies)
+				LoadPluginFromAssembly(assembly);
+		}
+
+		void LoadPluginFromAssembly(Assembly assembly)
+		{
+			foreach (var probe in assembly.GetTypes())
+			{
+				var ISagaRegistrar = probe.GetInterface("ISagaRegistrar");
+				if (ISagaRegistrar != null)
+				{
+					var registrar = Activator.CreateInstance(probe) as ISagaRegistrar;
+					registrar.Register(this);
+				}
+			}
 		}
 	}
 }

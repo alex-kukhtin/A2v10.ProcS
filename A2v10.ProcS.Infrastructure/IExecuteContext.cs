@@ -12,6 +12,7 @@ namespace A2v10.ProcS.Infrastructure
 		IScriptContext ScriptContext { get; }
 
 		IResumeContext CreateResumeContext(IInstance instance);
+		Task ResumeProcess(Guid id, String result);
 	}
 
 	public interface IExecuteContext : IHandleContext

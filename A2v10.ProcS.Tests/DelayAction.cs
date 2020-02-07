@@ -13,7 +13,7 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleRun()
 		{
-			(WorkflowEngine engine, IWorkflowStorage storage, IServiceBus bus) = ProcessEngine.CreateEngine();
+			var (engine, storage, _) = ProcessEngine.CreateEngine();
 
 			var stm = (await storage.WorkflowFromStorage(new Identity("delay.json"))) as StateMachine;
 
