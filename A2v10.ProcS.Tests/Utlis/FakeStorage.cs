@@ -15,6 +15,18 @@ namespace A2v10.ProcS.Tests
 	{
 		private readonly Dictionary<Guid, IInstance> _instances = new Dictionary<Guid, IInstance>();
 
+		private string path;
+
+		public FakeStorage() : this("../../../../Workflows/")
+		{
+
+		}
+
+		public FakeStorage(String path)
+		{
+			this.path = path;
+		}
+
 		#region IInstanceStorage
 		public IInstance Create(Guid processId)
 		{
@@ -56,7 +68,7 @@ namespace A2v10.ProcS.Tests
 
 		public Task<IWorkflowDefinition> WorkflowFromStorage(IIdentity identity)
 		{
-			String json = File.ReadAllText($"..//..//..//..//Workflows//{identity.ProcessId}");
+			String json = File.ReadAllText(Path.Combine(path, identity.ProcessId));
 			var result = JsonConvert.DeserializeObject<StateMachine>(json, new JsonSerializerSettings()
 			{
 				TypeNameHandling = TypeNameHandling.Auto,
