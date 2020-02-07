@@ -41,7 +41,8 @@ namespace A2v10.ProcS.Tests
 
 			//var stm = await storage.WorkflowFromStorage(new Identity("simple.json"));
 
-			await engine.StartWorkflow(new Identity("simple.json"));
+			var instance = await engine.StartWorkflow(new Identity("simple.json"));
+			Assert.AreEqual("End", instance.CurrentState);
 		}
 	}
 }

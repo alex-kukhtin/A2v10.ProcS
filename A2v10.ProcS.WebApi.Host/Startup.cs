@@ -26,8 +26,13 @@ namespace A2v10.ProcS.WebApi.Host
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddControllers();
+			services.AddControllers(SetControllerOptions);
 			services.AddAuthentication(SetAuthenticationOptions).AddJwtBearer(SetJwtBearerOptions);
+		}
+
+		public static void SetControllerOptions(MvcOptions options)
+		{
+			options.EnableEndpointRouting = false;
 		}
 
 		public void SetAuthenticationOptions(AuthenticationOptions options)
