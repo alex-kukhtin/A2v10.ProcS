@@ -75,17 +75,20 @@ namespace A2v10.ProcS
 
 		public void LoadPlugins(String path)
 		{
-			List<(Assembly assembly, ProcSPluginAttribute attr)> _assemblies = new List<(Assembly, ProcSPluginAttribute)>();
+			List<Assembly> _assemblies = new List<Assembly>();
 
 			foreach (var file in Directory.GetFiles(path, "*.dll"))
 			{
+				var name = Path.GetFileName(file).ToLowerInvariant();
+				if (name.StartsWith("System.") || name.StartsWith("Microsoft."))
+					continue;
 				var assembly = Assembly.LoadFrom(file);
 				var attr = assembly.GetCustomAttribute<ProcSPluginAttribute>();
 				if (attr != null)
-					_assemblies.Add((assembly, attr));
+					_assemblies.Add(assembly);
 			}
-			foreach (var (assembly, attr) in _assemblies)
-				LoadPluginFromAssembly(assembly);
+			foreach (var ass1 in _assemblies)
+				LoadPluginFromAssembly(ass1);
 		}
 
 		void LoadPluginFromAssembly(Assembly assembly)

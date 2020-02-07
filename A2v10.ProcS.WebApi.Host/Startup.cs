@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +27,16 @@ namespace A2v10.ProcS.WebApi.Host
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllers();
+			services.AddAuthentication(SetAuthenticationOptions).AddJwtBearer(SetJwtBearerOptions);
+		}
+
+		public void SetAuthenticationOptions(AuthenticationOptions options)
+		{
+
+		}
+
+		public void SetJwtBearerOptions(JwtBearerOptions options)
+		{
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -38,6 +50,7 @@ namespace A2v10.ProcS.WebApi.Host
 			app.UseRouting();
 
 			app.UseAuthorization();
+			app.UseAuthentication();
 
 			app.UseEndpoints(endpoints =>
 			{

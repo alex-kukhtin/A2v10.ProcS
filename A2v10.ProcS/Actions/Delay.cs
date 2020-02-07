@@ -14,7 +14,7 @@ namespace A2v10.ProcS
 		public async Task<ActionResult> Execute(IExecuteContext context)
 		{
 			TimeSpan span = TimeSpan.Parse(Duration);
-			String bookmark = Guid.NewGuid().ToString();
+			//String bookmark = Guid.NewGuid().ToString();
 			await Task.Delay(span);
 			return ActionResult.Idle;
 		}

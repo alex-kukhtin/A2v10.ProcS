@@ -21,6 +21,14 @@ namespace A2v10.ProcS
 			_object = new ExpandoObject();
 		}
 
+		public DynamicObject(Object prm)
+		{
+			if (prm is ExpandoObject prmEO)
+				_object = prmEO;
+			else
+				throw new NotImplementedException();
+		}
+
 		public DynamicObject(String json)
 		{
 			if (String.IsNullOrEmpty(json))

@@ -9,6 +9,7 @@ namespace A2v10.ProcS.Infrastructure
 	{
 		Task<IInstance> StartWorkflow(IIdentity identity, IDynamicObject prms = null);
 		Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, String result);
+		Task<IInstance> StartWorkflow(String processId, Object prms = null);
 
 		Task<IInstance> CreateInstance(IIdentity identity);
 		IInstance CreateInstance(IWorkflowDefinition workflow);

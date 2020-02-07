@@ -12,7 +12,7 @@ namespace A2v10.ProcS.Tests
 	[TestClass]
 	public class WaitCallback
 	{
-		
+
 		[TestMethod]
 		public async Task SimpleWait()
 		{
@@ -21,8 +21,10 @@ namespace A2v10.ProcS.Tests
 			var data = new DynamicObject();
 			var instance = await engine.StartWorkflow(new Identity("callback.json"), data);
 
-			var resp = new CallbackMessage("pseudopay");
-			resp.Result = "{ \"paymentId\": 123 }";
+			var resp = new CallbackMessage("pseudopay") {
+				Result = "{ \"paymentId\": 123 }"
+			};
+
 			bus.Send(resp);
 			await bus.Run();
 

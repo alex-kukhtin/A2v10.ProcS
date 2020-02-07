@@ -68,9 +68,9 @@ namespace A2v10.ProcS
 			{
 				if (response.IsSuccessStatusCode)
 				{
-					var headers = response.Content.Headers;
-					var contentType = headers.ContentType.MediaType;
-					var charset = headers.ContentType.CharSet;
+					//var headers = response.Content.Headers;
+					//var contentType = headers.ContentType.MediaType;
+					//var charset = headers.ContentType.CharSet;
 
 					var json = await response.Content.ReadAsStringAsync();
 

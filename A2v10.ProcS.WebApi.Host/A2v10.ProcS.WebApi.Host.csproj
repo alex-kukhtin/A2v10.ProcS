@@ -12,6 +12,21 @@
     <None Include="docs\openapi1.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\A2v10.ProcS.Infrastructure\A2v10.ProcS.Infrastructure.csproj" />
+    <ProjectReference Include="..\A2v10.ProcS\A2v10.ProcS.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Config\" />
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties docs_4openapi1_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Text;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
@@ -45,6 +46,12 @@ namespace A2v10.ProcS
 		public async Task<IInstance> StartWorkflow(IIdentity identity, IDynamicObject data = null)
 		{
 			return await Run(identity, data);
+		}
+
+		public Task<IInstance> StartWorkflow(String processId, Object prms = null)
+		{
+			var identity = new Identity(processId);
+			return Run(identity, prms != null ? new DynamicObject(prms) : null);
 		}
 
 		public async Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, String result)

@@ -36,7 +36,7 @@ namespace A2v10.ProcS.Tests
 		{
 			var path = new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath;
 			var pathes = path.Split(Path.DirectorySeparatorChar);
-			var debugRelease = pathes[pathes.Length - 3];
+			var debugRelease = pathes[^3];
 			var newPathes = pathes.Take(pathes.Length - 5).ToList();
 			newPathes.Add($"A2v10.ProcS.Plugin{Path.DirectorySeparatorChar}bin");
 			newPathes.Add(debugRelease);

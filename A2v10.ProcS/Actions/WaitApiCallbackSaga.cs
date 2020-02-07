@@ -115,6 +115,9 @@ namespace A2v10.ProcS
 
 		public Task Handle(IHandleContext context, WaitCallbackMessageProcess message)
 		{
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
 			_id = message.Id;
 			CorrelationId.Value = message.CorrelationId.Value;
 			return Task.CompletedTask;
