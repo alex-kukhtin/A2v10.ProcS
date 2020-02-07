@@ -6,7 +6,7 @@ namespace A2v10.ProcS.Infrastructure
 {
 	public interface ISagaRegistrar
 	{
-		void Register(ISagaManager mgr);
+		void Register(ISagaManager mgr, IServiceProvider provider);
 	}
 
 	public interface ISagaManager

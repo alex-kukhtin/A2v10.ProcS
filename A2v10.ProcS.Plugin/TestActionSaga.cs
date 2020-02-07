@@ -36,7 +36,7 @@ namespace A2v10.ProcS.Plugin
 
 	class TestPluginSagaRegistrar : ISagaRegistrar
 	{
-		public void Register(ISagaManager mgr)
+		public void Register(ISagaManager mgr, IServiceProvider provider)
 		{
 			var factory = new ConstructSagaFactory<TestPluginActionSaga>(nameof(TestPluginActionSaga));
 			mgr.RegisterSagaFactory<TaskPluginActionMessage>(factory);

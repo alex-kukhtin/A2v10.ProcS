@@ -49,7 +49,6 @@ namespace A2v10.ProcS.Infrastructure
 	{
 		public ConstructSagaFactory(String kind) : base(kind)
 		{
-
 		}
 
 		protected override ISaga CreateSagaInternal()

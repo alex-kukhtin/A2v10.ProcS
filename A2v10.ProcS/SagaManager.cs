@@ -96,7 +96,7 @@ namespace A2v10.ProcS
 				if (ISagaRegistrar != null)
 				{
 					var registrar = Activator.CreateInstance(probe) as ISagaRegistrar;
-					registrar.Register(this);
+					registrar.Register(this, null /*TODO: service provider*/);
 				}
 			}
 		}

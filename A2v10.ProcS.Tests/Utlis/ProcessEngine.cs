@@ -19,6 +19,7 @@ namespace A2v10.ProcS.Tests
 			mgr.RegisterSagaFactory<WaitCallbackMessageProcess, CallbackMessageResume>(new ConstructSagaFactory<WaitApiCallbackProcessSaga>(nameof(WaitApiCallbackProcessSaga)));
 
 			String pluginPath = @"D:\Git\A2v10.ProcS\A2v10.ProcS.Plugin\bin\Debug\netstandard2.0";
+
 			mgr.LoadPlugins(pluginPath);
 
 			var keeper = new InMemorySagaKeeper(mgr);
