@@ -39,11 +39,29 @@ namespace A2v10.ProcS
 			return new ResumeContext(_serviceBus, _repository, _scriptContext, instance);
 		}
 
-		public Task ResumeProcess(Guid id, String result)
+		public Task ResumeProcess(Guid id, String json)
+		{
+			return ResumeProcess(id, DynamicObject.From<String>(json));
+		}
+
+		public Task ResumeProcess(Guid id, IDynamicObject result)
 		{
 			var resumeProcess = new ResumeProcess(id, result);
 			SendMessage(resumeProcess);
 			return Task.CompletedTask;
+		}
+
+		public async Task<IInstance> StartProcess(String processId, Guid parentId, IDynamicObject data = null)
+		{
+			var instance = await _repository.CreateInstance(new Identity(processId), parentId);
+			if (data != null)
+				instance.SetParameters(data);
+			using (var newScriptContext = _scriptContext.NewContext())
+			{
+				var context = new ExecuteContext(_serviceBus, _repository, newScriptContext, instance);
+				await instance.Workflow.Run(context);
+				return instance;
+			}
 		}
 	}
 
@@ -88,19 +106,27 @@ namespace A2v10.ProcS
 
 		public T EvaluateScript<T>(String expression)
 		{
-			return _scriptContext.Eval<T>(expression);
+			return _scriptContext.Eval<T>($"({expression})");
 		}
 
-		public void ExecuteScript(String expression)
+		public void ExecuteScript(String code)
 		{
-			_scriptContext.Execute(expression);
+			_scriptContext.Execute(code);
+		}
+
+		public void ProcessComplete()
+		{
+			if (Instance.ParentInstanceId == Guid.Empty)
+				return;
+			var msg = new ResumeProcess(Instance.ParentInstanceId, Instance.GetResult());
+			_serviceBus.Send(msg);
 		}
 	}
 
 	public class ResumeContext : ExecuteContext, IResumeContext
 	{
 		public String Bookmark { get; set; }
-		public String Result { get; set; }
+		public IDynamicObject Result { get; set; }
 
 		public ResumeContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext, IInstance instance)
 			: base(bus, repository, scriptContext, instance)

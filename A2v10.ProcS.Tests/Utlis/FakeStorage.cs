@@ -15,7 +15,7 @@ namespace A2v10.ProcS.Tests
 	{
 		private readonly Dictionary<Guid, IInstance> _instances = new Dictionary<Guid, IInstance>();
 
-		private string path;
+		private readonly String path;
 
 		public FakeStorage() : this("../../../../Workflows/")
 		{

@@ -20,8 +20,8 @@ namespace A2v10.ProcS.Run
 				switch (Console.ReadKey().KeyChar)
 				{
 					case 'c':
-						var instance = engine.CreateInstance(new Identity("program"));
-						Console.WriteLine($"Instance created. Id={instance.Id}");
+						//var instance = engine.CreateInstance(new Identity("program"));
+						//Console.WriteLine($"Instance created. Id={instance.Id}");
 						break;
 					case 'l':
 						PrintList();

@@ -35,6 +35,11 @@ namespace A2v10.ProcS
 				if (States.TryGetValue(instance.CurrentState, out State state))
 				{
 					var result = await state.ExecuteStep(context);
+					if (result == ExecuteResult.Complete)
+					{
+						context.Instance.IsComplete = true;
+						return;
+					}
 					if (result != ExecuteResult.Continue)
 						return;
 				}

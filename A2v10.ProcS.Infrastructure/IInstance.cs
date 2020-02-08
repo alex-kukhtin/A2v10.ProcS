@@ -7,6 +7,9 @@ namespace A2v10.ProcS.Infrastructure
 	public interface IInstance
 	{
 		Guid Id { get; }
+		Guid ParentInstanceId { get; }
+		Boolean IsComplete { get; set; }
+
 		IWorkflowDefinition Workflow { get; set; }
 
 		String CurrentState { get; set; }
@@ -19,8 +22,5 @@ namespace A2v10.ProcS.Infrastructure
 
 		IDynamicObject GetData();
 		IDynamicObject GetResult();
-
-		//IDynamicObject GetData();
-		//void SetData(IDynamicObject data);
 	}
 }

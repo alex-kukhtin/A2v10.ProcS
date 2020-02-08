@@ -25,6 +25,7 @@
 						"Description": { "type": "string" },
 						"OnEntry": { "$ref": "#/definitions/action" },
 						"OnExit": { "$ref": "#/definitions/action" },
+						"NextState": { "type": "string" },
 						"Transitions": {
 							"type": "object",
 							"patternProperties": {
@@ -37,7 +38,7 @@
 										"Action": { "$ref": "#/definitions/action" }
 									},
 									"additionalProperties": false,
-									"required": ["To"]
+									"required": [ "To" ]
 								}
 							}
 						}

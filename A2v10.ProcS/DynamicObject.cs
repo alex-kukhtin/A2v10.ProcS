@@ -21,20 +21,27 @@ namespace A2v10.ProcS
 			_object = new ExpandoObject();
 		}
 
-		public DynamicObject(Object prm)
+		public DynamicObject(ExpandoObject expando)
 		{
-			if (prm is ExpandoObject prmEO)
-				_object = prmEO;
-			else
-				throw new NotImplementedException();
+			_object = expando;
 		}
 
-		public DynamicObject(String json)
+		public static IDynamicObject From<T>(T data)
 		{
-			if (String.IsNullOrEmpty(json))
-				_object = new ExpandoObject();
-			else
-				_object = JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter());
+			switch (data)
+			{
+				case ExpandoObject expando:
+					return new DynamicObject(expando);
+				case IDynamicObject dyna:
+					return dyna;
+				case String json:
+					{
+						if (String.IsNullOrEmpty(json))
+							return new DynamicObject();
+						return new DynamicObject(JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter()));
+					}
+			}
+			throw new NotImplementedException();
 		}
 
 		public void Set(String name, Object val)

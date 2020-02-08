@@ -17,11 +17,11 @@ namespace A2v10.ProcS.Tests
 		{
 			(WorkflowEngine engine, IWorkflowStorage storage, IServiceBus bus) = ProcessEngine.CreateEngine();
 
-			var wf = await storage.WorkflowFromStorage(new Identity("callapi.json")) as StateMachine;
-			var stm = wf as StateMachine;
+			var instance = await engine.StartWorkflow("callapi.json");
+
+			var stm = instance.Workflow as StateMachine;
 			Assert.IsInstanceOfType(stm.States["S1"].OnEntry, typeof(CallHttpApi));
 
-			IInstance instance = await engine.Run(wf);
 
 			await bus.Run();
 

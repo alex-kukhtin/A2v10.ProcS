@@ -11,6 +11,8 @@ namespace A2v10.ProcS.Infrastructure
 
 	public interface IScriptContext : IDisposable
 	{
+		IScriptContext NewContext();
+
 		T Eval<T>(String expression);
 		void Execute(String code);
 		void SetValue(String name, IDynamicObject value);

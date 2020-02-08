@@ -10,16 +10,24 @@ namespace A2v10.ProcS
 	{
 		public IScriptContext CreateContext()
 		{
-			return new ScriptContext();
+			return new ScriptContext(this);
 		}
 	}
 
 	public class ScriptContext : IScriptContext
 	{
+		private readonly IScriptEngine _parentScriptEngine;
+
+		internal ScriptContext(IScriptEngine scriptEngine)
+		{
+			_parentScriptEngine = scriptEngine;
+		}
+
 		private readonly Engine _engine = new Engine((opts)=>
 		{
 			opts.Strict(true);
 		});
+
 
 		public void Dispose()
 		{
@@ -28,6 +36,11 @@ namespace A2v10.ProcS
 
 		protected virtual void Dispose(Boolean disposing)
 		{
+		}
+
+		public IScriptContext NewContext()
+		{
+			return _parentScriptEngine.CreateContext();
 		}
 
 		public T Eval<T>(String expression)

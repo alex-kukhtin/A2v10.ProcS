@@ -42,7 +42,7 @@ namespace A2v10.ProcS
 			
 		}
 
-		public String Result { get; set; }
+		public IDynamicObject Result { get; set; }
 	}
 
 	public class CallbackMessageResume : MessageBase<String>
@@ -52,7 +52,7 @@ namespace A2v10.ProcS
 
 		}
 
-		public String Result { get; set; }
+		public IDynamicObject Result { get; set; }
 	}
 
 	public class WaitApiCallbackSaga : SagaBaseDispatched<String, WaitCallbackMessage, CallbackMessage>
@@ -76,7 +76,7 @@ namespace A2v10.ProcS
 
 		protected override Task Handle(IHandleContext context, CallbackMessage message)
 		{
-			var cval = context.ScriptContext.GetValueFromObject<String>(new DynamicObject(message.Result), correlationExpression);
+			var cval = context.ScriptContext.GetValueFromObject<String>(message.Result, correlationExpression);
 
 			context.SendMessage(new CallbackMessageResume(tag, cval)
 			{

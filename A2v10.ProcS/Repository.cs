@@ -40,5 +40,26 @@ namespace A2v10.ProcS
 		{
 			return _workflowStorage.WorkflowFromStorage(identity);
 		}
+
+		public async Task<IInstance> CreateInstance(IIdentity identity)
+		{
+			var workflow = await WorkflowFromStorage(identity);
+			return new Instance()
+			{
+				Id = Guid.NewGuid(),
+				Workflow = workflow
+			};
+		}
+
+		public async Task<IInstance> CreateInstance(IIdentity identity, Guid parentId)
+		{
+			var workflow = await WorkflowFromStorage(identity);
+			return new Instance()
+			{
+				Id = Guid.NewGuid(),
+				ParentInstanceId = parentId,
+				Workflow = workflow
+			};
+		}
 	}
 }

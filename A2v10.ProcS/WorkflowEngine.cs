@@ -27,34 +27,18 @@ namespace A2v10.ProcS
 		}
 
 		#region IWorkflowEngine
-		public async Task<IInstance> CreateInstance(IIdentity identity)
-		{
-			var workflow = await _repository.WorkflowFromStorage(identity);
-			return CreateInstance(workflow);
-		}
-
-		public IInstance CreateInstance(IWorkflowDefinition workflow)
-		{
-			return new Instance()
-			{
-				Id = Guid.NewGuid(),
-				Workflow = workflow
-			};
-		}
-
-
 		public async Task<IInstance> StartWorkflow(IIdentity identity, IDynamicObject data = null)
 		{
 			return await Run(identity, data);
 		}
 
-		public Task<IInstance> StartWorkflow(String processId, Object prms = null)
+		public Task<IInstance> StartWorkflow(String processId, IDynamicObject prms = null)
 		{
 			var identity = new Identity(processId);
-			return Run(identity, prms != null ? new DynamicObject(prms) : null);
+			return Run(identity, prms != null ? prms : null);
 		}
 
-		public async Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, String result)
+		public async Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, IDynamicObject result)
 		{
 			var instance = await _repository.Get(instaceId);
 			using (var scriptContext = _scriptEngine.CreateContext())
@@ -73,7 +57,7 @@ namespace A2v10.ProcS
 
 		public async Task<IInstance> Run(IIdentity identity, IDynamicObject data = null)
 		{
-			var instance = await CreateInstance(identity);
+			var instance = await _repository.CreateInstance(identity);
 			if (data != null)
 				instance.SetParameters(data);
 			using (var scriptContext = _scriptEngine.CreateContext())
@@ -82,24 +66,6 @@ namespace A2v10.ProcS
 				await instance.Workflow.Run(context);
 				return instance;
 			}
-		}
-
-		public async Task<IInstance> Run(IWorkflowDefinition workflow, IDynamicObject data = null)
-		{
-			var instance = CreateInstance(workflow);
-			if (data != null)
-				instance.SetParameters(data);
-			using (var scriptContext = _scriptEngine.CreateContext())
-			{
-				var context = new ExecuteContext(_serviceBus, _repository, scriptContext, instance);
-				await instance.Workflow.Run(context);
-				return instance;
-			}
-		}
-
-		public Task RunServiceBus()
-		{
-			return _serviceBus.Run();
 		}
 	}
 }

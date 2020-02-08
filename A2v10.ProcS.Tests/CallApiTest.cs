@@ -13,13 +13,13 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task OpenWeatherApi()
 		{
-			var engine = ProcessEngine.CreateEngine().engine;
+			var (engine, _, bus) = ProcessEngine.CreateEngine();
 
 			var prms = new DynamicObject();
 			prms.Set("city", "London");
 			var instance = await engine.StartWorkflow(new Identity("callapi/openweather.json"), prms);
 
-			await engine.RunServiceBus();
+			await bus.Run();
 
 			Assert.AreEqual(7.0, instance.GetResult().Eval<Double>("temp"));
 			Assert.AreEqual("London", instance.GetResult().Eval<String>("city"));

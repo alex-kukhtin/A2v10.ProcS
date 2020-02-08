@@ -1,0 +1,15 @@
+{
+	"$schema": "../../@schemas/statemachine-schema.json",
+	"Description": "Slave process Test",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"OnEntry": {
+				"Code": "result.p1 = params.p1 + 5; result.p2 = params.p2 + 10;"
+			},
+			"NextState": "End"
+		},
+		"End": {
+		}
+	}
+}

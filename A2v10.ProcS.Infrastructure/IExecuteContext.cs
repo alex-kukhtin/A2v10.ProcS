@@ -12,7 +12,10 @@ namespace A2v10.ProcS.Infrastructure
 		IScriptContext ScriptContext { get; }
 
 		IResumeContext CreateResumeContext(IInstance instance);
-		Task ResumeProcess(Guid id, String result);
+		Task<IInstance> StartProcess(String processId, Guid parentId, IDynamicObject data = null);
+
+		Task ResumeProcess(Guid id, IDynamicObject result);
+		Task ResumeProcess(Guid id, String json);
 	}
 
 	public interface IExecuteContext : IHandleContext
@@ -23,11 +26,13 @@ namespace A2v10.ProcS.Infrastructure
 		String Resolve(String source);
 		T EvaluateScript<T>(String expression);
 		void ExecuteScript(String code);
+
+		void ProcessComplete();
 	}
 
 	public interface IResumeContext : IExecuteContext
 	{
 		String Bookmark { get; }
-		String Result { get; set; }
+		IDynamicObject Result { get; set; }
 	}
 }

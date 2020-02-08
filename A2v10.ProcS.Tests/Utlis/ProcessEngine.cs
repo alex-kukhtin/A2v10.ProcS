@@ -15,7 +15,10 @@ namespace A2v10.ProcS.Tests
 		{
 			var storage = new FakeStorage();
 			var mgr = new SagaManager();
+
 			mgr.RegisterSagaFactory<ResumeProcess>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
+			mgr.RegisterSagaFactory<StartProcessMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
+
 			mgr.RegisterSagaFactory<CallApiRequestMessage, CallApiResponse>(new ConstructSagaFactory<CallHttpApiSaga>(nameof(CallHttpApiSaga)));
 			mgr.RegisterSagaFactory<WaitCallbackMessage, CallbackMessage>(new ConstructSagaFactory<WaitApiCallbackSaga>(nameof(WaitApiCallbackSaga)));
 			mgr.RegisterSagaFactory<WaitCallbackMessageProcess, CallbackMessageResume>(new ConstructSagaFactory<WaitApiCallbackProcessSaga>(nameof(WaitApiCallbackProcessSaga)));
@@ -42,7 +45,7 @@ namespace A2v10.ProcS.Tests
 			newPathes.Add($"bin");
 			newPathes.Add(debugRelease);
 			newPathes.Add("netstandard2.0");
-			return (newPathes[0] == "" ? new string(new char[] { Path.DirectorySeparatorChar }) : "") + Path.Combine(newPathes.ToArray());
+			return (newPathes[0] == "" ? new String(Path.DirectorySeparatorChar, 1) : "") + Path.Combine(newPathes.ToArray());
 		}
 	}
 }

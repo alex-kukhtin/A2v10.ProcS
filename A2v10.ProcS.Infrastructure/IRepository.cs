@@ -10,6 +10,9 @@ namespace A2v10.ProcS.Infrastructure
 		Task<IInstance> Get(Guid id);
 		Task Save(IInstance instance);
 
+		Task<IInstance> CreateInstance(IIdentity identity);
+		Task<IInstance> CreateInstance(IIdentity identity, Guid parentId);
+
 		Task<IWorkflowDefinition> WorkflowFromStorage(IIdentity identity);
 	}
 }

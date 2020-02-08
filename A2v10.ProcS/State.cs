@@ -13,7 +13,8 @@ namespace A2v10.ProcS
 	{
 		Continue,
 		Idle,
-		Exit
+		Exit,
+		Complete
 	}
 
 	public class State
@@ -24,6 +25,8 @@ namespace A2v10.ProcS
 
 		public IWorkflowAction OnEntry { get; set; }
 		public IWorkflowAction OnExit { get; set; }
+
+		public String NextState { get; set; }
 
 		public async Task<ExecuteResult> ExecuteStep(IExecuteContext context)
 		{
@@ -37,17 +40,27 @@ namespace A2v10.ProcS
 
 		public async Task ContinueStep(IResumeContext context)
 		{
-			context.ScriptContext.SetValue("reply", new DynamicObject(context.Result));
+			context.ScriptContext.SetValue("reply", context.Result);
 			await DoContinue(context);
 		}
 
 		async Task<ExecuteResult> DoContinue(IExecuteContext context)
 		{
-			var next = NextState(context);
+			var next = TransitionToNextState(context);
 			if (next == null)
 			{
-				await ExitState(context);
-				return ExecuteResult.Exit;
+				if (String.IsNullOrEmpty(NextState))
+				{
+					await ExitState(context);
+					context.ProcessComplete();
+					return ExecuteResult.Complete;
+				} 
+				else
+				{
+					await ExitState(context);
+					context.Instance.SetState(NextState);
+					return ExecuteResult.Continue;
+				}
 			}
 			else
 			{
@@ -58,7 +71,7 @@ namespace A2v10.ProcS
 			}
 		}
 
-		Transition NextState(IExecuteContext context)
+		Transition TransitionToNextState(IExecuteContext context)
 		{
 			if (Transitions == null || Transitions.Count == 0 || Final)
 				return null;

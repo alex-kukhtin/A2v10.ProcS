@@ -27,7 +27,7 @@ namespace A2v10.ProcS
 			
 		}
 
-		public String Result { get; set; }
+		public IDynamicObject Result { get; set; }
 	}
 
 
@@ -68,14 +68,23 @@ namespace A2v10.ProcS
 			{
 				if (response.IsSuccessStatusCode)
 				{
-					//var headers = response.Content.Headers;
-					//var contentType = headers.ContentType.MediaType;
+					var headers = response.Content.Headers;
+					var contentType = headers.ContentType.MediaType;
 					//var charset = headers.ContentType.CharSet;
 
 					var json = await response.Content.ReadAsStringAsync();
+					IDynamicObject result;
+					if (contentType == "application/json")
+					{
+						result = DynamicObject.From(json);
+					} 
+					else
+					{
+						throw new NotSupportedException($"'{contentType}' yet not supported");
+					}
 
 					var responseMessage = new CallApiResponse(correlationId) {
-						Result = json
+						Result = result
 					};
 					context.SendMessage(responseMessage);
 				}

@@ -8,12 +8,10 @@ namespace A2v10.ProcS.Infrastructure
 	public interface IWorkflowEngine
 	{
 		Task<IInstance> StartWorkflow(IIdentity identity, IDynamicObject prms = null);
-		Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, String result);
-		Task<IInstance> StartWorkflow(String processId, Object prms = null);
+		Task<IInstance> StartWorkflow(String processId, IDynamicObject prms = null);
 
-		Task<IInstance> CreateInstance(IIdentity identity);
-		IInstance CreateInstance(IWorkflowDefinition workflow);
+		Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, IDynamicObject result);
 
-		Task RunServiceBus();
+		//Task<IInstance> CreateInstance(IIdentity identity);
 	}
 }

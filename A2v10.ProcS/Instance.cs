@@ -9,6 +9,9 @@ namespace A2v10.ProcS
 	{
 		#region IInstance
 		public Guid Id { get; set; }
+		public Guid ParentInstanceId { get; set; }
+
+		public Boolean IsComplete { get; set; }
 
 		public IWorkflowDefinition Workflow { get; set; }
 
@@ -45,8 +48,6 @@ namespace A2v10.ProcS
 			return Result;
 		}
 		#endregion
-
-		public Boolean IsComplete { get; set; }
 
 		public Instance()
 		{

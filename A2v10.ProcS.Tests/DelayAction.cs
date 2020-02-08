@@ -15,14 +15,13 @@ namespace A2v10.ProcS.Tests
 		{
 			var (engine, storage, _) = ProcessEngine.CreateEngine();
 
-			var stm = (await storage.WorkflowFromStorage(new Identity("delay.json"))) as StateMachine;
+			var instance = await engine.StartWorkflow("delay.json");
+			var stm = instance.Workflow as StateMachine;
 
 			Assert.AreEqual("S1", stm.InitialState);
 			Assert.AreEqual("Delay Test", stm.Description);
 			var s1 = stm.States["S1"];
 			Assert.IsInstanceOfType(s1.OnEntry, typeof(A2v10.ProcS.Delay));
-
-			await engine.Run(stm);
 		}
 	}
 }

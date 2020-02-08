@@ -1,0 +1,21 @@
+{
+	"$schema": "../../@schemas/statemachine-schema.json",
+	"Description": "Master/slave test. Master",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"Description": "START CHILD PROCESS",
+			"OnEntry": {
+				"$type": "A2v10.ProcS.StartProcess, A2v10.ProcS",
+				"Process": "startprocess/slave.json",
+				"ParameterExpression": "{p1:params.value, p2:params.value * 2}"
+			},
+			"OnExit": {
+				"Code": "result.value = {p1: reply.p1, p2: reply.p2}"
+			},
+			"NextState": "End"
+		},
+		"End": {
+		}
+	}
+}
