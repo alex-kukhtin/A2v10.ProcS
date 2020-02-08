@@ -7,29 +7,6 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
-
-	public class ProcessCompleteMessage : MessageBase<Guid>
-	{
-		public IDynamicObject Result { get; set; }
-		public ProcessCompleteMessage(Guid parentId) 
-			: base(parentId)
-		{
-		}
-	}
-
-	public class StartProcessSaga : SagaBaseDispatched<Guid, ProcessCompleteMessage>
-	{
-		public StartProcessSaga() 
-			: base(nameof(StartProcessSaga))
-		{
-		}
-
-		protected override Task Handle(IHandleContext context, ProcessCompleteMessage message)
-		{
-			throw new NotImplementedException();
-		}
-	}
-
 	public class StartProcess : IWorkflowAction
 	{
 		public String Process { get; set; }
