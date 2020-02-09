@@ -44,13 +44,20 @@ namespace A2v10.ProcS
 			throw new NotImplementedException();
 		}
 
-		public void Set(String name, Object val)
+		public void Set<T>(String name, T val)
 		{
+			Object valueToSet = val;
+			switch (val)
+			{
+				case IDynamicObject doVal:
+					valueToSet = doVal.RawValue;
+					break;
+			}
 			var d = _object as IDictionary<String, Object>;
 			if (d.ContainsKey(name))
-				d[name] = val;
+				d[name] = valueToSet;
 			else
-				d.Add(name, val);
+				d.Add(name, valueToSet);
 		}
 
 		public T Get<T>(String name)

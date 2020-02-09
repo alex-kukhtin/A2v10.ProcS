@@ -19,7 +19,7 @@ namespace A2v10.ProcS.Tests
 			// slave p1 = p1 + 5, p2 = p2 + 10;
 
 			(WorkflowEngine engine, _, IServiceBus bus) = ProcessEngine.CreateEngine();
-			var prms = new DynamicObject();
+			var prms = engine.CreateDynamicObject();
 			prms.Set("value", 10);
 			var instance = await engine.StartWorkflow("startprocess/master.json", prms);
 
@@ -39,11 +39,11 @@ namespace A2v10.ProcS.Tests
 
 			(WorkflowEngine engine, _, IServiceBus bus) = ProcessEngine.CreateEngine();
 			
-			var prms1 = new DynamicObject();
+			var prms1 = engine.CreateDynamicObject();
 			prms1.Set("value", 10);
 			var instance1 = await engine.StartWorkflow("startprocess/master.json", prms1);
 
-			var prms2 = new DynamicObject();
+			var prms2 = engine.CreateDynamicObject();
 			prms2.Set("value", 20);
 			var instance2 = await engine.StartWorkflow("startprocess/master.json", prms2);
 

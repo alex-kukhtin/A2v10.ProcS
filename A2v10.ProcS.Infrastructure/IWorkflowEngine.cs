@@ -12,6 +12,8 @@ namespace A2v10.ProcS.Infrastructure
 
 		Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, IDynamicObject result);
 
+		IDynamicObject CreateDynamicObject();
+
 		//Task<IInstance> CreateInstance(IIdentity identity);
 	}
 }

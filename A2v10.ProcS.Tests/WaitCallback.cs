@@ -18,7 +18,7 @@ namespace A2v10.ProcS.Tests
 		{
 			(WorkflowEngine engine, _, IServiceBus bus) = ProcessEngine.CreateEngine();
 
-			var data = new DynamicObject();
+			var data = engine.CreateDynamicObject();
 			var instance = await engine.StartWorkflow(new Identity("callback.json"), data);
 
 			var resp = new CallbackMessage("pseudopay") {

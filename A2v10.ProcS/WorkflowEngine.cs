@@ -52,6 +52,11 @@ namespace A2v10.ProcS
 				return instance;
 			}
 		}
+
+		public IDynamicObject CreateDynamicObject()
+		{
+			return new DynamicObject();
+		}
 		#endregion
 
 
