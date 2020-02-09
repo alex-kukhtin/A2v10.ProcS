@@ -46,7 +46,7 @@ namespace A2v10.ProcS
 
 		public Task ResumeProcess(Guid id, IDynamicObject result)
 		{
-			var resumeProcess = new ResumeProcess(id, result);
+			var resumeProcess = new ResumeProcessMessage(id, result);
 			SendMessage(resumeProcess);
 			return Task.CompletedTask;
 		}
@@ -118,7 +118,7 @@ namespace A2v10.ProcS
 		{
 			if (Instance.ParentInstanceId == Guid.Empty)
 				return;
-			var msg = new ResumeProcess(Instance.ParentInstanceId, Instance.GetResult());
+			var msg = new ResumeProcessMessage(Instance.ParentInstanceId, Instance.GetResult());
 			_serviceBus.Send(msg);
 		}
 	}

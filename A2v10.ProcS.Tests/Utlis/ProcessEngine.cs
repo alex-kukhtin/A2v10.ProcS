@@ -16,7 +16,7 @@ namespace A2v10.ProcS.Tests
 			var storage = new FakeStorage();
 			var mgr = new SagaManager();
 
-			mgr.RegisterSagaFactory<ResumeProcess>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
+			mgr.RegisterSagaFactory<ResumeProcessMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
 			mgr.RegisterSagaFactory<StartProcessMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
 
 			mgr.RegisterSagaFactory<CallApiRequestMessage, CallApiResponse>(new ConstructSagaFactory<CallHttpApiSaga>(nameof(CallHttpApiSaga)));

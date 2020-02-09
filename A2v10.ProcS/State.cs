@@ -21,7 +21,7 @@ namespace A2v10.ProcS
 	{
 		public String Description { get; set; }
 		public Dictionary<String, Transition>  Transitions { get; set; }
-		public Boolean Final { get; set; }
+
 
 		public IWorkflowAction OnEntry { get; set; }
 		public IWorkflowAction OnExit { get; set; }
@@ -47,38 +47,27 @@ namespace A2v10.ProcS
 		async Task<ExecuteResult> DoContinue(IExecuteContext context)
 		{
 			var next = TransitionToNextState(context);
-			if (next == null)
+			String nextState = NextState;
+			if (next != null)
 			{
-				if (String.IsNullOrEmpty(NextState))
-				{
-					await ExitState(context);
-					context.ProcessComplete();
-					return ExecuteResult.Complete;
-				} 
-				else
-				{
-					await ExitState(context);
-					context.Instance.SetState(NextState);
-					return ExecuteResult.Continue;
-				}
-			}
-			else
-			{
+				nextState = next.To;
 				await next.ExecuteAction(context);
-				await ExitState(context);
-				context.Instance.SetState(next.To);
+			}
+			await ExitState(context);
+			if (!String.IsNullOrEmpty(nextState))
+			{
+				context.Instance.SetState(nextState);
 				return ExecuteResult.Continue;
 			}
+			context.ProcessComplete();
+			return ExecuteResult.Complete;
 		}
 
 		Transition TransitionToNextState(IExecuteContext context)
 		{
-			if (Transitions == null || Transitions.Count == 0 || Final)
+			if (Transitions == null || Transitions.Count == 0)
 				return null;
-			var next = Transitions.Where(kv => kv.Value.Evaluate(context)).Select(kv => kv.Value).FirstOrDefault();
-			if (next == null)
-				next = Transitions.Where(kv => kv.Value.Default).Select(kv => kv.Value).FirstOrDefault();
-			return next;
+			return Transitions.Where(kv => kv.Value.Evaluate(context)).Select(kv => kv.Value).FirstOrDefault();
 
 		}
 

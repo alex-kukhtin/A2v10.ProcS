@@ -8,12 +8,12 @@ namespace A2v10.ProcS
 {
 
 
-	public class ResumeProcess : MessageBase<String>
+	public class ResumeProcessMessage : MessageBase<String>
 	{
 		public Guid Id { get; }
 		public IDynamicObject Result { get; }
 
-		public ResumeProcess(Guid id, IDynamicObject result) : base(null)
+		public ResumeProcessMessage(Guid id, IDynamicObject result) : base(null)
 		{
 			Id = id;
 			Result = result;
@@ -32,14 +32,14 @@ namespace A2v10.ProcS
 		}
 	}
 
-	public class ProcessSaga : SagaBaseDispatched<String, ResumeProcess, StartProcessMessage>
+	public class ProcessSaga : SagaBaseDispatched<String, ResumeProcessMessage, StartProcessMessage>
 	{
 		public ProcessSaga() : base(nameof(ProcessSaga))
 		{
 
 		}
 
-		protected override async Task Handle(IHandleContext context, ResumeProcess message)
+		protected override async Task Handle(IHandleContext context, ResumeProcessMessage message)
 		{
 			var instance = await context.LoadInstance(message.Id);
 			var resumeContext = context.CreateResumeContext(instance);
@@ -51,7 +51,6 @@ namespace A2v10.ProcS
 		{
 			IInstance instance = await context.StartProcess(message.ProcessId, message.ParentId, message.Parameters);
 			message.CorrelationId.Value = instance.Id;
-
 		}
 	}
 }

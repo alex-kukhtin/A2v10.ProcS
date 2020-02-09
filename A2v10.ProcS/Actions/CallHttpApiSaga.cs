@@ -99,7 +99,7 @@ namespace A2v10.ProcS
 
 		protected override Task Handle(IHandleContext context, CallApiResponse message)
 		{
-			var resumeProcess = new ResumeProcess(_id, message.Result);
+			var resumeProcess = new ResumeProcessMessage(_id, message.Result);
 			context.SendMessage(resumeProcess);
 			IsComplete = true;
 			return Task.CompletedTask;

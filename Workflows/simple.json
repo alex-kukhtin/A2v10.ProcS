@@ -1,4 +1,5 @@
 {
+	"$schema": "../@schemas/statemachine-schema.json",
 	"Description": "First state machine",
 	"InitialState": "S1",
 	"States": {
@@ -7,7 +8,6 @@
 			"Transitions": {
 				"S1->S2": {
 					"Description": "From S1 to S2",
-					"Default": true,
 					"To": "S2"
 				}
 			}
@@ -16,13 +16,13 @@
 			"Description": "State 2",
 			"Transitions": {
 				"S2->End": {
-					"Default": true,
+					"Description": "From S2 to End",
 					"To": "End"
 				}
 			}
 		},
 		"End": {
-			"Description":  "State End"
+			"Description": "State End"
 		}
 	}
 }

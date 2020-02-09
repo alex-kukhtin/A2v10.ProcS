@@ -9,11 +9,9 @@
 				"Return": {
 					"Condition": "params.counter > 0",
 					"To": "S1"
-				},
-				"End": {
-					"To": "End"
 				}
 			},
+			"NextState": "End",
 			"OnExit": {
 				"Code": "params.counter -= 1"
 			}

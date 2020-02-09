@@ -30,7 +30,6 @@ namespace A2v10.ProcS.Tests
 
 			var t1 = s1.Transitions["S1->S2"];
 			Assert.AreEqual("S2", t1.To);
-			Assert.AreEqual(true, t1.Default);
 			Assert.AreEqual("From S1 to S2", t1.Description);
 		}
 

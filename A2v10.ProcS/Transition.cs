@@ -1,7 +1,6 @@
-﻿
+﻿// Copyright © 2020 Alex Kukhtin. All rights reserved.
+
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 
@@ -9,7 +8,6 @@ namespace A2v10.ProcS
 {
 	public class Transition
 	{
-		public Boolean Default { get; set; }
 		public String Condition { get; set; }
 		public String Description { get; set; }
 
@@ -19,7 +17,7 @@ namespace A2v10.ProcS
 		public Boolean Evaluate(IExecuteContext context)
 		{
 			if (String.IsNullOrEmpty(Condition))
-				return true;
+				return true; // no condition, always true
 			return context.EvaluateScript<Boolean>(Condition);
 		}
 
