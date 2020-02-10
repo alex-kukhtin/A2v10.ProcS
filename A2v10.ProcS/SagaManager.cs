@@ -14,7 +14,12 @@ namespace A2v10.ProcS
 	public class SagaManager : ISagaManager
 	{
 		private readonly Dictionary<Type, ISagaFactory> _messagesMap = new Dictionary<Type, ISagaFactory>();
+		private readonly IServiceProvider serviceProvider;
 
+		public SagaManager(IServiceProvider serviceProvider)
+		{
+			this.serviceProvider = serviceProvider;
+		}
 
 		public void RegisterSagaFactory<TMessage>(ISagaFactory factory) where TMessage : IMessage
 		{
@@ -99,7 +104,7 @@ namespace A2v10.ProcS
 				if (ISagaRegistrar != null)
 				{
 					var registrar = Activator.CreateInstance(probe) as ISagaRegistrar;
-					registrar.Register(this, null /*TODO: service provider*/);
+					registrar.Register(this, serviceProvider);
 				}
 			}
 		}

@@ -14,7 +14,7 @@ namespace A2v10.ProcS.Tests
 		public static (WorkflowEngine engine, IWorkflowStorage storage, IServiceBus bus) CreateEngine()
 		{
 			var storage = new FakeStorage();
-			var mgr = new SagaManager();
+			var mgr = new SagaManager(null);
 
 			mgr.RegisterSagaFactory<ResumeProcessMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
 			mgr.RegisterSagaFactory<StartProcessMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
