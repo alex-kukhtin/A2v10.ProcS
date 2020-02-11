@@ -23,7 +23,7 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		}
 
 		[HttpPost]
-		[Authorize]
+		//[Authorize]
 		[Route("{key}/{*extra}")]
 		public async Task Handle([FromBody] String body, String key, String extra)
 		{

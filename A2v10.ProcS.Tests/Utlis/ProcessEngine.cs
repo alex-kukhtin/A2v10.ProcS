@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
+using Microsoft.Extensions.Configuration;
 
 namespace A2v10.ProcS.Tests
 {
@@ -25,7 +26,9 @@ namespace A2v10.ProcS.Tests
 
 			String pluginPath = GetPluginPath();
 
-			mgr.LoadPlugins(pluginPath);
+			var configuration = new ConfigurationBuilder().Build();
+
+			mgr.LoadPlugins(pluginPath, configuration);
 
 			var keeper = new InMemorySagaKeeper(mgr);
 			var scriptEngine = new ScriptEngine();

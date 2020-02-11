@@ -11,7 +11,7 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
-	public class EndointManager : IEndpointManager, IEndpointResolver
+	public class EndpointManager : IEndpointManager, IEndpointResolver
 	{
 		private readonly Dictionary<String, IEndpointHandlerFactory> factories = new Dictionary<String, IEndpointHandlerFactory>();
 		private readonly ConcurrentDictionary<String, IEndpointHandler> handlers = new ConcurrentDictionary<String, IEndpointHandler>();

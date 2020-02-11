@@ -31,8 +31,9 @@ namespace A2v10.ProcS.WebApi.Host
 			services.AddControllers(SetControllerOptions);
 			services.AddAuthentication(SetAuthenticationOptions).AddJwtBearer(SetJwtBearerOptions);
 
-			var storage = new Classes.FakeStorage();
+			var storage = new Classes.FakeStorage(Configuration["ProcS:Workflows"]);
 
+			services.AddSingleton<IEndpointManager, EndpointManager>();
 
 			services.AddSingleton<IWorkflowStorage>(storage);
 			services.AddSingleton<IInstanceStorage>(storage);
@@ -48,7 +49,7 @@ namespace A2v10.ProcS.WebApi.Host
 			services.AddSingleton(CreateSagaManager);
 		}
 
-		public static ISagaManager CreateSagaManager(IServiceProvider serviceProvider)
+		public ISagaManager CreateSagaManager(IServiceProvider serviceProvider)
 		{
 			var mgr = new SagaManager(serviceProvider);
 
@@ -61,25 +62,15 @@ namespace A2v10.ProcS.WebApi.Host
 
 			foreach (var path in GetPluginPathes())
 			{
-				mgr.LoadPlugins(path);
+				mgr.LoadPlugins(path, Configuration.GetSection("ProcS.Plugins"));
 			}
 
 			return mgr;
 		}
 
-		private static IEnumerable<String> GetPluginPathes()
+		private IEnumerable<String> GetPluginPathes()
 		{
-			{
-				var path = new Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).LocalPath;
-				var pathes = path.Split(Path.DirectorySeparatorChar);
-				var debugRelease = pathes[^3];
-				var newPathes = pathes.Take(pathes.Length - 5).ToList();
-				newPathes.Add($"A2v10.ProcS.Plugin");
-				newPathes.Add($"bin");
-				newPathes.Add(debugRelease);
-				newPathes.Add("netstandard2.0");
-				yield return (newPathes[0] == "" ? new String(Path.DirectorySeparatorChar, 1) : "") + Path.Combine(newPathes.ToArray());
-			}
+			return Configuration.GetSection("ProcS:Plugins").GetChildren().Select(s => s.Value);
 		}
 
 		public static void SetControllerOptions(MvcOptions options)

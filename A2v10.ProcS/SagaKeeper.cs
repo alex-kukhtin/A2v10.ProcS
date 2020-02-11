@@ -44,10 +44,10 @@ namespace A2v10.ProcS
 
 	public class InMemorySagaKeeper : ISagaKeeper
 	{
-		private readonly SagaManager sagaManager;
+		private readonly ISagaManager sagaManager;
 		private readonly ConcurrentDictionary<ISagaKeeperKey, ISaga> sagas;
 
-		public InMemorySagaKeeper(SagaManager sagaManager)
+		public InMemorySagaKeeper(ISagaManager sagaManager)
 		{
 			sagas = new ConcurrentDictionary<ISagaKeeperKey, ISaga>();
 			this.sagaManager = sagaManager;

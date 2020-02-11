@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,7 +7,7 @@ namespace A2v10.ProcS.Infrastructure
 {
 	public interface ISagaRegistrar
 	{
-		void Register(ISagaManager mgr, IServiceProvider provider);
+		void Register(ISagaManager mgr);
 	}
 
 	public interface ISagaManager
@@ -27,5 +28,12 @@ namespace A2v10.ProcS.Infrastructure
 			where TMessage4 : IMessage;
 		void RegisterSagaFactory(ISagaFactory factory, params Type[] types);
 		void RegisterSagaFactory(ISagaFactory factory, IEnumerable<Type> types);
+
+		ISagaFactory GetSagaFactory(IMessage message);
+		ISagaFactory GetSagaFactory(Type messageType);
+		ISagaFactory GetSagaFactory<TMessage>() where TMessage : IMessage;
+
+		void LoadPlugins(String path, IConfiguration configuration);
+		void LoadPluginFromAssembly(System.Reflection.Assembly assembly, ProcSPluginAttribute attr, IConfiguration configuration);
 	}
 }
