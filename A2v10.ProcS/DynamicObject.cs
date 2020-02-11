@@ -40,6 +40,11 @@ namespace A2v10.ProcS
 							return new DynamicObject();
 						return new DynamicObject(JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter()));
 					}
+				default:
+                    {
+						var json = JsonConvert.SerializeObject(data);
+						return From(json);
+                    }
 			}
 			throw new NotImplementedException();
 		}
