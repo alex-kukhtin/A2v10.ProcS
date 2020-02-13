@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\A2v10.ProcS.Chatbot\A2v10.ProcS.Chatbot\A2v10.ProcS.Chatbot.csproj" />
     <ProjectReference Include="..\A2v10.ProcS.Infrastructure\A2v10.ProcS.Infrastructure.csproj" />
     <ProjectReference Include="..\A2v10.ProcS\A2v10.ProcS.csproj" />
   </ItemGroup>

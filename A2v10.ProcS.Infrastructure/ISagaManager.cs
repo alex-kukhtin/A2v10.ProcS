@@ -29,11 +29,15 @@ namespace A2v10.ProcS.Infrastructure
 		void RegisterSagaFactory(ISagaFactory factory, params Type[] types);
 		void RegisterSagaFactory(ISagaFactory factory, IEnumerable<Type> types);
 
+		void LoadPlugins(String path, IConfiguration configuration);
+
+		ISagaResolver Resolver { get; }
+	}
+
+	public interface ISagaResolver
+	{
 		ISagaFactory GetSagaFactory(IMessage message);
 		ISagaFactory GetSagaFactory(Type messageType);
 		ISagaFactory GetSagaFactory<TMessage>() where TMessage : IMessage;
-
-		void LoadPlugins(String path, IConfiguration configuration);
-		void LoadPluginFromAssembly(System.Reflection.Assembly assembly, ProcSPluginAttribute attr, IConfiguration configuration);
 	}
 }

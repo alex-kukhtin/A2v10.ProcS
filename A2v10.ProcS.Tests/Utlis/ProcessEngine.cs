@@ -30,7 +30,7 @@ namespace A2v10.ProcS.Tests
 
 			mgr.LoadPlugins(pluginPath, configuration);
 
-			var keeper = new InMemorySagaKeeper(mgr);
+			var keeper = new InMemorySagaKeeper(mgr.Resolver);
 			var scriptEngine = new ScriptEngine();
 			var repository = new Repository(storage, storage);
 			var bus = new ServiceBus(keeper, repository, scriptEngine);

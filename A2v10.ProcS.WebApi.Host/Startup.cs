@@ -31,9 +31,17 @@ namespace A2v10.ProcS.WebApi.Host
 			services.AddControllers(SetControllerOptions);
 			services.AddAuthentication(SetAuthenticationOptions).AddJwtBearer(SetJwtBearerOptions);
 
+			services.AddMvc(opt =>
+			{
+				opt.InputFormatters.Insert(0, new MvcExtensions.RawJsonBodyInputFormatter());
+			});
+
 			var storage = new Classes.FakeStorage(Configuration["ProcS:Workflows"]);
 
-			services.AddSingleton<IEndpointManager, EndpointManager>();
+			var epm = new EndpointManager();
+
+			services.AddSingleton<IEndpointManager>(epm);
+			services.AddSingleton<IEndpointResolver>(epm);
 
 			services.AddSingleton<IWorkflowStorage>(storage);
 			services.AddSingleton<IInstanceStorage>(storage);
@@ -47,6 +55,8 @@ namespace A2v10.ProcS.WebApi.Host
 			services.AddSingleton<ISagaKeeper, InMemorySagaKeeper>();
 
 			services.AddSingleton(CreateSagaManager);
+
+			services.AddSingleton(svs => svs.GetService<ISagaManager>().Resolver);
 		}
 
 		public ISagaManager CreateSagaManager(IServiceProvider serviceProvider)
@@ -62,7 +72,7 @@ namespace A2v10.ProcS.WebApi.Host
 
 			foreach (var path in GetPluginPathes())
 			{
-				mgr.LoadPlugins(path, Configuration.GetSection("ProcS.Plugins"));
+				mgr.LoadPlugins(path, Configuration.GetSection("ProcS:Plugins"));
 			}
 
 			return mgr;
@@ -70,7 +80,7 @@ namespace A2v10.ProcS.WebApi.Host
 
 		private IEnumerable<String> GetPluginPathes()
 		{
-			return Configuration.GetSection("ProcS:Plugins").GetChildren().Select(s => s.Value);
+			return Configuration.GetSection("ProcS:PluginsPath").GetChildren().Select(s => s.Value);
 		}
 
 		public static void SetControllerOptions(MvcOptions options)
