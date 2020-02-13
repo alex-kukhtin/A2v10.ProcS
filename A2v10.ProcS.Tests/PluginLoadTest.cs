@@ -15,11 +15,11 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task LoadPlugin()
 		{
-			(IWorkflowEngine engine, _, IServiceBus bus) = ProcessEngine.CreateEngine();
+			(IWorkflowEngine engine, _, ServiceBus bus) = ProcessEngine.CreateEngine();
 
 			IInstance inst = await engine.StartWorkflow(new Identity("plugins/loadplugin.json"));
 
-			await bus.Run();
+			await bus.Run(bus.CancelWhenEmpty.Token);
 
 			Assert.AreEqual("End", inst.CurrentState);
 			Assert.AreEqual(42, inst.GetResult().Eval<Int32>("value"));

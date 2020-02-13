@@ -12,7 +12,7 @@ namespace A2v10.ProcS.Tests
 {
 	public static class ProcessEngine
 	{
-		public static (WorkflowEngine engine, IWorkflowStorage storage, IServiceBus bus) CreateEngine()
+		public static (WorkflowEngine engine, IWorkflowStorage storage, ServiceBus bus) CreateEngine()
 		{
 			var storage = new FakeStorage();
 			var mgr = new SagaManager(null);

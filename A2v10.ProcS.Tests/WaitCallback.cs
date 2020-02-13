@@ -16,7 +16,7 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleWait()
 		{
-			(WorkflowEngine engine, _, IServiceBus bus) = ProcessEngine.CreateEngine();
+			(WorkflowEngine engine, _, ServiceBus bus) = ProcessEngine.CreateEngine();
 
 			var data = engine.CreateDynamicObject();
 			var instance = await engine.StartWorkflow(new Identity("callback.json"), data);
@@ -26,7 +26,7 @@ namespace A2v10.ProcS.Tests
 			};
 
 			bus.Send(resp);
-			await bus.Run();
+			await bus.Run(bus.CancelWhenEmpty.Token);
 
 			Assert.AreEqual("End", instance.CurrentState);
 		}

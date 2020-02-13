@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
@@ -48,7 +49,12 @@ namespace A2v10.ProcS.WebApi.Host
 
 			services.AddSingleton<IScriptEngine, ScriptEngine>();
 			services.AddSingleton<IRepository, Repository>();
-			services.AddSingleton<IServiceBus, ServiceBus>();
+			services.AddSingleton(svs => {
+				var bus = svs.GetService<IServiceBus>();
+				var source = new CancellationTokenSource();
+				var task = Task.Run(() => bus.Run(source.Token));
+				return bus;
+            });
 
 			services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
 

@@ -27,7 +27,7 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		[HttpPost]
 		//[Authorize]
 		[Route("send")]
-		public async Task SendMessage([FromBody] String json)
+		public void SendMessage([FromBody] String json)
 		{
 			var sett = new JsonSerializerSettings()
 			{
@@ -36,7 +36,6 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 			};
 			var message = JsonConvert.DeserializeObject<IMessage>(json, sett);
 			bus.Send(message);
-			await bus.Run();
 		}
 	}
 }
