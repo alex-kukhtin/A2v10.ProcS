@@ -1,4 +1,6 @@
-﻿using A2v10.ProcS.Infrastructure;
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
+
+using A2v10.ProcS.Infrastructure;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;

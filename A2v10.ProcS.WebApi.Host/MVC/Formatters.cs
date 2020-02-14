@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc.Formatters;
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
+
+using Microsoft.AspNetCore.Mvc.Formatters;
 using System;
 using System.Collections.Generic;
 using System.IO;
