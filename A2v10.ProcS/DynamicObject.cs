@@ -7,9 +7,65 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using A2v10.ProcS.Infrastructure;
+using Newtonsoft.Json.Serialization;
 
 namespace A2v10.ProcS
 {
+	internal class InterfaceContractResolver<T1> : InterfaceContractResolver where T1 : class
+	{
+		public InterfaceContractResolver() : base(typeof(T1))
+		{
+			
+		}
+	}
+
+	internal class InterfaceContractResolver<T1, T2> : InterfaceContractResolver where T1 : class where T2 : class
+	{
+		public InterfaceContractResolver() : base(typeof(T1), typeof(T2))
+		{
+
+		}
+	}
+
+	internal class InterfaceContractResolver<T1, T2, T3> : InterfaceContractResolver where T1 : class where T2 : class where T3 : class
+	{
+		public InterfaceContractResolver() : base(typeof(T1), typeof(T2), typeof(T3))
+		{
+
+		}
+	}
+
+	internal class InterfaceContractResolver<T1, T2, T3, T4> : InterfaceContractResolver where T1 : class where T2 : class where T3 : class where T4 : class
+	{
+		public InterfaceContractResolver() : base(typeof(T1), typeof(T2), typeof(T3), typeof(T4))
+		{
+
+		}
+	}
+
+
+	internal class InterfaceContractResolver : DefaultContractResolver
+	{
+		private Type[] types;
+
+		public InterfaceContractResolver(params Type[] types)
+		{
+			this.types = types;
+		}
+
+		protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+		{
+			foreach (var t in types)
+			{
+				if (t.IsAssignableFrom(type))
+				{
+					return base.CreateProperties(t, memberSerialization);
+				}
+			}
+			return base.CreateProperties(type, memberSerialization);
+		}
+	}
+
 	public class DynamicObject : IDynamicObject
 	{
 		private readonly ExpandoObject _object;
@@ -26,7 +82,7 @@ namespace A2v10.ProcS
 			_object = expando;
 		}
 
-		public static IDynamicObject From<T>(T data)
+		public static IDynamicObject From<T>(T data) where T : class
 		{
 			switch (data)
 			{
@@ -42,11 +98,13 @@ namespace A2v10.ProcS
 					}
 				default:
                     {
+						var settings = new JsonSerializerSettings();
+						settings.ContractResolver = new InterfaceContractResolver<T>();
+						settings.Converters.Add(new StringEnumConverter());
 						var json = JsonConvert.SerializeObject(data);
 						return From(json);
                     }
 			}
-			throw new NotImplementedException();
 		}
 
 		public void Set<T>(String name, T val)
