@@ -82,6 +82,35 @@ namespace A2v10.ProcS
 			_object = expando;
 		}
 
+		public static IDynamicObject From<RT>(RT data, params Type[] types) where RT : class
+		{
+			var settings = new JsonSerializerSettings();
+			settings.ContractResolver = new InterfaceContractResolver(types);
+			settings.Converters.Add(new StringEnumConverter());
+			var json = JsonConvert.SerializeObject(data);
+			return From(json);
+		}
+
+		public static IDynamicObject From<RT, T1>(RT data) where RT : class where T1 : class
+		{
+			return From(data, typeof(T1));
+		}
+
+		public static IDynamicObject From<RT, T1, T2>(RT data) where RT : class where T1 : class where T2 : class
+		{
+			return From(data, typeof(T1), typeof(T2));
+		}
+
+		public static IDynamicObject From<RT, T1, T2, T3>(RT data) where RT : class where T1 : class where T2 : class where T3 : class
+		{
+			return From(data, typeof(T1), typeof(T2), typeof(T3));
+		}
+
+		public static IDynamicObject From<RT, T1, T2, T3, T4>(RT data) where RT : class where T1 : class where T2 : class where T3 : class where T4 : class
+		{
+			return From(data, typeof(T1), typeof(T2), typeof(T3), typeof(T4));
+		}
+
 		public static IDynamicObject From<T>(T data) where T : class
 		{
 			switch (data)
@@ -98,12 +127,8 @@ namespace A2v10.ProcS
 					}
 				default:
                     {
-						var settings = new JsonSerializerSettings();
-						settings.ContractResolver = new InterfaceContractResolver<T>();
-						settings.Converters.Add(new StringEnumConverter());
-						var json = JsonConvert.SerializeObject(data);
-						return From(json);
-                    }
+						return From(data, new Type[0]);
+					}
 			}
 		}
 
