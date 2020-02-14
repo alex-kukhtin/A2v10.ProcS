@@ -1,6 +1,7 @@
-﻿// Copyright © 2020 Alex Kukhtin. All rights reserved.
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace A2v10.ProcS.Infrastructure
@@ -26,6 +27,6 @@ namespace A2v10.ProcS.Infrastructure
 	public interface IServiceBus
 	{
 		void Send(IMessage message);
-		Task Run();
+		Task Run(CancellationToken token);
 	}
 }

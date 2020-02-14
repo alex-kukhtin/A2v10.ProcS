@@ -1,4 +1,5 @@
-﻿
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,12 +19,12 @@ namespace A2v10.ProcS.Tests
 			// master p1 = p1, p2 = p1 * 2
 			// slave p1 = p1 + 5, p2 = p2 + 10;
 
-			(WorkflowEngine engine, _, IServiceBus bus) = ProcessEngine.CreateEngine();
+			(WorkflowEngine engine, _, ServiceBus bus) = ProcessEngine.CreateEngine();
 			var prms = engine.CreateDynamicObject();
 			prms.Set("value", 10);
 			var instance = await engine.StartWorkflow("startprocess/master.json", prms);
 
-			await bus.Run();
+			await bus.Run(bus.CancelWhenEmpty.Token);
 
 			var result = instance.GetResult();
 
@@ -37,7 +38,7 @@ namespace A2v10.ProcS.Tests
 			// master p1 = p1, p2 = p1 * 2
 			// slave p1 = p1 + 5, p2 = p2 + 10;
 
-			(WorkflowEngine engine, _, IServiceBus bus) = ProcessEngine.CreateEngine();
+			(WorkflowEngine engine, _, ServiceBus bus) = ProcessEngine.CreateEngine();
 			
 			var prms1 = engine.CreateDynamicObject();
 			prms1.Set("value", 10);
@@ -47,7 +48,7 @@ namespace A2v10.ProcS.Tests
 			prms2.Set("value", 20);
 			var instance2 = await engine.StartWorkflow("startprocess/master.json", prms2);
 
-			await bus.Run();
+			await bus.Run(bus.CancelWhenEmpty.Token);
 
 			var result1 = instance1.GetResult();
 

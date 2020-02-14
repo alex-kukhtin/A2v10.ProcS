@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 Alex Kukhtin. All rights reserved.
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
 using System;
 using System.Collections.Concurrent;
@@ -44,18 +44,18 @@ namespace A2v10.ProcS
 
 	public class InMemorySagaKeeper : ISagaKeeper
 	{
-		private readonly SagaManager sagaManager;
+		private readonly ISagaResolver sagaResolver;
 		private readonly ConcurrentDictionary<ISagaKeeperKey, ISaga> sagas;
 
-		public InMemorySagaKeeper(SagaManager sagaManager)
+		public InMemorySagaKeeper(ISagaResolver sagaResolver)
 		{
 			sagas = new ConcurrentDictionary<ISagaKeeperKey, ISaga>();
-			this.sagaManager = sagaManager;
+			this.sagaResolver = sagaResolver;
 		}
 
 		public ISaga GetSagaForMessage(IMessage message, out ISagaKeeperKey key, out Boolean isNew)
 		{
-			var sagaFactory = sagaManager.GetSagaFactory(message.GetType());
+			var sagaFactory = sagaResolver.GetSagaFactory(message.GetType());
 			key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
 			if (message.CorrelationId != null && sagas.TryGetValue(key, out ISaga saga))
 			{

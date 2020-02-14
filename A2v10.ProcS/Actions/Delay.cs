@@ -1,4 +1,5 @@
-﻿
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
+
 using System;
 using System.Collections.Generic;
 using System.Text;

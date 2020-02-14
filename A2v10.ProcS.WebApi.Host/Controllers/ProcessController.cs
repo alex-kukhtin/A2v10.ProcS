@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 Alex Kukhtin. All rights reserved.
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
 using System;
 using System.Dynamic;
@@ -36,7 +36,7 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		}
 
 		[HttpPost]
-		[Authorize]
+		//[Authorize]
 		[Route("start")]
 		public async Task StartProcess([FromBody] StartProcessRequest prm)
 		{
@@ -44,7 +44,7 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		}
 
 		[HttpPost]
-		[Authorize]
+		//[Authorize]
 		[Route("resume")]
 		public async Task Resume([FromBody] ResumeProcessRequest prm)
 		{

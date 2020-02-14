@@ -1,7 +1,12 @@
+// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
+
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using A2v10.ProcS.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -28,6 +33,62 @@ namespace A2v10.ProcS.WebApi.Host
 		{
 			services.AddControllers(SetControllerOptions);
 			services.AddAuthentication(SetAuthenticationOptions).AddJwtBearer(SetJwtBearerOptions);
+
+			services.AddMvc(opt =>
+			{
+				opt.InputFormatters.Insert(0, new MvcExtensions.RawJsonBodyInputFormatter());
+			});
+
+			var storage = new Classes.FakeStorage(Configuration["ProcS:Workflows"]);
+
+			var epm = new EndpointManager();
+
+			services.AddSingleton<IEndpointManager>(epm);
+			services.AddSingleton<IEndpointResolver>(epm);
+
+			services.AddSingleton<IWorkflowStorage>(storage);
+			services.AddSingleton<IInstanceStorage>(storage);
+
+			services.AddSingleton<IScriptEngine, ScriptEngine>();
+			services.AddSingleton<IRepository, Repository>();
+			services.AddSingleton(svs => {
+				var bus = svs.GetService<IServiceBus>();
+				var source = new CancellationTokenSource();
+				var task = Task.Run(() => bus.Run(source.Token));
+				return bus;
+            });
+
+			services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
+
+			services.AddSingleton<ISagaKeeper, InMemorySagaKeeper>();
+
+			services.AddSingleton(CreateSagaManager);
+
+			services.AddSingleton(svs => svs.GetService<ISagaManager>().Resolver);
+		}
+
+		public ISagaManager CreateSagaManager(IServiceProvider serviceProvider)
+		{
+			var mgr = new SagaManager(serviceProvider);
+
+			mgr.RegisterSagaFactory<ResumeProcessMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
+			mgr.RegisterSagaFactory<StartProcessMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
+
+			mgr.RegisterSagaFactory<CallApiRequestMessage, CallApiResponse>(new ConstructSagaFactory<CallHttpApiSaga>(nameof(CallHttpApiSaga)));
+			mgr.RegisterSagaFactory<WaitCallbackMessage, CallbackMessage>(new ConstructSagaFactory<WaitApiCallbackSaga>(nameof(WaitApiCallbackSaga)));
+			mgr.RegisterSagaFactory<WaitCallbackMessageProcess, CallbackMessageResume>(new ConstructSagaFactory<WaitApiCallbackProcessSaga>(nameof(WaitApiCallbackProcessSaga)));
+
+			foreach (var path in GetPluginPathes())
+			{
+				mgr.LoadPlugins(path, Configuration.GetSection("ProcS:Plugins"));
+			}
+
+			return mgr;
+		}
+
+		private IEnumerable<String> GetPluginPathes()
+		{
+			return Configuration.GetSection("ProcS:PluginsPath").GetChildren().Select(s => s.Value);
 		}
 
 		public static void SetControllerOptions(MvcOptions options)

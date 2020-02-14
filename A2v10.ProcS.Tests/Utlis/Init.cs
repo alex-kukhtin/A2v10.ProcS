@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace A2v10.ProcS.Tests
 {

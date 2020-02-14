@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
+
+using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,7 +9,7 @@ namespace A2v10.ProcS.Infrastructure
 {
 	public interface ISagaRegistrar
 	{
-		void Register(ISagaManager mgr, IServiceProvider provider);
+		void Register(ISagaManager mgr);
 	}
 
 	public interface ISagaManager
@@ -27,5 +30,16 @@ namespace A2v10.ProcS.Infrastructure
 			where TMessage4 : IMessage;
 		void RegisterSagaFactory(ISagaFactory factory, params Type[] types);
 		void RegisterSagaFactory(ISagaFactory factory, IEnumerable<Type> types);
+
+		void LoadPlugins(String path, IConfiguration configuration);
+
+		ISagaResolver Resolver { get; }
+	}
+
+	public interface ISagaResolver
+	{
+		ISagaFactory GetSagaFactory(IMessage message);
+		ISagaFactory GetSagaFactory(Type messageType);
+		ISagaFactory GetSagaFactory<TMessage>() where TMessage : IMessage;
 	}
 }

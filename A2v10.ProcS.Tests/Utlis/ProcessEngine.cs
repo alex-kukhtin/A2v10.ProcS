@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,15 +8,16 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
+using Microsoft.Extensions.Configuration;
 
 namespace A2v10.ProcS.Tests
 {
 	public static class ProcessEngine
 	{
-		public static (WorkflowEngine engine, IWorkflowStorage storage, IServiceBus bus) CreateEngine()
+		public static (WorkflowEngine engine, IWorkflowStorage storage, ServiceBus bus) CreateEngine()
 		{
 			var storage = new FakeStorage();
-			var mgr = new SagaManager();
+			var mgr = new SagaManager(null);
 
 			mgr.RegisterSagaFactory<ResumeProcessMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
 			mgr.RegisterSagaFactory<StartProcessMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
@@ -25,9 +28,11 @@ namespace A2v10.ProcS.Tests
 
 			String pluginPath = GetPluginPath();
 
-			mgr.LoadPlugins(pluginPath);
+			var configuration = new ConfigurationBuilder().Build();
 
-			var keeper = new InMemorySagaKeeper(mgr);
+			mgr.LoadPlugins(pluginPath, configuration);
+
+			var keeper = new InMemorySagaKeeper(mgr.Resolver);
 			var scriptEngine = new ScriptEngine();
 			var repository = new Repository(storage, storage);
 			var bus = new ServiceBus(keeper, repository, scriptEngine);

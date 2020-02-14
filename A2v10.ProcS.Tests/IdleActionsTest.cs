@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +17,7 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleCallApi()
 		{
-			(WorkflowEngine engine, IWorkflowStorage storage, IServiceBus bus) = ProcessEngine.CreateEngine();
+			(WorkflowEngine engine, IWorkflowStorage storage, ServiceBus bus) = ProcessEngine.CreateEngine();
 
 			var instance = await engine.StartWorkflow("callapi.json");
 
@@ -23,7 +25,7 @@ namespace A2v10.ProcS.Tests
 			Assert.IsInstanceOfType(stm.States["S1"].OnEntry, typeof(CallHttpApi));
 
 
-			await bus.Run();
+			await bus.Run(bus.CancelWhenEmpty.Token);
 
 			Assert.AreEqual("End", instance.CurrentState);
 

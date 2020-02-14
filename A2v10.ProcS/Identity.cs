@@ -1,4 +1,5 @@
-﻿
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
+
 using System;
 using A2v10.ProcS.Infrastructure;
 

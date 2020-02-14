@@ -1,4 +1,5 @@
-﻿
+﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
+
 using System;
 using System.Dynamic;
 using System.Threading.Tasks;
@@ -37,7 +38,7 @@ namespace A2v10.ProcS.Plugin
 
 	class TestPluginSagaRegistrar : ISagaRegistrar
 	{
-		public void Register(ISagaManager mgr, IServiceProvider provider)
+		public void Register(ISagaManager mgr)
 		{
 			var factory = new ConstructSagaFactory<TestPluginActionSaga>(nameof(TestPluginActionSaga));
 			mgr.RegisterSagaFactory<TaskPluginActionMessage>(factory);
