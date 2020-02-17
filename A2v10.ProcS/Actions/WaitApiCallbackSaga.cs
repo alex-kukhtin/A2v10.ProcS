@@ -21,7 +21,8 @@ namespace A2v10.ProcS
 
 	public class WaitCallbackMessageProcess : MessageBase<String>
 	{
-		public WaitCallbackMessageProcess(Guid id, String tag, String corrVal) : base(tag + ":" + corrVal)
+		public WaitCallbackMessageProcess(Guid id, String tag, String corrVal) 
+			: base($"{tag}:{corrVal}")
 		{
 			Id = id;
 			Tag = tag;
@@ -47,7 +48,8 @@ namespace A2v10.ProcS
 
 	public class CallbackMessageResume : MessageBase<String>
 	{
-		public CallbackMessageResume(String tag, String corrVal) : base(tag + ":" + corrVal)
+		public CallbackMessageResume(String tag, String corrVal) 
+			: base($"{tag}:{corrVal}")
 		{
 
 		}
