@@ -72,10 +72,10 @@ namespace A2v10.ProcS.WebApi.Host.Classes
 			var result = JsonConvert.DeserializeObject<StateMachine>(json, new JsonSerializerSettings()
 			{
 				TypeNameHandling = TypeNameHandling.Auto,
-				ContractResolver = new ActualContractResolver()
-			}) as IWorkflowDefinition;
+				TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple
+			});
 			result.SetIdentity(identity);
-			return Task.FromResult(result);
+			return Task.FromResult<IWorkflowDefinition>(result);
 		}
 		#endregion
 	}
@@ -84,10 +84,11 @@ namespace A2v10.ProcS.WebApi.Host.Classes
 	{
 		public override JsonContract ResolveContract(Type type)
 		{
-			if (type == typeof(IWorkflowAction))
+			// There is an Error. It always uses CodeAction contracts, not only when $type is not defined
+			/*if (type == typeof(IWorkflowAction))
 			{
 				return base.ResolveContract(typeof(CodeAction));
-			}
+			}*/
 			return base.ResolveContract(type);
 		}
 	}

@@ -34,6 +34,11 @@ namespace A2v10.ProcS
 			_serviceBus.Send(message);
 		}
 
+		public void SendMessagesSequence(params IMessage[] messages)
+		{
+			_serviceBus.SendSequence(messages);
+		}
+
 		public IResumeContext CreateResumeContext(IInstance instance)
 		{
 			return new ResumeContext(_serviceBus, _repository, _scriptContext, instance);

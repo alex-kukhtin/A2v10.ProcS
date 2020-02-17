@@ -28,7 +28,11 @@ namespace A2v10.ProcS
 
 		public IEndpointHandler GetHandler(String key)
 		{
-			return handlers.GetOrAdd(key, k => factories[k].CreateHandler());
+			if (factories.TryGetValue(key, out var factory))
+			{
+				return handlers.GetOrAdd(key, k => factory.CreateHandler());
+			}
+			return null;
 		}
 	}
 }

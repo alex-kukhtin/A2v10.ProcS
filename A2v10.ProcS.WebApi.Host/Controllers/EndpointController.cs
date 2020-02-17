@@ -25,11 +25,12 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		[HttpPost]
 		//[Authorize]
 		[Route("{key}/{*extra}")]
-		public async Task Handle([FromBody] String body, String key, String extra)
+		public async Task<IActionResult> Handle([FromBody] String body, String key, String extra)
 		{
 			var handler = _endointManager.GetHandler(key);
+			if (handler == null) return NotFound();
 			var ret = await handler.HandleAsync(body, extra);
-			Content(ret.body, ret.type);
+			return Content(ret.body, ret.type);
 		}
 	}
 }
