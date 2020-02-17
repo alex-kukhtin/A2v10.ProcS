@@ -39,6 +39,10 @@ namespace A2v10.ProcS.WebApi.Host
 				opt.InputFormatters.Insert(0, new MvcExtensions.RawJsonBodyInputFormatter());
 			});
 
+			var tm = new Classes.TaskManager();
+
+			services.AddSingleton<ITaskManager>(tm);
+
 			var storage = new Classes.FakeStorage(Configuration["ProcS:Workflows"]);
 
 			var epm = new EndpointManager();
@@ -52,9 +56,9 @@ namespace A2v10.ProcS.WebApi.Host
 			services.AddSingleton<IScriptEngine, ScriptEngine>();
 			services.AddSingleton<IRepository, Repository>();
 			services.AddSingleton<IServiceBus>(svs => {
-				var bus = new ServiceBus(svs.GetService<ISagaKeeper>(), svs.GetService<IRepository>(), svs.GetService<IScriptEngine>());
+				var bus = new ServiceBus(svs.GetService<ITaskManager>(), svs.GetService<ISagaKeeper>(), svs.GetService<IRepository>(), svs.GetService<IScriptEngine>());
 				var source = new CancellationTokenSource();
-				var task = Task.Run(() => bus.Run(source.Token));
+				tm.AddTask(new Task(async () => await bus.Run(source.Token)));
 				return bus;
             });
 

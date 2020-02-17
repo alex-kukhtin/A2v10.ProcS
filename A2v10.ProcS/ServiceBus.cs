@@ -35,7 +35,7 @@ namespace A2v10.ProcS
 		private readonly ISagaKeeper _sagaKeeper;
 		private readonly IScriptEngine _scriptEngine;
 		private readonly ConcurrentQueue<ServiceBusItem> _messages = new ConcurrentQueue<ServiceBusItem>();
-
+		private readonly ITaskManager _taskManager;
 
 		private readonly IRepository _repository;
 
@@ -57,8 +57,9 @@ namespace A2v10.ProcS
 			}
 		}
 
-		public ServiceBus(ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine)
+		public ServiceBus(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine)
 		{
+			_taskManager = taskManager;
 			_repository = repository ?? throw new ArgumentNullException(nameof(_repository));
 			_scriptEngine = scriptEngine ?? throw new ArgumentNullException(nameof(scriptEngine));
 			_sagaKeeper = sagaKeeper;
@@ -118,7 +119,7 @@ namespace A2v10.ProcS
 		{
 			var saga = _sagaKeeper.GetSagaForMessage(item.Message, out ISagaKeeperKey key, out Boolean isNew);
 			if (saga == null) return false;
-			var task = Task.Run(async () =>
+			var task = new Task(async () =>
 			{
 				using (var scriptContext = _scriptEngine.CreateContext())
 				{
@@ -128,6 +129,7 @@ namespace A2v10.ProcS
 				Send(item.After);
 				_sagaKeeper.SagaUpdate(saga, key);
 			});
+			_taskManager.AddTask(task);
 			return true;
 		}
 

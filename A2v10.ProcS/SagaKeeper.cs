@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-
+using System.Threading;
 using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
@@ -47,11 +47,11 @@ namespace A2v10.ProcS
 		public SagaState(ISaga saga)
 		{
 			Saga = saga;
-			IsHold = false;
+			HoldLevel = 0;
 		}
 
 		public ISaga Saga { get; }
-		public Boolean IsHold;
+		public int HoldLevel;
 	}
 
 	public class InMemorySagaKeeper : ISagaKeeper
@@ -72,9 +72,9 @@ namespace A2v10.ProcS
 			if (message.CorrelationId != null && sagas.TryGetValue(key, out SagaState state))
 			{
 				isNew = false;
-				if (state.IsHold) return null;
-				state.IsHold = true;
-				return state.Saga;
+				if (Interlocked.CompareExchange(ref state.HoldLevel, 1, 0) == 0)
+				    return state.Saga;
+				return null;
 			}
 			else 
 			{
