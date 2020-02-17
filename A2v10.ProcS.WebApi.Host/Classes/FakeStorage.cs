@@ -84,11 +84,10 @@ namespace A2v10.ProcS.WebApi.Host.Classes
 	{
 		public override JsonContract ResolveContract(Type type)
 		{
-			// There is an Error. It always uses CodeAction contracts, not only when $type is not defined
-			/*if (type == typeof(IWorkflowAction))
+			if (type == typeof(IWorkflowAction))
 			{
 				return base.ResolveContract(typeof(CodeAction));
-			}*/
+			}
 			return base.ResolveContract(type);
 		}
 	}
