@@ -103,7 +103,7 @@ namespace A2v10.ProcS
             while (!token.IsCancellationRequested)
 			{
 				while (!token.IsCancellationRequested && _messages.TryDequeue(out var message)) {
-					await Process(message);
+					if (!Process(message)) _messages.Enqueue(message);
 				}
 				if (cancelWhenEmpty.IsValueCreated) cancelWhenEmpty.Value.Cancel();
 				lock (lck)
@@ -114,18 +114,21 @@ namespace A2v10.ProcS
 			}
 		}
 
-		async Task Process(ServiceBusItem item)
+		Boolean Process(ServiceBusItem item)
 		{
 			var saga = _sagaKeeper.GetSagaForMessage(item.Message, out ISagaKeeperKey key, out Boolean isNew);
-
-			using (var scriptContext = _scriptEngine.CreateContext())
+			if (saga == null) return false;
+			var task = Task.Run(async () =>
 			{
-				var hc = new HandleContext(this, _repository, scriptContext);
-				await saga.Handle(hc, item.Message);
-			}
-			Send(item.After);
-
-			_sagaKeeper.SagaUpdate(saga, key);
+				using (var scriptContext = _scriptEngine.CreateContext())
+				{
+					var hc = new HandleContext(this, _repository, scriptContext);
+					await saga.Handle(hc, item.Message);
+				}
+				Send(item.After);
+				_sagaKeeper.SagaUpdate(saga, key);
+			});
+			return true;
 		}
 
         ~ServiceBus()

@@ -42,14 +42,26 @@ namespace A2v10.ProcS
 		}
 	}
 
+	public class SagaState
+	{
+		public SagaState(ISaga saga)
+		{
+			Saga = saga;
+			IsHold = false;
+		}
+
+		public ISaga Saga { get; }
+		public Boolean IsHold;
+	}
+
 	public class InMemorySagaKeeper : ISagaKeeper
 	{
 		private readonly ISagaResolver sagaResolver;
-		private readonly ConcurrentDictionary<ISagaKeeperKey, ISaga> sagas;
+		private readonly ConcurrentDictionary<ISagaKeeperKey, SagaState> sagas;
 
 		public InMemorySagaKeeper(ISagaResolver sagaResolver)
 		{
-			sagas = new ConcurrentDictionary<ISagaKeeperKey, ISaga>();
+			sagas = new ConcurrentDictionary<ISagaKeeperKey, SagaState>();
 			this.sagaResolver = sagaResolver;
 		}
 
@@ -57,10 +69,12 @@ namespace A2v10.ProcS
 		{
 			var sagaFactory = sagaResolver.GetSagaFactory(message.GetType());
 			key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
-			if (message.CorrelationId != null && sagas.TryGetValue(key, out ISaga saga))
+			if (message.CorrelationId != null && sagas.TryGetValue(key, out SagaState state))
 			{
 				isNew = false;
-				return saga;
+				if (state.IsHold) return null;
+				state.IsHold = true;
+				return state.Saga;
 			}
 			else 
 			{
@@ -73,11 +87,12 @@ namespace A2v10.ProcS
 		{
 			if (saga.IsComplete || saga.CorrelationId == null || !saga.CorrelationId.Equals(key.CorrelationId))
 			{
-				sagas.TryRemove(key, out ISaga removed);
+				sagas.TryRemove(key, out var removed);
 			}
 			if (!saga.IsComplete)
 			{
-				sagas.AddOrUpdate(new SagaKeeperKey(saga), saga, (k, s) => saga);
+				var ns = new SagaState(saga);
+				sagas.AddOrUpdate(new SagaKeeperKey(saga), ns, (k, s) => ns);
 			}
 		}
 	}

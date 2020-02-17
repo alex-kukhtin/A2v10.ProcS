@@ -20,6 +20,7 @@ namespace A2v10.ProcS.Infrastructure
 	public interface ISaga
 	{
 		String Kind { get; }
+		Boolean IsHold { get; }
 		Boolean IsComplete { get; }
 		ICorrelationId CorrelationId { get; }
 		Task Handle(IHandleContext context, IMessage message);
