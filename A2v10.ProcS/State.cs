@@ -33,6 +33,8 @@ namespace A2v10.ProcS
 			if (await EnterState(context) == ActionResult.Idle)
 			{
 				//context.SaveInstance();
+				var resume = new InitResumeSagaMessage(context.ResumeId);
+				context.SendMessage(resume);
 				return ExecuteResult.Idle;
 			}
 			return await DoContinue(context);
@@ -40,7 +42,8 @@ namespace A2v10.ProcS
 
 		public async Task ContinueStep(IResumeContext context)
 		{
-			context.ScriptContext.SetValue("reply", context.Result);
+			context.ScriptContext.SetValue("result", context.Result);
+			
 			await DoContinue(context);
 		}
 

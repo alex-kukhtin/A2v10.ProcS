@@ -69,18 +69,15 @@ namespace A2v10.ProcS
 		{
 			var sagaFactory = sagaResolver.GetSagaFactory(message.GetType());
 			key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
-			if (message.CorrelationId != null && sagas.TryGetValue(key, out SagaState state))
+			isNew = false;
+			var state = sagas.GetOrAdd(key, k =>
 			{
-				isNew = false;
-				if (Interlocked.CompareExchange(ref state.HoldLevel, 1, 0) == 0)
-				    return state.Saga;
-				return null;
-			}
-			else 
-			{
-				isNew = true;
-				return sagaFactory.CreateSaga();
-			}
+				var saga = sagaFactory.CreateSaga();
+				return new SagaState(saga);
+			});
+			if (Interlocked.CompareExchange(ref state.HoldLevel, 1, 0) == 0)
+				return state.Saga;
+			return null;
 		}
 
 		public void SagaUpdate(ISaga saga, ISagaKeeperKey key)

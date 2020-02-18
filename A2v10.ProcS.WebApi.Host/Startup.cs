@@ -58,7 +58,8 @@ namespace A2v10.ProcS.WebApi.Host
 			services.AddSingleton<IServiceBus>(svs => {
 				var bus = new ServiceBus(svs.GetService<ITaskManager>(), svs.GetService<ISagaKeeper>(), svs.GetService<IRepository>(), svs.GetService<IScriptEngine>());
 				var source = new CancellationTokenSource();
-				tm.AddTask(new Task(async () => await bus.Run(source.Token)));
+				//tm.AddTask(new Task(async () => await bus.Run(source.Token)));
+				new Thread(() => Task.Run(async () => await bus.Run(source.Token)).Wait()).Start();
 				return bus;
             });
 

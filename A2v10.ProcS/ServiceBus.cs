@@ -39,22 +39,29 @@ namespace A2v10.ProcS
 
 		private readonly IRepository _repository;
 
-		private void Send(ServiceBusItem item)
+		private void SignalUpdate()
 		{
-			_messages.Enqueue(item);
-			lock (lck)
+			rwl.AcquireReaderLock(10);
+			try
 			{
 				ts?.TrySetResult(true);
 			}
+			finally
+			{
+				rwl.ReleaseReaderLock();
+			}
+		}
+
+		private void Send(ServiceBusItem item)
+		{
+			_messages.Enqueue(item);
+			SignalUpdate();
 		}
 
 		private void Send(IEnumerable<ServiceBusItem> items)
 		{
 			foreach (var itm in items) Send(itm);
-			lock (lck)
-			{
-				ts?.TrySetResult(true);
-			}
+			SignalUpdate();
 		}
 
 		public ServiceBus(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine)
@@ -93,8 +100,8 @@ namespace A2v10.ProcS
 			Send(GetSequenceItem(en));
 		}
 
-		private readonly Object lck = new Object();
-        private volatile TaskCompletionSource<bool> ts = null;
+		private readonly ReaderWriterLock rwl = new ReaderWriterLock();
+		private volatile TaskCompletionSource<bool> ts = null;
 
 		private readonly Lazy<CancellationTokenSource> cancelWhenEmpty = new Lazy<CancellationTokenSource>(() => new CancellationTokenSource());
 		public CancellationTokenSource CancelWhenEmpty => cancelWhenEmpty.Value;
@@ -107,11 +114,16 @@ namespace A2v10.ProcS
 					if (!Process(message)) _messages.Enqueue(message);
 				}
 				if (cancelWhenEmpty.IsValueCreated) cancelWhenEmpty.Value.Cancel();
-				lock (lck)
+				rwl.AcquireWriterLock(0);
+				try
 				{
-					ts = new TaskCompletionSource<bool>();
+					ts = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 				}
-                await Task.WhenAny(ts.Task, Task.Delay(50, token));
+				finally
+				{
+					rwl.ReleaseWriterLock();
+				}
+				await Task.WhenAny(ts.Task, Task.Delay(50, token));
 			}
 		}
 
