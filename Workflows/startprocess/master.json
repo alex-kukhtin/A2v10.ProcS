@@ -6,7 +6,7 @@
 		"S1": {
 			"Description": "START CHILD PROCESS",
 			"OnEntry": {
-				"$type": "A2v10.ProcS.StartProcess, A2v10.ProcS",
+				"$type": "A2v10.ProcS.StartProcessActivity, A2v10.ProcS",
 				"Process": "startprocess/slave.json",
 				"ParameterExpression": "{p1:params.value, p2:params.value * 2}"
 			},

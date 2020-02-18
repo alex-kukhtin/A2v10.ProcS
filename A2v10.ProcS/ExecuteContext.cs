@@ -39,21 +39,24 @@ namespace A2v10.ProcS
 			_serviceBus.SendSequence(messages);
 		}
 
-		public IResumeContext CreateResumeContext(IInstance instance)
+		public IExecuteContext CreateExecuteContext(IInstance instance, String bookmark = null, IDynamicObject result = null)
 		{
-			return new ResumeContext(_serviceBus, _repository, _scriptContext, instance);
+			return new ExecuteContext(_serviceBus, _repository, _scriptContext, instance)
+			{
+				Bookmark = bookmark,
+				Result = result
+			};
 		}
 
-		public Task ResumeProcess(Guid id, String json)
+		public void ContinueProcess(Guid id, String bookmark, String json)
 		{
-			return ResumeProcess(id, DynamicObject.From<String>(json));
+			ContinueProcess(id, bookmark, DynamicObject.From<String>(json));
 		}
 
-		public Task ResumeProcess(Guid id, IDynamicObject result)
+		public void ContinueProcess(Guid id, String bookmark, IDynamicObject result)
 		{
-			var resumeProcess = new ResumeProcessMessage(id, result);
-			SendMessage(resumeProcess);
-			return Task.CompletedTask;
+			var msg = new ContinueActivityMessage(id, bookmark, result);
+			SendMessage(msg);
 		}
 
 		public async Task<IInstance> StartProcess(String processId, Guid parentId, IDynamicObject data = null)
@@ -73,6 +76,10 @@ namespace A2v10.ProcS
 	public class ExecuteContext : HandleContext, IExecuteContext
 	{
 		public IInstance Instance { get; }
+		public Boolean IsContinue { get; set; }
+
+		public String Bookmark { get; set; }
+		public IDynamicObject Result { get; set; }
 
 		public ExecuteContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext, IInstance instance)
 			: base(bus, repository, scriptContext)
@@ -119,23 +126,12 @@ namespace A2v10.ProcS
 			_scriptContext.Execute(code);
 		}
 
-		public void ProcessComplete()
+		public void ProcessComplete(String bookmark)
 		{
 			if (Instance.ParentInstanceId == Guid.Empty)
 				return;
-			var msg = new ResumeProcessMessage(Instance.ParentInstanceId, Instance.GetResult());
+			var msg = new ContinueActivityMessage(Instance.ParentInstanceId, bookmark, Instance.GetResult());
 			_serviceBus.Send(msg);
-		}
-	}
-
-	public class ResumeContext : ExecuteContext, IResumeContext
-	{
-		public String Bookmark { get; set; }
-		public IDynamicObject Result { get; set; }
-
-		public ResumeContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext, IInstance instance)
-			: base(bus, repository, scriptContext, instance)
-		{
 		}
 	}
 }

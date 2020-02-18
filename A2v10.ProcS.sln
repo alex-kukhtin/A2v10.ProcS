@@ -61,6 +61,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "startprocess", "startproces
 		Workflows\startprocess\slave.json = Workflows\startprocess\slave.json
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "composite", "composite", "{53CA889E-F35B-48AB-8240-91C9140D6366}"
+	ProjectSection(SolutionItems) = preProject
+		Workflows\composite\sequence.json = Workflows\composite\sequence.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +110,7 @@ Global
 		{405F197E-CB79-4ADA-8AF1-4CF01D39E3D9} = {2BE122E4-347D-4BB3-B0C1-0AFB56747B42}
 		{6B328BD1-F16E-46EA-9C60-613F1753DA99} = {DC046347-1F11-47B5-817F-0627AFD7E5B5}
 		{42D03240-CFEB-4637-93E1-6387FBE1B006} = {DC046347-1F11-47B5-817F-0627AFD7E5B5}
+		{53CA889E-F35B-48AB-8240-91C9140D6366} = {DC046347-1F11-47B5-817F-0627AFD7E5B5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B5EA97A5-CA19-4BCC-BC05-3B5A09F89A62}

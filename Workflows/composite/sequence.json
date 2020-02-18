@@ -1,0 +1,32 @@
+{
+	"$schema": "../../@schemas/statemachine-schema.json",
+	"Description": "Sequence",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"Description": "Sequence",
+			"OnEntry": {
+				"$type": "A2v10.ProcS.SequenceActivity, A2v10.ProcS",
+				"Activities": [
+					{ "Code": "data.counter = params.value" },
+					{ "Code": "data.counter += 1" },
+					{ "Code": "data.counter += 5" }
+				]
+			},
+			"OnExit": {
+				"$type": "A2v10.ProcS.SequenceActivity, A2v10.ProcS",
+				"Activities": [
+					{ "Code": "data.counter += 10" },
+					{ "Code": "data.counter += 20" }
+				]
+			},
+			"NextState": "End"
+		},
+		"End": {
+			"Description": "State End",
+			"OnEntry": {
+				"Code": "result.counter = data.counter"
+			}
+		}
+	}
+}

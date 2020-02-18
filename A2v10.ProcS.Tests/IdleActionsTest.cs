@@ -22,12 +22,12 @@ namespace A2v10.ProcS.Tests
 			var instance = await engine.StartWorkflow("callapi.json");
 
 			var stm = instance.Workflow as StateMachine;
-			Assert.IsInstanceOfType(stm.States["S1"].OnEntry, typeof(CallHttpApi));
+			Assert.IsInstanceOfType(stm.States["S1"].OnEntry, typeof(CallHttpApiActivity));
 
 
 			await bus.Run(bus.CancelWhenEmpty.Token);
 
-			Assert.AreEqual("End", instance.CurrentState);
+			Assert.AreEqual(null, instance.CurrentState);
 
 		}
 	}

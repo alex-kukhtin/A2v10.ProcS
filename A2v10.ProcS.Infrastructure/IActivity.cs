@@ -5,15 +5,14 @@ using System.Threading.Tasks;
 
 namespace A2v10.ProcS.Infrastructure
 {
-	public enum ActionResult
+	public enum ActivityExecutionResult
 	{
-		Success,
-		Fail,
-		Idle
+		Idle,
+		Complete
 	}
 
-	public interface IWorkflowAction
+	public interface IActivity
 	{
-		Task<ActionResult> Execute(IExecuteContext context);
+		ActivityExecutionResult Execute(IExecuteContext context);
 	}
 }

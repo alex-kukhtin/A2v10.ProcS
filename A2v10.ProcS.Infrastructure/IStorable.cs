@@ -4,7 +4,7 @@ using System.Text;
 
 namespace A2v10.ProcS.Infrastructure
 {
-	public interface IStoragable
+	public interface IStorable
 	{
 		IDynamicObject Store();
 		void Restore(IDynamicObject store);

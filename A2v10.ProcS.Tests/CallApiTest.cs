@@ -23,10 +23,11 @@ namespace A2v10.ProcS.Tests
 
 			await bus.Run(bus.CancelWhenEmpty.Token);
 
-			Assert.AreEqual(7.0, instance.GetResult().Eval<Double>("temp"));
+			var result = instance.GetResult();
+			Assert.AreEqual(7.0, result.Eval<Double>("temp"));
 			Assert.AreEqual("London", instance.GetResult().Eval<String>("city"));
 
-			Assert.AreEqual("End", instance.CurrentState);
+			Assert.AreEqual(null, instance.CurrentState);
 		}
 	}
 }

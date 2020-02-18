@@ -93,16 +93,17 @@ namespace A2v10.ProcS
 		}
 
 		private readonly Object lck = new Object();
-        private volatile TaskCompletionSource<bool> ts = null;
+		private volatile TaskCompletionSource<bool> ts = null;
 
 		private readonly Lazy<CancellationTokenSource> cancelWhenEmpty = new Lazy<CancellationTokenSource>(() => new CancellationTokenSource());
 		public CancellationTokenSource CancelWhenEmpty => cancelWhenEmpty.Value;
 
 		public async Task Run(CancellationToken token)
 		{
-            while (!token.IsCancellationRequested)
+			while (!token.IsCancellationRequested)
 			{
-				while (!token.IsCancellationRequested && _messages.TryDequeue(out var message)) {
+				while (!token.IsCancellationRequested && _messages.TryDequeue(out var message))
+				{
 					await Process(message);
 				}
 				if (cancelWhenEmpty.IsValueCreated) cancelWhenEmpty.Value.Cancel();
@@ -110,7 +111,7 @@ namespace A2v10.ProcS
 				{
 					ts = new TaskCompletionSource<bool>();
 				}
-                await Task.WhenAny(ts.Task, Task.Delay(50, token));
+				await Task.WhenAny(ts.Task, Task.Delay(50, token));
 			}
 		}
 
@@ -128,8 +129,8 @@ namespace A2v10.ProcS
 			_sagaKeeper.SagaUpdate(saga, key);
 		}
 
-        ~ServiceBus()
-        {
+		~ServiceBus()
+		{
 			if (cancelWhenEmpty.IsValueCreated) cancelWhenEmpty.Value.Dispose();
 		}
 	}

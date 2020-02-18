@@ -6,15 +6,15 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
-	public class CallHttpApi : IWorkflowAction
+	public class CallHttpApiActivity : IActivity
 	{
 		public String Url { get; set; }
 		public String Method { get; set; }
-		public String ResultExpression { get; set; }
 
-		async public Task<ActionResult> Execute(IExecuteContext context)
+		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
-			await context.SaveInstance();
+			if (context.IsContinue)
+				return ActivityExecutionResult.Complete;
 			var request = new CallApiRequestMessage()
 			{
 				Id = context.Instance.Id,
@@ -22,7 +22,7 @@ namespace A2v10.ProcS
 				Method = context.Resolve(Method)
 			};
 			context.SendMessage(request);
-			return ActionResult.Idle;
+			return ActivityExecutionResult.Idle;
 		}
 	}
 }

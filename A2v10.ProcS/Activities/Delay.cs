@@ -8,16 +8,16 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
-	public class Delay : IWorkflowAction
+	public class Delay : IActivity
 	{
 		public String Duration { get; set; }
 
-		public async Task<ActionResult> Execute(IExecuteContext context)
+		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
 			TimeSpan span = TimeSpan.Parse(Duration);
 			//String bookmark = Guid.NewGuid().ToString();
-			await Task.Delay(span);
-			return ActionResult.Idle;
+			// TODO
+			return ActivityExecutionResult.Idle;
 		}
 	}
 }
