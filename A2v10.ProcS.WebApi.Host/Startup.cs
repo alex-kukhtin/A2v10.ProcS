@@ -55,26 +55,29 @@ namespace A2v10.ProcS.WebApi.Host
 
 			services.AddSingleton<IScriptEngine, ScriptEngine>();
 			services.AddSingleton<IRepository, Repository>();
-			services.AddSingleton<IServiceBus>(svs => {
-				var bus = new ServiceBus(svs.GetService<ITaskManager>(), svs.GetService<ISagaKeeper>(), svs.GetService<IRepository>(), svs.GetService<IScriptEngine>());
-				var source = new CancellationTokenSource();
-				//tm.AddTask(new Task(async () => await bus.Run(source.Token)));
-				new Thread(() => Task.Run(async () => await bus.Run(source.Token)).Wait()).Start();
-				return bus;
-            });
+			services.AddSingleton<InMemoryServiceBus>();
+			services.AddSingleton(CreateServiceBus);
 
 			services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
 
 			services.AddSingleton<ISagaKeeper, InMemorySagaKeeper>();
 
+			services.AddSingleton<SagaManager>();
 			services.AddSingleton(CreateSagaManager);
 
 			services.AddSingleton(svs => svs.GetService<ISagaManager>().Resolver);
 		}
 
-		public ISagaManager CreateSagaManager(IServiceProvider serviceProvider)
+		private static IServiceBus CreateServiceBus(IServiceProvider serviceProvider)
 		{
-			var mgr = new SagaManager(serviceProvider);
+			var bus = serviceProvider.GetService<InMemoryServiceBus>();
+			new Thread(bus.Start).Start();
+			return bus;
+		}
+
+		private ISagaManager CreateSagaManager(IServiceProvider serviceProvider)
+		{
+			var mgr = serviceProvider.GetService<SagaManager>();
 
 			mgr.RegisterSagaFactory<SetBookmarkMessage, ResumeBookmarkMessage>(new ConstructSagaFactory<BookmarkSaga>(nameof(BookmarkSaga)));
 			mgr.RegisterSagaFactory<StartProcessMessage,ContinueActivityMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));

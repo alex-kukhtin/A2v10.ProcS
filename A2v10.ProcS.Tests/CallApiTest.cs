@@ -21,7 +21,7 @@ namespace A2v10.ProcS.Tests
 			prms.Set("city", "London");
 			var instance = await engine.StartWorkflow(new Identity("callapi/openweather.json"), prms);
 
-			await bus.Run(bus.CancelWhenEmpty.Token);
+			bus.Process();
 
 			var result = instance.GetResult();
 			Assert.AreEqual(7.0, result.Eval<Double>("temp"));

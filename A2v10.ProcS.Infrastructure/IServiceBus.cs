@@ -35,6 +35,5 @@ namespace A2v10.ProcS.Infrastructure
 		void Send(IMessage message);
 		void Send(IEnumerable<IMessage> messages);
 		void SendSequence(IEnumerable<IMessage> messages);
-		Task Run(CancellationToken token);
 	}
 }

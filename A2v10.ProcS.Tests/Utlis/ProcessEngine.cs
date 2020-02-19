@@ -14,7 +14,7 @@ namespace A2v10.ProcS.Tests
 {
 	public static class ProcessEngine
 	{
-		public static (WorkflowEngine engine, IWorkflowStorage storage, ServiceBus bus) CreateEngine()
+		public static (WorkflowEngine engine, IWorkflowStorage storage, InMemoryServiceBus bus) CreateEngine()
 		{
 			var storage = new FakeStorage();
 			var mgr = new SagaManager(null);
@@ -36,7 +36,7 @@ namespace A2v10.ProcS.Tests
             var keeper = new InMemorySagaKeeper(mgr.Resolver);
 			var scriptEngine = new ScriptEngine();
 			var repository = new Repository(storage, storage);
-			var bus = new ServiceBus(taskManager, keeper, repository, scriptEngine);
+			var bus = new InMemoryServiceBus(taskManager, keeper, repository, scriptEngine);
 			var engine = new WorkflowEngine(repository, bus, scriptEngine);
 			return (engine, storage, bus);
 		}

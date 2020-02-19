@@ -17,14 +17,14 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleSequence()
 		{
-			(IWorkflowEngine engine, _, ServiceBus bus) = ProcessEngine.CreateEngine();
+			(IWorkflowEngine engine, _, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
 
 			var prms = new DynamicObject();
 			prms.Set("value", 1);
 
 			var instance = await engine.StartWorkflow(new Identity("composite/sequence.json"), prms);
 
-			await bus.Run(bus.CancelWhenEmpty.Token);
+			bus.Process();
 
 			Assert.AreEqual(null, instance.CurrentState);
 			var r = instance.GetResult();

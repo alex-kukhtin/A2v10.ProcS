@@ -30,7 +30,7 @@ namespace A2v10.ProcS
 		public ServiceBusItem[] After { get; private set; }
 	}
 
-	public class ServiceBus : IServiceBus
+	public class InMemoryServiceBus : IServiceBus
 	{
 		private readonly ISagaKeeper _sagaKeeper;
 		private readonly IScriptEngine _scriptEngine;
@@ -41,15 +41,7 @@ namespace A2v10.ProcS
 
 		private void SignalUpdate()
 		{
-			rwl.AcquireReaderLock(10);
-			try
-			{
-				ts?.TrySetResult(true);
-			}
-			finally
-			{
-				rwl.ReleaseReaderLock();
-			}
+			mre.Set();
 		}
 
 		private void Send(ServiceBusItem item)
@@ -64,7 +56,7 @@ namespace A2v10.ProcS
 			SignalUpdate();
 		}
 
-		public ServiceBus(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine)
+		public InMemoryServiceBus(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine)
 		{
 			_taskManager = taskManager;
 			_repository = repository ?? throw new ArgumentNullException(nameof(_repository));
@@ -100,35 +92,39 @@ namespace A2v10.ProcS
 			Send(GetSequenceItem(en));
 		}
 
-		private readonly ReaderWriterLock rwl = new ReaderWriterLock();
-		private volatile TaskCompletionSource<bool> ts = null;
+		private readonly ManualResetEvent mre = new ManualResetEvent(false);
 
-		private readonly Lazy<CancellationTokenSource> cancelWhenEmpty = new Lazy<CancellationTokenSource>(() => new CancellationTokenSource());
-		public CancellationTokenSource CancelWhenEmpty => cancelWhenEmpty.Value;
-
-		public async Task Run(CancellationToken token)
+		public void Process()
 		{
-			while (!token.IsCancellationRequested)
+			while (_messages.TryDequeue(out var message))
 			{
-				while (!token.IsCancellationRequested && _messages.TryDequeue(out var message))
-				{
-					if (!Process(message)) _messages.Enqueue(message);
-				}
-				if (cancelWhenEmpty.IsValueCreated) cancelWhenEmpty.Value.Cancel();
-				rwl.AcquireWriterLock(0);
-				try
-				{
-					ts = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-				}
-				finally
-				{
-					rwl.ReleaseWriterLock();
-				}
-				await Task.WhenAny(ts.Task, Task.Delay(50, token));
+				if (!ProcessItem(message)) _messages.Enqueue(message);
 			}
 		}
 
-		Boolean Process(ServiceBusItem item)
+		private volatile bool running = false;
+
+		public void Stop()
+		{
+			running = false;
+			SignalUpdate();
+		}
+
+		public void Start()
+		{
+			lock (this)
+			{
+				running = true;
+				while (running)
+				{
+					Process();
+					mre.Reset();
+					mre.WaitOne(50);
+				}
+			}
+		}
+
+		private Boolean ProcessItem(ServiceBusItem item)
 		{
 			var saga = _sagaKeeper.GetSagaForMessage(item.Message, out ISagaKeeperKey key, out Boolean isNew);
 			if (saga == null) return false;
@@ -144,11 +140,6 @@ namespace A2v10.ProcS
 			});
 			_taskManager.AddTask(task);
 			return true;
-		}
-
-		~ServiceBus()
-		{
-			if (cancelWhenEmpty.IsValueCreated) cancelWhenEmpty.Value.Dispose();
 		}
 	}
 }
