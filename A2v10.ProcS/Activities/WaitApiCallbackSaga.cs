@@ -127,8 +127,7 @@ namespace A2v10.ProcS
 
 		public Task Handle(IHandleContext context, CallbackMessageResume message)
 		{
-			var resumeProcess = new ContinueActivityMessage(_id, null, message.Result);
-			context.SendMessage(resumeProcess);
+			context.SendMessage(new ContinueActivityMessage(_id, null, message.Result));
 			IsComplete = true;
 			return Task.CompletedTask;
 		}
