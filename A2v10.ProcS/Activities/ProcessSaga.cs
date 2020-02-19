@@ -7,15 +7,16 @@ using A2v10.ProcS.Infrastructure;
 namespace A2v10.ProcS
 {
 
-
-	public class ResumeProcessMessage : MessageBase<String>
+	public class ContinueActivityMessage : MessageBase<Guid>
 	{
-		public Guid Id { get; }
+		public Guid InstanceId { get; }
 		public IDynamicObject Result { get; }
+		public String Bookmark { get; }
 
-		public ResumeProcessMessage(Guid id, IDynamicObject result) : base(null)
+		public ContinueActivityMessage(Guid instanceId, String bookmark, IDynamicObject result): base(instanceId)
 		{
-			Id = id;
+			InstanceId = instanceId;
+			Bookmark = bookmark;
 			Result = result;
 		}
 	}
@@ -32,25 +33,25 @@ namespace A2v10.ProcS
 		}
 	}
 
-	public class ProcessSaga : SagaBaseDispatched<String, ResumeProcessMessage, StartProcessMessage>
+	public class ProcessSaga : SagaBaseDispatched<String, StartProcessMessage, ContinueActivityMessage>
 	{
 		public ProcessSaga() : base(nameof(ProcessSaga))
 		{
-
-		}
-
-		protected override async Task Handle(IHandleContext context, ResumeProcessMessage message)
-		{
-			var instance = await context.LoadInstance(message.Id);
-			var resumeContext = context.CreateResumeContext(instance);
-			resumeContext.Result = message.Result;
-			await instance.Workflow.Resume(resumeContext);
 		}
 
 		protected override async Task Handle(IHandleContext context, StartProcessMessage message)
 		{
 			IInstance instance = await context.StartProcess(message.ProcessId, message.ParentId, message.Parameters);
 			message.CorrelationId.Value = instance.Id;
+		}
+
+		protected async override Task Handle(IHandleContext context, ContinueActivityMessage message)
+		{
+			var instance = await context.LoadInstance(message.InstanceId);
+			var continueContext = context.CreateExecuteContext(instance, message.Bookmark, message.Result);
+			continueContext.ScriptContext.SetValue("reply", message.Result);
+			continueContext.IsContinue = true;
+			await instance.Workflow.Continue(continueContext);
 		}
 	}
 }

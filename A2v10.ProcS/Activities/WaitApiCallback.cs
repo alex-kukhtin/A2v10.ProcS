@@ -7,16 +7,17 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
-	public class WaitApiCallback : IWorkflowAction
+	public class WaitApiCallback : IActivity
 	{
 		public String Tag { get; set; }
 
 		public String CorrelationValue { get; set; }
 		public String CorrelationExpression { get; set; }
 
-		async public Task<ActionResult> Execute(IExecuteContext context)
+		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
-			await context.SaveInstance();
+			if (context.IsContinue)
+				return ActivityExecutionResult.Complete;
 
 			var mess = new WaitCallbackMessage(Tag) {
 				CorrelationExpression = CorrelationExpression
@@ -27,7 +28,7 @@ namespace A2v10.ProcS
 				CorrelationExpression = CorrelationExpression
 			};
 			context.SendMessage(mess2);
-			return ActionResult.Idle;
+			return ActivityExecutionResult.Idle;
 		}
 	}
 }

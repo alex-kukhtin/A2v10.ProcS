@@ -30,7 +30,7 @@ namespace A2v10.ProcS.Tests
 			bus.Send(resp);
 			await bus.Run(bus.CancelWhenEmpty.Token);
 
-			Assert.AreEqual("End", instance.CurrentState);
+			Assert.AreEqual(null, instance.CurrentState);
 		}
 	}
 }

@@ -23,14 +23,14 @@ namespace A2v10.ProcS
 		public Dictionary<String, Transition>  Transitions { get; set; }
 
 
-		public IWorkflowAction OnEntry { get; set; }
-		public IWorkflowAction OnExit { get; set; }
+		public IActivity OnEntry { get; set; }
+		public IActivity OnExit { get; set; }
 
 		public String NextState { get; set; }
 
 		public async Task<ExecuteResult> ExecuteStep(IExecuteContext context)
 		{
-			if (await EnterState(context) == ActionResult.Idle)
+			if (await EnterState(context) == ActivityExecutionResult.Idle)
 			{
 				//context.SaveInstance();
 				var resume = new InitResumeSagaMessage(context.ResumeId);
@@ -40,7 +40,40 @@ namespace A2v10.ProcS
 			return await DoContinue(context);
 		}
 
-		public async Task ContinueStep(IResumeContext context)
+		public ActivityExecutionResult Execute(IExecuteContext context)
+		{
+			ActivityExecutionResult result;
+			String nextState = NextState;
+			// on entry
+			if (OnEntry != null)
+			{
+				result = OnEntry.Execute(context);
+				if (result == ActivityExecutionResult.Idle)
+					return result;
+				context.IsContinue = false;
+			}
+			// transitions
+			var nextTransition = TransitionToNextState(context);
+			if (nextTransition != null)
+			{
+				nextState = nextTransition.To;
+				result = nextTransition.Execute(context);
+				if (result == ActivityExecutionResult.Idle)
+					return result;
+				context.IsContinue = false;
+			}
+			if (OnExit != null)
+			{
+				result = OnExit.Execute(context);
+				if (result == ActivityExecutionResult.Idle)
+					return result;
+				context.IsContinue = false;
+			}
+			context.Instance.SetState(nextState);
+			return ActivityExecutionResult.Complete;
+		}
+
+		public async Task ContinueStep(IExecuteContext context)
 		{
 			context.ScriptContext.SetValue("result", context.Result);
 			
@@ -54,7 +87,7 @@ namespace A2v10.ProcS
 			if (next != null)
 			{
 				nextState = next.To;
-				await next.ExecuteAction(context);
+				next.Execute(context);
 			}
 			await ExitState(context);
 			if (!String.IsNullOrEmpty(nextState))
@@ -62,7 +95,7 @@ namespace A2v10.ProcS
 				context.Instance.SetState(nextState);
 				return ExecuteResult.Continue;
 			}
-			context.ProcessComplete();
+			context.ProcessComplete("TODO:process complete bookmark");
 			return ExecuteResult.Complete;
 		}
 
@@ -71,21 +104,22 @@ namespace A2v10.ProcS
 			if (Transitions == null || Transitions.Count == 0)
 				return null;
 			return Transitions.Where(kv => kv.Value.Evaluate(context)).Select(kv => kv.Value).FirstOrDefault();
-
 		}
 
-		async Task<ActionResult> EnterState(IExecuteContext context)
+		 Task<ActivityExecutionResult> EnterState(IExecuteContext context)
 		{
 			if (OnEntry == null)
-				return ActionResult.Success;
-			return await OnEntry.Execute(context);
+				return Task.FromResult(ActivityExecutionResult.Complete);
+			OnEntry.Execute(context);
+			return Task.FromResult(ActivityExecutionResult.Complete);
 		}
 
-		async Task ExitState(IExecuteContext context)
+		Task ExitState(IExecuteContext context)
 		{
 			if (OnExit == null)
-				return;
-			await OnExit.Execute(context);
+				return Task.CompletedTask;
+			OnExit.Execute(context);
+			return Task.CompletedTask;
 		}
 	}
 }

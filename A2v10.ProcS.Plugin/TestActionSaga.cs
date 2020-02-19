@@ -31,7 +31,7 @@ namespace A2v10.ProcS.Plugin
 		{
 			Int32 result = message.CorrelationId.Value.Value;
 			var reply = $"{{result:{result}}}";
-			context.ResumeProcess(message.Id, reply);
+			context.ContinueProcess(message.Id, null, reply);
 			return Task.CompletedTask;
 		}
 	}

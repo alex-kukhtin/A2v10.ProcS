@@ -43,12 +43,12 @@ namespace A2v10.ProcS
 			var instance = await _repository.Get(instaceId);
 			using (var scriptContext = _scriptEngine.CreateContext())
 			{
-				var context = new ResumeContext(_serviceBus, _repository, scriptContext, instance)
+				var context = new ExecuteContext(_serviceBus, _repository, scriptContext, instance)
 				{
 					Bookmark = bookmark,
 					Result = result
 				};
-				await instance.Workflow.Resume(context);
+				await instance.Workflow.Continue(context);
 				return instance;
 			}
 		}

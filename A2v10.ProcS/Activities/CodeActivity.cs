@@ -7,14 +7,14 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
-	public class CodeAction : IWorkflowAction
+	public class CodeActivity : IActivity
 	{
 		public String Code { get; set; }
 
-		public Task<ActionResult> Execute(IExecuteContext context)
+		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
 			context.ExecuteScript(Code);
-			return Task.FromResult(ActionResult.Success);
+			return ActivityExecutionResult.Complete;
 		}
 	}
 }

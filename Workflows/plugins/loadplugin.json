@@ -4,7 +4,7 @@
 	"States": {
 		"S1": {
 			"OnEntry": {
-				"$type": "A2v10.ProcS.Plugin.TestPluginAction, A2v10.ProcS.Plugin"
+				"$type": "A2v10.ProcS.Plugin.TestPluginActivity, A2v10.ProcS.Plugin"
 			},
 			"Transitions": {
 				"S1->End": {

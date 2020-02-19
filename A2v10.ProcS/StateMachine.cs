@@ -20,42 +20,50 @@ namespace A2v10.ProcS
 		public IIdentity GetIdentity() { return _identity; }
 		public void SetIdentity(IIdentity identity) { _identity = identity; }
 
-		public async Task Run(IExecuteContext context)
+		public Task Run(IExecuteContext context)
+		{
+			return Execute(context);
+		}
+
+		public Task<ExecuteResult> Execute(IExecuteContext context)
 		{
 			if (States == null || States.Count == 0)
-				return;
+				return Task.FromResult(ExecuteResult.Complete);
 			var instance = context.Instance;
 			if (String.IsNullOrEmpty(instance.CurrentState))
 			{
-				if (!String.IsNullOrEmpty(InitialState))
-					instance.CurrentState = InitialState;
-				else
+				if (String.IsNullOrEmpty(InitialState))
 					instance.CurrentState = States.First(x => true).Key;
+				else
+					instance.CurrentState = InitialState;
 			}
+			return DoContinue(instance, context);
+		}
+
+		private async Task<ExecuteResult> DoContinue(IInstance instance, IExecuteContext context)
+		{ 
 			while (true)
 			{
+				if (instance.CurrentState == null)
+				{
+					context.ProcessComplete(context.Bookmark);
+					return ExecuteResult.Complete;
+				}
 				if (States.TryGetValue(instance.CurrentState, out State state))
 				{
-					var result = await state.ExecuteStep(context);
-					if (result == ExecuteResult.Complete)
+					var result = state.Execute(context);
+					if (result == ActivityExecutionResult.Idle)
 					{
-						context.Instance.IsComplete = true;
-						return;
+						await context.SaveInstance();
+						return ExecuteResult.Idle;
 					}
-					if (result != ExecuteResult.Continue)
-						return;
 				}
 			}
 		}
 
-		public async Task Resume(IResumeContext context)
+		public Task Continue(IExecuteContext context)
 		{
-			var instance = context.Instance;
-			if (States.TryGetValue(instance.CurrentState, out State state))
-			{
-				await state.ContinueStep(context);
-			}
-			await Run(context);
+			return DoContinue(context.Instance, context);
 		}
 	}
 }

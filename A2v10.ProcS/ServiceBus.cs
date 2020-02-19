@@ -108,9 +108,9 @@ namespace A2v10.ProcS
 
 		public async Task Run(CancellationToken token)
 		{
-            while (!token.IsCancellationRequested)
+			while (!token.IsCancellationRequested)
 			{
-				while (!token.IsCancellationRequested && _messages.TryDequeue(out var message)) {
+				while (!token.IsCancellationRequested && _messages.TryDequeue(out var message))
 					if (!Process(message)) _messages.Enqueue(message);
 				}
 				if (cancelWhenEmpty.IsValueCreated) cancelWhenEmpty.Value.Cancel();
@@ -145,8 +145,8 @@ namespace A2v10.ProcS
 			return true;
 		}
 
-        ~ServiceBus()
-        {
+		~ServiceBus()
+		{
 			if (cancelWhenEmpty.IsValueCreated) cancelWhenEmpty.Value.Dispose();
 		}
 	}
