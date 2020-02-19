@@ -28,15 +28,6 @@ namespace A2v10.ProcS
 
 		public String NextState { get; set; }
 
-		public async Task<ExecuteResult> ExecuteStep(IExecuteContext context)
-		{
-			if (await EnterState(context) == ActivityExecutionResult.Idle)
-			{
-				//context.SaveInstance();
-				return ExecuteResult.Idle;
-			}
-			return await DoContinue(context);
-		}
 
 		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
@@ -69,31 +60,6 @@ namespace A2v10.ProcS
 			}
 			context.Instance.SetState(nextState);
 			return ActivityExecutionResult.Complete;
-		}
-
-		public async Task ContinueStep(IExecuteContext context)
-		{
-			context.ScriptContext.SetValue("reply", context.Result);
-			await DoContinue(context);
-		}
-
-		async Task<ExecuteResult> DoContinue(IExecuteContext context)
-		{
-			var next = TransitionToNextState(context);
-			String nextState = NextState;
-			if (next != null)
-			{
-				nextState = next.To;
-				next.Execute(context);
-			}
-			await ExitState(context);
-			if (!String.IsNullOrEmpty(nextState))
-			{
-				context.Instance.SetState(nextState);
-				return ExecuteResult.Continue;
-			}
-			context.ProcessComplete("TODO:process complete bookmark");
-			return ExecuteResult.Complete;
 		}
 
 		Transition TransitionToNextState(IExecuteContext context)
