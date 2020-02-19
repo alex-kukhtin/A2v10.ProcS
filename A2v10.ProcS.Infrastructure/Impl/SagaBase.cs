@@ -16,6 +16,16 @@ namespace A2v10.ProcS.Infrastructure
 
 		public CorrelationId<CorrelationT> CorrelationId { get; } = new CorrelationId<CorrelationT>(default);
 
+		protected void SetCorrelation(CorrelationId<CorrelationT> correlationId)
+		{
+			CorrelationId.Value = correlationId.Value;
+		}
+
+		protected void SetCorrelation(MessageBase<CorrelationT> message)
+		{
+			SetCorrelation(message.CorrelationId);
+		}
+
 		ICorrelationId ISaga.CorrelationId => CorrelationId;
 
 		public Boolean IsComplete { get; set; }

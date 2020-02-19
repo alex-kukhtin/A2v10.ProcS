@@ -19,12 +19,12 @@ namespace A2v10.ProcS.Tests
 			var storage = new FakeStorage();
 			var mgr = new SagaManager(null);
 
-			mgr.RegisterSagaFactory<StartProcessMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
-			mgr.RegisterSagaFactory<ContinueActivityMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
+			mgr.RegisterSagaFactory<SetBookmarkMessage, ResumeBookmarkMessage>(new ConstructSagaFactory<BookmarkSaga>(nameof(BookmarkSaga)));
+			mgr.RegisterSagaFactory<StartProcessMessage, ContinueActivityMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
 
 			mgr.RegisterSagaFactory<CallApiRequestMessage, CallApiResponseMessage>(new ConstructSagaFactory<CallHttpApiSaga>(nameof(CallHttpApiSaga)));
-			mgr.RegisterSagaFactory<WaitCallbackMessage, CallbackMessage>(new ConstructSagaFactory<WaitApiCallbackSaga>(nameof(WaitApiCallbackSaga)));
-			mgr.RegisterSagaFactory<WaitCallbackMessageProcess, CallbackMessageResume>(new ConstructSagaFactory<WaitApiCallbackProcessSaga>(nameof(WaitApiCallbackProcessSaga)));
+			mgr.RegisterSagaFactory<RegisterCallbackMessage, CallbackMessage>(new ConstructSagaFactory<RegisterCallbackSaga>(nameof(RegisterCallbackSaga)));
+			mgr.RegisterSagaFactory<WaitCallbackMessage, CorrelatedCallbackMessage>(new ConstructSagaFactory<CallbackCorrelationSaga>(nameof(CallbackCorrelationSaga)));
 
 			String pluginPath = GetPluginPath();
 

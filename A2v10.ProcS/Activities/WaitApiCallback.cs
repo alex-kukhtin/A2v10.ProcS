@@ -19,15 +19,16 @@ namespace A2v10.ProcS
 			if (context.IsContinue)
 				return ActivityExecutionResult.Complete;
 
-			var mess = new WaitCallbackMessage(Tag) {
-				CorrelationExpression = CorrelationExpression
-			};
-			context.SendMessage(mess);
+			var book = context.SetBookmark();
 
-			var mess2 = new WaitCallbackMessageProcess(context.Instance.Id, Tag, CorrelationValue) { 
+			var mess = new RegisterCallbackMessage(Tag) {
 				CorrelationExpression = CorrelationExpression
 			};
-			context.SendMessage(mess2);
+
+			var mess2 = new WaitCallbackMessage(book, Tag, CorrelationValue);
+
+			context.SendMessagesSequence(mess, mess2);
+
 			return ActivityExecutionResult.Idle;
 		}
 	}

@@ -17,6 +17,11 @@ namespace A2v10.ProcS.Infrastructure
 		ICorrelationId CorrelationId { get; }
 	}
 
+	public interface IResultMessage : IMessage
+	{
+		IDynamicObject Result { set; }
+	}
+
 	public interface ISaga
 	{
 		String Kind { get; }

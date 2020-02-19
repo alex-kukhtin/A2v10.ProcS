@@ -71,6 +71,12 @@ namespace A2v10.ProcS
 				return instance;
 			}
 		}
+
+		public void ResumeBookmark(Guid id, IDynamicObject result)
+		{
+			var msg = new ResumeBookmarkMessage(id, result);
+			_serviceBus.Send(msg);
+		}
 	}
 
 	public class ExecuteContext : HandleContext, IExecuteContext
@@ -132,6 +138,14 @@ namespace A2v10.ProcS
 				return;
 			var msg = new ContinueActivityMessage(Instance.ParentInstanceId, bookmark, Instance.GetResult());
 			_serviceBus.Send(msg);
+		}
+
+		public Guid SetBookmark()
+		{
+			var id = Guid.NewGuid();
+			var msg = new SetBookmarkMessage(id, new ContinueActivityMessage(Instance.Id, String.Empty));
+			_serviceBus.Send(msg);
+			return id;
 		}
 	}
 }

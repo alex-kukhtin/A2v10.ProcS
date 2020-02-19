@@ -8,31 +8,14 @@ using A2v10.ProcS.Infrastructure;
 namespace A2v10.ProcS
 {
 
-	public class WaitCallbackMessage : MessageBase<String>
+	public class RegisterCallbackMessage : MessageBase<String>
 	{
-		public WaitCallbackMessage(String tag) : base(tag)
+		public RegisterCallbackMessage(String tag) : base(tag)
 		{
 			Tag = tag;
 		}
 
 		public String Tag { get; set; }
-		public String CorrelationExpression { get; set; }
-	}
-
-	public class WaitCallbackMessageProcess : MessageBase<String>
-	{
-		public WaitCallbackMessageProcess(Guid id, String tag, String corrVal) 
-			: base($"{tag}:{corrVal}")
-		{
-			Id = id;
-			Tag = tag;
-			CorrelationValue = corrVal;
-		}
-
-		public Guid Id { get; set; }
-
-		public String Tag { get; set; }
-		public String CorrelationValue { get; set; }
 		public String CorrelationExpression { get; set; }
 	}
 
@@ -46,9 +29,25 @@ namespace A2v10.ProcS
 		public IDynamicObject Result { get; set; }
 	}
 
-	public class CallbackMessageResume : MessageBase<String>
+	public class WaitCallbackMessage : MessageBase<String>
 	{
-		public CallbackMessageResume(String tag, String corrVal) 
+		public WaitCallbackMessage(Guid bookmark, String tag, String corrVal)
+			: base($"{tag}:{corrVal}")
+		{
+			BookmarkId = bookmark;
+			Tag = tag;
+			CorrelationValue = corrVal;
+		}
+
+		public Guid BookmarkId { get; set; }
+
+		public String Tag { get; set; }
+		public String CorrelationValue { get; set; }
+	}
+
+	public class CorrelatedCallbackMessage : MessageBase<String>
+	{
+		public CorrelatedCallbackMessage(String tag, String corrVal) 
 			: base($"{tag}:{corrVal}")
 		{
 
@@ -57,9 +56,9 @@ namespace A2v10.ProcS
 		public IDynamicObject Result { get; set; }
 	}
 
-	public class WaitApiCallbackSaga : SagaBaseDispatched<String, WaitCallbackMessage, CallbackMessage>
+	public class RegisterCallbackSaga : SagaBaseDispatched<String, RegisterCallbackMessage, CallbackMessage>
 	{
-		public WaitApiCallbackSaga() : base(nameof(WaitApiCallbackSaga))
+		public RegisterCallbackSaga() : base(nameof(RegisterCallbackSaga))
 		{
 
 		}
@@ -68,11 +67,11 @@ namespace A2v10.ProcS
 		private String tag;
 		private String correlationExpression;
 
-		protected override Task Handle(IHandleContext context, WaitCallbackMessage message)
+		protected override Task Handle(IHandleContext context, RegisterCallbackMessage message)
 		{
 			correlationExpression = message.CorrelationExpression;
 			tag = message.Tag;
-			CorrelationId.Value = message.CorrelationId.Value;
+			SetCorrelation(message);
 			return Task.CompletedTask;
 		}
 
@@ -80,7 +79,7 @@ namespace A2v10.ProcS
 		{
 			var cval = context.ScriptContext.GetValueFromObject<String>(message.Result, correlationExpression);
 
-			context.SendMessage(new CallbackMessageResume(tag, cval)
+			context.SendMessage(new CorrelatedCallbackMessage(tag, cval)
 			{
 				Result = message.Result
 			});
@@ -88,47 +87,26 @@ namespace A2v10.ProcS
 		}
 	}
 
-	public class WaitApiCallbackProcessSaga : SagaBase<String>
+	public class CallbackCorrelationSaga : SagaBaseDispatched<String, WaitCallbackMessage, CorrelatedCallbackMessage>
 	{
-		public WaitApiCallbackProcessSaga() : base(nameof(WaitApiCallbackProcessSaga))
+		public CallbackCorrelationSaga() : base(nameof(CallbackCorrelationSaga))
 		{
 
 		}
 
 		// serializable
-		private Guid _id;
+		private Guid bookmark;
 
-		#region dispatch
-		public override async Task Handle(IHandleContext context, IMessage message)
+		protected override Task Handle(IHandleContext context, WaitCallbackMessage message)
 		{
-			switch (message)
-			{
-				case WaitCallbackMessageProcess wait:
-					await Handle(context, wait);
-					break;
-				case CallbackMessageResume callback:
-					await Handle(context, callback);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(message.GetType().FullName);
-			}
-		}
-		#endregion
-
-		public Task Handle(IHandleContext context, WaitCallbackMessageProcess message)
-		{
-			if (context is null)
-				throw new ArgumentNullException(nameof(context));
-
-			_id = message.Id;
-			CorrelationId.Value = message.CorrelationId.Value;
+			bookmark = message.BookmarkId;
+			SetCorrelation(message);
 			return Task.CompletedTask;
 		}
 
-		public Task Handle(IHandleContext context, CallbackMessageResume message)
+		protected override Task Handle(IHandleContext context, CorrelatedCallbackMessage message)
 		{
-			var resumeProcess = new ContinueActivityMessage(_id, null, message.Result);
-			context.SendMessage(resumeProcess);
+			context.ResumeBookmark(bookmark, message.Result);
 			IsComplete = true;
 			return Task.CompletedTask;
 		}

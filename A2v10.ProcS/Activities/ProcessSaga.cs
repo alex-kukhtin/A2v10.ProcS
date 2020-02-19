@@ -6,11 +6,57 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
+	public class SetBookmarkMessage : MessageBase<Guid>
+	{
+		public SetBookmarkMessage(Guid id, IResultMessage resultMessage) : base(id)
+		{
+			Id = id;
+			ResultMessage = resultMessage;
+		}
 
-	public class ContinueActivityMessage : MessageBase<Guid>
+		public Guid Id { get; }
+		public IResultMessage ResultMessage { get; }
+	}
+
+	public class ResumeBookmarkMessage : MessageBase<Guid>
+	{
+		public ResumeBookmarkMessage(Guid id, IDynamicObject result) : base(id)
+		{
+			Id = id;
+			Result = result;
+		}
+
+		public Guid Id { get; }
+		public IDynamicObject Result { get; }
+	}
+
+	public class BookmarkSaga : SagaBaseDispatched<Guid, SetBookmarkMessage, ResumeBookmarkMessage>
+	{
+		public BookmarkSaga() : base(nameof(BookmarkSaga))
+		{
+		}
+
+		private IResultMessage resultMessage;
+
+		protected override Task Handle(IHandleContext context, SetBookmarkMessage message)
+		{
+			SetCorrelation(message.CorrelationId);
+			resultMessage = message.ResultMessage;
+			return Task.CompletedTask;
+		}
+
+		protected override Task Handle(IHandleContext context, ResumeBookmarkMessage message)
+		{
+			resultMessage.Result = message.Result;
+			context.SendMessage(resultMessage);
+			return Task.CompletedTask;
+		}
+	}
+
+	public class ContinueActivityMessage : MessageBase<Guid>, IResultMessage
 	{
 		public Guid InstanceId { get; }
-		public IDynamicObject Result { get; }
+		public IDynamicObject Result { get; set; }
 		public String Bookmark { get; }
 
 		public ContinueActivityMessage(Guid instanceId, String bookmark, IDynamicObject result): base(instanceId)
@@ -18,6 +64,12 @@ namespace A2v10.ProcS
 			InstanceId = instanceId;
 			Bookmark = bookmark;
 			Result = result;
+		}
+
+		public ContinueActivityMessage(Guid instanceId, String bookmark) : base(instanceId)
+		{
+			InstanceId = instanceId;
+			Bookmark = bookmark;
 		}
 	}
 

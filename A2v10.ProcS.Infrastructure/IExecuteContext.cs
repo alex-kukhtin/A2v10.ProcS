@@ -19,6 +19,8 @@ namespace A2v10.ProcS.Infrastructure
 
 		void ContinueProcess(Guid id, String bookmark, IDynamicObject result);
 		void ContinueProcess(Guid id, String bookmark, String json);
+
+		void ResumeBookmark(Guid id, IDynamicObject result);
 	}
 
 	public interface IExecuteContext : IHandleContext
@@ -35,5 +37,7 @@ namespace A2v10.ProcS.Infrastructure
 		void ExecuteScript(String code);
 
 		void ProcessComplete(String bookmark);
+
+		Guid SetBookmark();
 	}
 }
