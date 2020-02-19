@@ -7,17 +7,18 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
-	public class StartProcess : IWorkflowAction
+	public class StartProcessActivity : IActivity
 	{
 		public String Process { get; set; }
-
 		public String ParameterExpression { get; set; } // params <=
 
-		public String SetResult { get; set; } //  reply => 
+		CorrelationId<Guid> CorrelationId = new CorrelationId<Guid>(Guid.NewGuid());
 
-		public async Task<ActionResult> Execute(IExecuteContext context)
+		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
-			await context.SaveInstance();
+			if (context.IsContinue)
+				return ActivityExecutionResult.Complete;
+
 			var prms = context.EvaluateScript<ExpandoObject>(ParameterExpression);
 			var startMessage = new StartProcessMessage(context.Instance.Id)
 			{				
@@ -25,7 +26,7 @@ namespace A2v10.ProcS
 				Parameters = new DynamicObject(prms)
 			};
 			context.SendMessage(startMessage);
-			return ActionResult.Idle;
+			return ActivityExecutionResult.Idle;
 		}
 	}
 }

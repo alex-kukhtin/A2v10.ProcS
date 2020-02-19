@@ -5,7 +5,7 @@
 	"States": {
 		"S1": {
 			"OnEntry": {
-				"$type": "A2v10.ProcS.CallHttpApi, A2v10.ProcS",
+				"$type": "A2v10.ProcS.CallHttpApiActivity, A2v10.ProcS",
 				"Url": "https://samples.openweathermap.org/data/2.5/weather?q={{params.city}}&appid=b6907d289e10d714a6e88b30761fae22",
 				"Method": "Get" /* todo: enum */
 			},

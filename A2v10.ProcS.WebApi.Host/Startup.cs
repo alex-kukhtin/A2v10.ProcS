@@ -39,6 +39,10 @@ namespace A2v10.ProcS.WebApi.Host
 				opt.InputFormatters.Insert(0, new MvcExtensions.RawJsonBodyInputFormatter());
 			});
 
+			var tm = new Classes.TaskManager();
+
+			services.AddSingleton<ITaskManager>(tm);
+
 			var storage = new Classes.FakeStorage(Configuration["ProcS:Workflows"]);
 
 			var epm = new EndpointManager();
@@ -51,32 +55,36 @@ namespace A2v10.ProcS.WebApi.Host
 
 			services.AddSingleton<IScriptEngine, ScriptEngine>();
 			services.AddSingleton<IRepository, Repository>();
-			services.AddSingleton<IServiceBus>(svs => {
-				var bus = new ServiceBus(svs.GetService<ISagaKeeper>(), svs.GetService<IRepository>(), svs.GetService<IScriptEngine>());
-				var source = new CancellationTokenSource();
-				var task = Task.Run(() => bus.Run(source.Token));
-				return bus;
-            });
+			services.AddSingleton<InMemoryServiceBus>();
+			services.AddSingleton(CreateServiceBus);
 
 			services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
 
 			services.AddSingleton<ISagaKeeper, InMemorySagaKeeper>();
 
+			services.AddSingleton<SagaManager>();
 			services.AddSingleton(CreateSagaManager);
 
 			services.AddSingleton(svs => svs.GetService<ISagaManager>().Resolver);
 		}
 
-		public ISagaManager CreateSagaManager(IServiceProvider serviceProvider)
+		private static IServiceBus CreateServiceBus(IServiceProvider serviceProvider)
 		{
-			var mgr = new SagaManager(serviceProvider);
+			var bus = serviceProvider.GetService<InMemoryServiceBus>();
+			new Thread(bus.Start).Start();
+			return bus;
+		}
 
-			mgr.RegisterSagaFactory<ResumeProcessMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
-			mgr.RegisterSagaFactory<StartProcessMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
+		private ISagaManager CreateSagaManager(IServiceProvider serviceProvider)
+		{
+			var mgr = serviceProvider.GetService<SagaManager>();
 
-			mgr.RegisterSagaFactory<CallApiRequestMessage, CallApiResponse>(new ConstructSagaFactory<CallHttpApiSaga>(nameof(CallHttpApiSaga)));
-			mgr.RegisterSagaFactory<WaitCallbackMessage, CallbackMessage>(new ConstructSagaFactory<WaitApiCallbackSaga>(nameof(WaitApiCallbackSaga)));
-			mgr.RegisterSagaFactory<WaitCallbackMessageProcess, CallbackMessageResume>(new ConstructSagaFactory<WaitApiCallbackProcessSaga>(nameof(WaitApiCallbackProcessSaga)));
+			mgr.RegisterSagaFactory<SetBookmarkMessage, ResumeBookmarkMessage>(new ConstructSagaFactory<BookmarkSaga>(nameof(BookmarkSaga)));
+			mgr.RegisterSagaFactory<StartProcessMessage,ContinueActivityMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
+
+			mgr.RegisterSagaFactory<CallApiRequestMessage, CallApiResponseMessage>(new ConstructSagaFactory<CallHttpApiSaga>(nameof(CallHttpApiSaga)));
+			mgr.RegisterSagaFactory<RegisterCallbackMessage, CallbackMessage>(new ConstructSagaFactory<RegisterCallbackSaga>(nameof(RegisterCallbackSaga)));
+			mgr.RegisterSagaFactory<WaitCallbackMessage, CorrelatedCallbackMessage>(new ConstructSagaFactory<CallbackCorrelationSaga>(nameof(CallbackCorrelationSaga)));
 
 			foreach (var path in GetPluginPathes())
 			{

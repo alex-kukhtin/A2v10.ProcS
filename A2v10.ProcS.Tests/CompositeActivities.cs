@@ -2,29 +2,33 @@
 
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+
 namespace A2v10.ProcS.Tests
 {
 	[TestClass]
-	public class PluginLoadTest
+	public class CompositeActivities
 	{
 		[TestMethod]
-		public async Task LoadPlugin()
+		public async Task SimpleSequence()
 		{
 			(IWorkflowEngine engine, _, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
 
-			IInstance inst = await engine.StartWorkflow(new Identity("plugins/loadplugin.json"));
+			var prms = new DynamicObject();
+			prms.Set("value", 1);
+
+			var instance = await engine.StartWorkflow(new Identity("composite/sequence.json"), prms);
 
 			bus.Process();
 
-			Assert.AreEqual(42, inst.GetResult().Eval<Int32>("value"));
-			Assert.AreEqual(null, inst.CurrentState);
+			Assert.AreEqual(null, instance.CurrentState);
+			var r = instance.GetResult();
+			Assert.AreEqual(37, r.Eval<Int32>("counter"));
 		}
 	}
 }

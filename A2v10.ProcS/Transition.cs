@@ -12,7 +12,7 @@ namespace A2v10.ProcS
 		public String Description { get; set; }
 
 		public String To { get; set; }
-		public IWorkflowAction Action { get; set; }
+		public IActivity Activity { get; set; }
 
 		public Boolean Evaluate(IExecuteContext context)
 		{
@@ -21,10 +21,11 @@ namespace A2v10.ProcS
 			return context.EvaluateScript<Boolean>(Condition);
 		}
 
-		public async Task ExecuteAction(IExecuteContext context)
+		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
-			if (Action != null)
-				await Action.Execute(context);
+			if (Activity != null)
+				return Activity.Execute(context);
+			return ActivityExecutionResult.Complete;
 		}
 	}
 }

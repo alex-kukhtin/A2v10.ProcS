@@ -24,7 +24,7 @@ namespace A2v10.ProcS.Tests
 			var instance = await engine.StartWorkflow(new Identity("scripts/counter.json"), data);
 			var prms = instance.GetParameters();
 
-			Assert.AreEqual("End", instance.CurrentState);
+			Assert.AreEqual(null, instance.CurrentState);
 			Assert.AreEqual(-1, prms.Eval<Int32>("counter"));
 		}
 
@@ -35,7 +35,7 @@ namespace A2v10.ProcS.Tests
 
 			var instance = await engine.StartWorkflow(new Identity("scripts/result.json"));
 
-			Assert.AreEqual("S1", instance.CurrentState);
+			Assert.AreEqual(null, instance.CurrentState);
 
 			var r = instance.GetResult();
 

@@ -23,44 +23,42 @@ namespace A2v10.ProcS
 		public Dictionary<String, Transition>  Transitions { get; set; }
 
 
-		public IWorkflowAction OnEntry { get; set; }
-		public IWorkflowAction OnExit { get; set; }
+		public IActivity OnEntry { get; set; }
+		public IActivity OnExit { get; set; }
 
 		public String NextState { get; set; }
 
-		public async Task<ExecuteResult> ExecuteStep(IExecuteContext context)
+		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
-			if (await EnterState(context) == ActionResult.Idle)
-			{
-				//context.SaveInstance();
-				return ExecuteResult.Idle;
-			}
-			return await DoContinue(context);
-		}
-
-		public async Task ContinueStep(IResumeContext context)
-		{
-			context.ScriptContext.SetValue("reply", context.Result);
-			await DoContinue(context);
-		}
-
-		async Task<ExecuteResult> DoContinue(IExecuteContext context)
-		{
-			var next = TransitionToNextState(context);
+			ActivityExecutionResult result;
 			String nextState = NextState;
-			if (next != null)
+			// on entry
+			if (OnEntry != null)
 			{
-				nextState = next.To;
-				await next.ExecuteAction(context);
+				result = OnEntry.Execute(context);
+				if (result == ActivityExecutionResult.Idle)
+					return result;
+				context.IsContinue = false;
 			}
-			await ExitState(context);
-			if (!String.IsNullOrEmpty(nextState))
+			// transitions
+			var nextTransition = TransitionToNextState(context);
+			if (nextTransition != null)
 			{
-				context.Instance.SetState(nextState);
-				return ExecuteResult.Continue;
+				nextState = nextTransition.To;
+				result = nextTransition.Execute(context);
+				if (result == ActivityExecutionResult.Idle)
+					return result;
+				context.IsContinue = false;
 			}
-			context.ProcessComplete();
-			return ExecuteResult.Complete;
+			if (OnExit != null)
+			{
+				result = OnExit.Execute(context);
+				if (result == ActivityExecutionResult.Idle)
+					return result;
+				context.IsContinue = false;
+			}
+			context.Instance.SetState(nextState);
+			return ActivityExecutionResult.Complete;
 		}
 
 		Transition TransitionToNextState(IExecuteContext context)
@@ -68,21 +66,22 @@ namespace A2v10.ProcS
 			if (Transitions == null || Transitions.Count == 0)
 				return null;
 			return Transitions.Where(kv => kv.Value.Evaluate(context)).Select(kv => kv.Value).FirstOrDefault();
-
 		}
 
-		async Task<ActionResult> EnterState(IExecuteContext context)
+		 Task<ActivityExecutionResult> EnterState(IExecuteContext context)
 		{
 			if (OnEntry == null)
-				return ActionResult.Success;
-			return await OnEntry.Execute(context);
+				return Task.FromResult(ActivityExecutionResult.Complete);
+			OnEntry.Execute(context);
+			return Task.FromResult(ActivityExecutionResult.Complete);
 		}
 
-		async Task ExitState(IExecuteContext context)
+		Task ExitState(IExecuteContext context)
 		{
 			if (OnExit == null)
-				return;
-			await OnExit.Execute(context);
+				return Task.CompletedTask;
+			OnExit.Execute(context);
+			return Task.CompletedTask;
 		}
 	}
 }

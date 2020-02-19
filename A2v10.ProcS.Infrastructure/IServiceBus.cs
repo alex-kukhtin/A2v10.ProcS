@@ -17,6 +17,11 @@ namespace A2v10.ProcS.Infrastructure
 		ICorrelationId CorrelationId { get; }
 	}
 
+	public interface IResultMessage : IMessage
+	{
+		IDynamicObject Result { set; }
+	}
+
 	public interface ISaga
 	{
 		String Kind { get; }
@@ -30,6 +35,5 @@ namespace A2v10.ProcS.Infrastructure
 		void Send(IMessage message);
 		void Send(IEnumerable<IMessage> messages);
 		void SendSequence(IEnumerable<IMessage> messages);
-		Task Run(CancellationToken token);
 	}
 }

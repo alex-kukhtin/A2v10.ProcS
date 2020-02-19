@@ -20,9 +20,9 @@ namespace A2v10.ProcS
 		public String Url { get; set; }
 	}
 
-	public class CallApiResponse : MessageBase<String>
+	public class CallApiResponseMessage : MessageBase<String>
 	{
-		public CallApiResponse(String correlationId) : base(correlationId)
+		public CallApiResponseMessage(String correlationId) : base(correlationId)
 		{
 			
 		}
@@ -31,7 +31,7 @@ namespace A2v10.ProcS
 	}
 
 
-	public class CallHttpApiSaga : SagaBaseDispatched<String, CallApiRequestMessage, CallApiResponse>
+	public class CallHttpApiSaga : SagaBaseDispatched<String, CallApiRequestMessage, CallApiResponseMessage>
 	{
 		public CallHttpApiSaga() : base(nameof(CallHttpApiSaga))
 		{
@@ -83,7 +83,7 @@ namespace A2v10.ProcS
 						throw new NotSupportedException($"'{contentType}' yet not supported");
 					}
 
-					var responseMessage = new CallApiResponse(correlationId) {
+					var responseMessage = new CallApiResponseMessage(correlationId) {
 						Result = result
 					};
 					context.SendMessage(responseMessage);
@@ -97,10 +97,10 @@ namespace A2v10.ProcS
 			throw new NotImplementedException(nameof(ExecutePost));
 		}
 
-		protected override Task Handle(IHandleContext context, CallApiResponse message)
+		protected override Task Handle(IHandleContext context, CallApiResponseMessage message)
 		{
-			var resumeProcess = new ResumeProcessMessage(_id, message.Result);
-			context.SendMessage(resumeProcess);
+			var continueMessage = new ContinueActivityMessage(_id, "", message.Result);
+			context.SendMessage(continueMessage);
 			IsComplete = true;
 			return Task.CompletedTask;
 		}

@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-
+using System.Threading;
 using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
@@ -42,14 +42,26 @@ namespace A2v10.ProcS
 		}
 	}
 
+	public class SagaState
+	{
+		public SagaState(ISaga saga)
+		{
+			Saga = saga;
+			HoldLevel = 0;
+		}
+
+		public ISaga Saga { get; }
+		public int HoldLevel;
+	}
+
 	public class InMemorySagaKeeper : ISagaKeeper
 	{
 		private readonly ISagaResolver sagaResolver;
-		private readonly ConcurrentDictionary<ISagaKeeperKey, ISaga> sagas;
+		private readonly ConcurrentDictionary<ISagaKeeperKey, SagaState> sagas;
 
 		public InMemorySagaKeeper(ISagaResolver sagaResolver)
 		{
-			sagas = new ConcurrentDictionary<ISagaKeeperKey, ISaga>();
+			sagas = new ConcurrentDictionary<ISagaKeeperKey, SagaState>();
 			this.sagaResolver = sagaResolver;
 		}
 
@@ -57,27 +69,27 @@ namespace A2v10.ProcS
 		{
 			var sagaFactory = sagaResolver.GetSagaFactory(message.GetType());
 			key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
-			if (message.CorrelationId != null && sagas.TryGetValue(key, out ISaga saga))
+			isNew = false;
+			var state = sagas.GetOrAdd(key, k =>
 			{
-				isNew = false;
-				return saga;
-			}
-			else 
-			{
-				isNew = true;
-				return sagaFactory.CreateSaga();
-			}
+				var saga = sagaFactory.CreateSaga();
+				return new SagaState(saga);
+			});
+			if (Interlocked.CompareExchange(ref state.HoldLevel, 1, 0) == 0)
+				return state.Saga;
+			return null;
 		}
 
 		public void SagaUpdate(ISaga saga, ISagaKeeperKey key)
 		{
 			if (saga.IsComplete || saga.CorrelationId == null || !saga.CorrelationId.Equals(key.CorrelationId))
 			{
-				sagas.TryRemove(key, out ISaga removed);
+				sagas.TryRemove(key, out var removed);
 			}
 			if (!saga.IsComplete)
 			{
-				sagas.AddOrUpdate(new SagaKeeperKey(saga), saga, (k, s) => saga);
+				var ns = new SagaState(saga);
+				sagas.AddOrUpdate(new SagaKeeperKey(saga), ns, (k, s) => ns);
 			}
 		}
 	}

@@ -30,35 +30,35 @@ namespace A2v10.ProcS
 		public ServiceBusItem[] After { get; private set; }
 	}
 
-	public class ServiceBus : IServiceBus
+	public class InMemoryServiceBus : IServiceBus
 	{
 		private readonly ISagaKeeper _sagaKeeper;
 		private readonly IScriptEngine _scriptEngine;
 		private readonly ConcurrentQueue<ServiceBusItem> _messages = new ConcurrentQueue<ServiceBusItem>();
-
+		private readonly ITaskManager _taskManager;
 
 		private readonly IRepository _repository;
+
+		private void SignalUpdate()
+		{
+			mre.Set();
+		}
 
 		private void Send(ServiceBusItem item)
 		{
 			_messages.Enqueue(item);
-			lock (lck)
-			{
-				ts?.TrySetResult(true);
-			}
+			SignalUpdate();
 		}
 
 		private void Send(IEnumerable<ServiceBusItem> items)
 		{
 			foreach (var itm in items) Send(itm);
-			lock (lck)
-			{
-				ts?.TrySetResult(true);
-			}
+			SignalUpdate();
 		}
 
-		public ServiceBus(ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine)
+		public InMemoryServiceBus(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine)
 		{
+			_taskManager = taskManager;
 			_repository = repository ?? throw new ArgumentNullException(nameof(_repository));
 			_scriptEngine = scriptEngine ?? throw new ArgumentNullException(nameof(scriptEngine));
 			_sagaKeeper = sagaKeeper;
@@ -92,45 +92,54 @@ namespace A2v10.ProcS
 			Send(GetSequenceItem(en));
 		}
 
-		private readonly Object lck = new Object();
-        private volatile TaskCompletionSource<bool> ts = null;
+		private readonly ManualResetEvent mre = new ManualResetEvent(false);
 
-		private readonly Lazy<CancellationTokenSource> cancelWhenEmpty = new Lazy<CancellationTokenSource>(() => new CancellationTokenSource());
-		public CancellationTokenSource CancelWhenEmpty => cancelWhenEmpty.Value;
-
-		public async Task Run(CancellationToken token)
+		public void Process()
 		{
-            while (!token.IsCancellationRequested)
+			while (_messages.TryDequeue(out var message))
 			{
-				while (!token.IsCancellationRequested && _messages.TryDequeue(out var message)) {
-					await Process(message);
-				}
-				if (cancelWhenEmpty.IsValueCreated) cancelWhenEmpty.Value.Cancel();
-				lock (lck)
-				{
-					ts = new TaskCompletionSource<bool>();
-				}
-                await Task.WhenAny(ts.Task, Task.Delay(50, token));
+				if (!ProcessItem(message)) _messages.Enqueue(message);
 			}
 		}
 
-		async Task Process(ServiceBusItem item)
+		private volatile bool running = false;
+
+		public void Stop()
+		{
+			running = false;
+			SignalUpdate();
+		}
+
+		public void Start()
+		{
+			lock (this)
+			{
+				running = true;
+				while (running)
+				{
+					Process();
+					mre.Reset();
+					mre.WaitOne(50);
+				}
+			}
+		}
+
+		private Boolean ProcessItem(ServiceBusItem item)
 		{
 			var saga = _sagaKeeper.GetSagaForMessage(item.Message, out ISagaKeeperKey key, out Boolean isNew);
-
-			using (var scriptContext = _scriptEngine.CreateContext())
+			if (saga == null) return false;
+			var task = new Task(async () =>
 			{
-				var hc = new HandleContext(this, _repository, scriptContext);
-				await saga.Handle(hc, item.Message);
-			}
-			Send(item.After);
-
-			_sagaKeeper.SagaUpdate(saga, key);
-		}
-
-        ~ServiceBus()
-        {
-			if (cancelWhenEmpty.IsValueCreated) cancelWhenEmpty.Value.Dispose();
+				using (var scriptContext = _scriptEngine.CreateContext())
+				{
+					var hc = new HandleContext(this, _repository, scriptContext);
+					await saga.Handle(hc, item.Message);
+				}
+				Send(item.After);
+				_sagaKeeper.SagaUpdate(saga, key);
+			});
+			_taskManager.AddTask(task);
+			return true;
 		}
 	}
 }

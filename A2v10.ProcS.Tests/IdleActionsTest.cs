@@ -17,17 +17,16 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleCallApi()
 		{
-			(WorkflowEngine engine, IWorkflowStorage storage, ServiceBus bus) = ProcessEngine.CreateEngine();
+			(WorkflowEngine engine, IWorkflowStorage storage, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
 
 			var instance = await engine.StartWorkflow("callapi.json");
 
 			var stm = instance.Workflow as StateMachine;
-			Assert.IsInstanceOfType(stm.States["S1"].OnEntry, typeof(CallHttpApi));
+			Assert.IsInstanceOfType(stm.States["S1"].OnEntry, typeof(CallHttpApiActivity));
+			
+			bus.Process();
 
-
-			await bus.Run(bus.CancelWhenEmpty.Token);
-
-			Assert.AreEqual("End", instance.CurrentState);
+			Assert.AreEqual(null, instance.CurrentState);
 
 		}
 	}

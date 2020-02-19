@@ -10,7 +10,7 @@ namespace A2v10.ProcS.Infrastructure
 	public interface IWorkflowDefinition
 	{
 		Task Run(IExecuteContext context);
-		Task Resume(IResumeContext context);
+		Task Continue(IExecuteContext context);
 
 		IIdentity GetIdentity();
 		void SetIdentity(IIdentity identity);

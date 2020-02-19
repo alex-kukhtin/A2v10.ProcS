@@ -21,12 +21,13 @@ namespace A2v10.ProcS.Tests
 			prms.Set("city", "London");
 			var instance = await engine.StartWorkflow(new Identity("callapi/openweather.json"), prms);
 
-			await bus.Run(bus.CancelWhenEmpty.Token);
+			bus.Process();
 
-			Assert.AreEqual(7.0, instance.GetResult().Eval<Double>("temp"));
+			var result = instance.GetResult();
+			Assert.AreEqual(7.0, result.Eval<Double>("temp"));
 			Assert.AreEqual("London", instance.GetResult().Eval<String>("city"));
 
-			Assert.AreEqual("End", instance.CurrentState);
+			Assert.AreEqual(null, instance.CurrentState);
 		}
 	}
 }
