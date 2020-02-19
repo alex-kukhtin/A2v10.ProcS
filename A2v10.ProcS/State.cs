@@ -28,9 +28,6 @@ namespace A2v10.ProcS
 
 		public String NextState { get; set; }
 
-				var resume = new InitResumeSagaMessage(context.ResumeId);
-				context.SendMessage(resume);
-
 		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
 			ActivityExecutionResult result;

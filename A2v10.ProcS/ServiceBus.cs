@@ -111,6 +111,7 @@ namespace A2v10.ProcS
 			while (!token.IsCancellationRequested)
 			{
 				while (!token.IsCancellationRequested && _messages.TryDequeue(out var message))
+				{
 					if (!Process(message)) _messages.Enqueue(message);
 				}
 				if (cancelWhenEmpty.IsValueCreated) cancelWhenEmpty.Value.Cancel();
