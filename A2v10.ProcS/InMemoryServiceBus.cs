@@ -102,7 +102,7 @@ namespace A2v10.ProcS
 			}
 		}
 
-		private volatile bool running = false;
+		private volatile Boolean running = false;
 
 		public void Stop()
 		{
@@ -130,13 +130,21 @@ namespace A2v10.ProcS
 			if (saga == null) return false;
 			var task = new Task(async () =>
 			{
-				using (var scriptContext = _scriptEngine.CreateContext())
+				try
 				{
-					var hc = new HandleContext(this, _repository, scriptContext);
-					await saga.Handle(hc, item.Message);
+					using (var scriptContext = _scriptEngine.CreateContext())
+					{
+						var hc = new HandleContext(this, _repository, scriptContext);
+						await saga.Handle(hc, item.Message);
+					}
+					Send(item.After);
+					_sagaKeeper.SagaUpdate(saga, key);
+				} 
+				catch (Exception ex)
+				{
+					// TODO: ????
+					var msg = ex.Message;
 				}
-				Send(item.After);
-				_sagaKeeper.SagaUpdate(saga, key);
 			});
 			_taskManager.AddTask(task);
 			return true;

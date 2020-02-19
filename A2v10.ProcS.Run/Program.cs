@@ -14,7 +14,8 @@ namespace A2v10.ProcS.Run
 		static void Main()
 		{
 			var scriptEngine = new ScriptEngine();
-			var bus = new ServiceBus(new InMemorySagaKeeper(null), null, scriptEngine);
+			var tm = new SyncTaskManager();
+			var bus = new InMemoryServiceBus(tm, new InMemorySagaKeeper(null), null, scriptEngine);
 			var engine = new WorkflowEngine(null, bus, scriptEngine);
 
 			while (true)

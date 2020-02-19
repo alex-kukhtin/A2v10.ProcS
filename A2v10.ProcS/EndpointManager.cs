@@ -3,9 +3,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Threading.Tasks;
 
 using A2v10.ProcS.Infrastructure;
 

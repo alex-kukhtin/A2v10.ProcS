@@ -21,7 +21,7 @@ namespace A2v10.ProcS
 
 			var prms = context.EvaluateScript<ExpandoObject>(ParameterExpression);
 			var startMessage = new StartProcessMessage(context.Instance.Id)
-			{				
+			{
 				ProcessId = Process,
 				Parameters = new DynamicObject(prms)
 			};
