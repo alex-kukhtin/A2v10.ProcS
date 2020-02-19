@@ -64,6 +64,7 @@ namespace A2v10.ProcS
 		{
 			_id = message.Id;
 			String correlationId = Guid.NewGuid().ToString();
+
 			using (var response = await _httpClient.GetAsync(message.Url))
 			{
 				if (response.IsSuccessStatusCode)

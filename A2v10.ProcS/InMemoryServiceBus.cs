@@ -127,24 +127,19 @@ namespace A2v10.ProcS
 		private Boolean ProcessItem(ServiceBusItem item)
 		{
 			var saga = _sagaKeeper.GetSagaForMessage(item.Message, out ISagaKeeperKey key, out Boolean isNew);
-			if (saga == null) return false;
+			if (saga == null) 
+				return false;
+			// ЭТА ШТУКА НЕ РАБОТАЕТ.
+			// new Task НЕ компилирует async в stateMachine. Поэтому задача выполняется до первого await'а
 			var task = new Task(async () =>
 			{
-				try
+				using (var scriptContext = _scriptEngine.CreateContext())
 				{
-					using (var scriptContext = _scriptEngine.CreateContext())
-					{
-						var hc = new HandleContext(this, _repository, scriptContext);
-						await saga.Handle(hc, item.Message);
-					}
-					Send(item.After);
-					_sagaKeeper.SagaUpdate(saga, key);
-				} 
-				catch (Exception ex)
-				{
-					// TODO: ????
-					var msg = ex.Message;
+					var hc = new HandleContext(this, _repository, scriptContext);
+					await saga.Handle(hc, item.Message);
 				}
+				Send(item.After);
+				_sagaKeeper.SagaUpdate(saga, key);
 			});
 			_taskManager.AddTask(task);
 			return true;

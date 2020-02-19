@@ -11,6 +11,9 @@ namespace A2v10.ProcS
 		public void AddTask(Task task)
 		{
 			task.RunSynchronously();
+			// Although the task was run synchronously, it is a good practice
+			// to wait for it in the event exceptions were thrown by the task.
+			task.Wait();
 		}
 	}
 }
