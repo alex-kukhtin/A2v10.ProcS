@@ -84,9 +84,9 @@ namespace A2v10.ProcS.WebApi.Host.Classes
 	{
 		public override JsonContract ResolveContract(Type type)
 		{
-			if (type == typeof(IWorkflowAction))
+			if (type == typeof(IActivity))
 			{
-				return base.ResolveContract(typeof(CodeAction));
+				return base.ResolveContract(typeof(CodeActivity));
 			}
 			return base.ResolveContract(type);
 		}
