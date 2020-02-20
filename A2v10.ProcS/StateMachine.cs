@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
@@ -87,7 +88,12 @@ namespace A2v10.ProcS
 
 		public void Restore(IDynamicObject store)
 		{
-			throw new NotImplementedException();
+			foreach (var stx in States)
+			{
+				var obj = store.GetDynamicObject(stx.Key);
+				if (obj != null)
+					stx.Value.Restore(obj);
+			}
 		}
 		#endregion
 	}

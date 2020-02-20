@@ -13,11 +13,13 @@ namespace A2v10.ProcS.Tests
 {
 	public class InstanceItem
 	{
+		public IInstance Instance;
+		public String WorkflowState;
 	}
 
 	public class FakeStorage : IWorkflowStorage, IInstanceStorage
 	{
-		private readonly Dictionary<Guid, IInstance> _instances = new Dictionary<Guid, IInstance>();
+		private readonly Dictionary<Guid, InstanceItem> _instances = new Dictionary<Guid, InstanceItem>();
 
 		private readonly String path;
 
@@ -39,12 +41,18 @@ namespace A2v10.ProcS.Tests
 
 		public Task<IInstance> Load(Guid instanceId)
 		{
-			if (_instances.TryGetValue(instanceId, out IInstance instance))
+			if (_instances.TryGetValue(instanceId, out InstanceItem item))
 			{
 				//var workflow = await WorkflowFromStorage(instance.Workflow.GetIdentity());
 				//workflow.SetState()
 				//instance.Workflow = workflow;
-				return Task.FromResult(instance);
+				if (item.WorkflowState != null)
+				{
+					var workflowState = DynamicObject.FromJson(item.WorkflowState);
+					item.Instance.Workflow.Restore(workflowState);
+				}
+
+				return Task.FromResult(item.Instance);
 			}
 			throw new ArgumentOutOfRangeException(instanceId.ToString());
 		}
@@ -52,17 +60,21 @@ namespace A2v10.ProcS.Tests
 		public Task Save(IInstance instance)
 		{
 			IDynamicObject state = instance.Workflow.Store();
+			String stateJson = null;
+
 			if (state != null)
 			{
-				String stateJson = state.ToJson();
-				int z = 55;
+				stateJson = state.ToJson();
 			}
 
-
 			if (_instances.ContainsKey(instance.Id))
-				_instances[instance.Id] = instance;
+				_instances[instance.Id].WorkflowState = stateJson;
 			else
-				_instances.Add(instance.Id, instance);
+				_instances.Add(instance.Id, new InstanceItem()
+				{
+					Instance = instance,
+					WorkflowState = stateJson
+				});
 			return Task.FromResult(0);
 		}
 

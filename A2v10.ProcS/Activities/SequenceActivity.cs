@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Dynamic;
 using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
@@ -28,12 +28,21 @@ namespace A2v10.ProcS
 			}
 		}
 
-		const String currentActionName = "current";
+		const String currentActionName = "Current";
 
 		#region IStorable
 		public IDynamicObject Store()
 		{
+			var list = new List<Object>();
+			foreach (var activity in Activities)
+			{
+				if (activity is IStorable storable)
+					list.Add(storable.Store().Root);
+				else
+					list.Add(null);
+			}
 			var ret = new DynamicObject();
+			ret.Set(nameof(Activities), list);
 			ret.Set(currentActionName, _currentAction);
 			return ret;
 		}
@@ -41,6 +50,16 @@ namespace A2v10.ProcS
 		public void Restore(IDynamicObject store)
 		{
 			_currentAction = store.Get<Int32>(currentActionName);
+			var activities = store.Get<List<Object>>(nameof(Activities));
+			for (int i=0; i<activities.Count; i++)
+			{
+				var elem = DynamicObject.From(activities[i]);
+				if (elem != null && Activities[i] is IStorable storable)
+				{
+					storable.Restore(elem);
+				}
+			}
+			int z = 55;
 		}
 		#endregion
 	}
