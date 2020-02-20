@@ -8,6 +8,7 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
+	[ResourceKey(ProcS.ResName + ":" + nameof(Delay))]
 	public class Delay : IActivity
 	{
 		public String Duration { get; set; }

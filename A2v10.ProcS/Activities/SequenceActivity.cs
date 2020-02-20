@@ -7,6 +7,7 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
+	[ResourceKey(ProcS.ResName + ":" + nameof(SequenceActivity))]
 	public class SequenceActivity : IActivity, IStorable
 	{
 		public List<IActivity> Activities { get; set; }

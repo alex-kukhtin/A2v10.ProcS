@@ -8,6 +8,7 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS.Plugin
 {
+	[ResourceKey("com.a2.procs.test:" + nameof(TestPluginActivity))]
 	public class TestPluginActivity : IActivity
 	{
 		public Int32 CorrelationId { get; set; }

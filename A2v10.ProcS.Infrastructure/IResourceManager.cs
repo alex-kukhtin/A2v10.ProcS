@@ -10,32 +10,33 @@ namespace A2v10.ProcS.Infrastructure
 	public interface IResourceManager
 	{
 		void RegisterResource(Type type);
-		void RegisterResource<T>() where T : IStorable, new();
+		void RegisterResource<T>() where T : new();
 		void RegisterResources(IEnumerable<Type> types);
 		void RegisterResources<T1,T2>()
-			where T1 : IStorable, new()
-			where T2 : IStorable, new();
+			where T1 : new()
+			where T2 : new();
 		void RegisterResources<T1, T2, T3>()
-			where T1 : IStorable, new()
-			where T2 : IStorable, new()
-			where T3 : IStorable, new();
+			where T1 : new()
+			where T2 : new()
+			where T3 : new();
 		void RegisterResources<T1, T2, T3, T4>()
-			where T1 : IStorable, new()
-			where T2 : IStorable, new()
-			where T3 : IStorable, new()
-			where T4 : IStorable, new();
+			where T1 : new()
+			where T2 : new()
+			where T3 : new()
+			where T4 : new();
 		void RegisterResourceFactory(String key, IResourceFactory factory);
 	}
 
 	public interface IResourceWrapper
 	{
-		IStorable Wrap(IStorable obj);
-		IStorable Unwrap(IStorable res);
+		IStorable Wrap(Object obj);
+		Object Unwrap(IStorable res);
+		T Unwrap<T>(IStorable res) where T : class;
 	}
 
 	public interface IResourceFactory
 	{
-		IStorable Create();
+		Object Create();
 	}
 
 	[AttributeUsage(AttributeTargets.Class)]

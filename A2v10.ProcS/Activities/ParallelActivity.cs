@@ -14,6 +14,7 @@ namespace A2v10.ProcS
 		Any
 	}
 
+	[ResourceKey(ProcS.ResName + ":" + nameof(ParallelActivity))]
 	public class ParallelActivity : IActivity, IStorable
 	{
 		public List<IActivity> Activities { get; set; }

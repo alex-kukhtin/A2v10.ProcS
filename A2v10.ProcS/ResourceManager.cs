@@ -19,20 +19,18 @@ namespace A2v10.ProcS
 
 		public TypeResourceFactory(Type type)
 		{
-			if (!typeof(IStorable).IsAssignableFrom(type))
-				throw new Exception("Resource type must implement IStorable");
 			this.type = type;
 		}
 
-		public IStorable Create()
+		public Object Create()
 		{
-			return Activator.CreateInstance(type) as IStorable;
+			return Activator.CreateInstance(type);
 		}
 	}
 
-	public class GenericResourceFactory<T> : IResourceFactory where T : IStorable, new()
+	public class GenericResourceFactory<T> : IResourceFactory where T : new()
 	{
-		public IStorable Create()
+		public Object Create()
 		{
 			return new T();
 		}
@@ -47,7 +45,7 @@ namespace A2v10.ProcS
 			this.fact = fact;
 		}
 
-		public IStorable Create()
+		public Object Create()
 		{
 			return fact.CreateSaga();
 		}
@@ -80,12 +78,12 @@ namespace A2v10.ProcS
 			RegisterResourceFactory(GetKey(type), new TypeResourceFactory(type));
 		}
 
-		public void RegisterResource<T>(String key) where T : IStorable, new()
+		public void RegisterResource<T>(String key) where T : new()
 		{
 			RegisterResourceFactory(key, new GenericResourceFactory<T>());
 		}
 
-		public void RegisterResource<T>() where T : IStorable, new()
+		public void RegisterResource<T>() where T : new()
 		{
 			RegisterResource<T>(GetKey(typeof(T)));
 		}
@@ -99,17 +97,17 @@ namespace A2v10.ProcS
 		}
 
 		public void RegisterResources<T1, T2>()
-			where T1 : IStorable, new()
-			where T2 : IStorable, new()
+			where T1 : new()
+			where T2 : new()
 		{
 			RegisterResource<T1>();
 			RegisterResource<T2>();
 		}
 
 		public void RegisterResources<T1, T2, T3>()
-			where T1 : IStorable, new()
-			where T2 : IStorable, new()
-			where T3 : IStorable, new()
+			where T1 : new()
+			where T2 : new()
+			where T3 : new()
 		{
 			RegisterResource<T1>();
 			RegisterResource<T2>();
@@ -117,10 +115,10 @@ namespace A2v10.ProcS
 		}
 
 		public void RegisterResources<T1, T2, T3, T4>()
-			where T1 : IStorable, new()
-			where T2 : IStorable, new()
-			where T3 : IStorable, new()
-			where T4 : IStorable, new()
+			where T1 : new()
+			where T2 : new()
+			where T3 : new()
+			where T4 : new()
 		{
 			RegisterResource<T1>();
 			RegisterResource<T2>();
@@ -128,25 +126,50 @@ namespace A2v10.ProcS
 			RegisterResource<T4>();
 		}
 
-		public IStorable Wrap(IStorable obj)
+		public IStorable Wrap(Object obj)
 		{
 			var type = obj.GetType();
 			var att = type.GetCustomAttribute<ResourceKeyAttribute>();
 			if (att == null) throw new Exception("Resource must have ResourceKeyAttribute");
-			return new Resource(att.Key, obj.Store());
+			IDynamicObject data;
+			if (obj is IStorable sto) data = sto.Store();
+			else data = new DynamicObject();
+			return new Resource(att.Key, data);
 		}
 
-		public IStorable Unwrap(IStorable src)
+		public Object Unwrap(IStorable src)
+		{
+			var res = RestoreResource(src);
+			var obj = Unwrap(res);
+			return obj;
+		}
+
+		private Resource RestoreResource(IStorable src)
 		{
 			var d = src.Store();
 			var res = new Resource();
 			res.Restore(d);
-			if (!resources.ContainsKey(res.Key))
-				throw new Exception($"Resource {res.Key} is not registred");
-			var fact = resources[res.Key];
+			return res;
+		}
+
+		private Object Unwrap(Resource res)
+		{
+			var key = res.Key;
+			if (!resources.ContainsKey(key))
+				throw new Exception($"Resource {key} is not registred");
+			var fact = resources[key];
 			var obj = fact.Create();
-			obj.Restore(res.Object);
+			if (obj is IStorable sto)
+				sto.Restore(res.Object);
 			return obj;
+		}
+
+		public T Unwrap<T>(IStorable src) where T : class
+		{
+			var res = RestoreResource(src);
+			var obj = Unwrap(res);
+			if (obj is T t) return t;
+			throw new Exception($"Resource {res.Key} is not {typeof(T)}");
 		}
 	}
 

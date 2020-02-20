@@ -7,9 +7,11 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
-
+	[ResourceKey(ukey)]
 	public class RegisterCallbackMessage : MessageBase<String>
 	{
+		public const string ukey = ProcS.ResName + ":" + nameof(RegisterCallbackMessage);
+
 		public RegisterCallbackMessage(String tag) : base(tag)
 		{
 			Tag = tag;
@@ -19,8 +21,11 @@ namespace A2v10.ProcS
 		public String CorrelationExpression { get; set; }
 	}
 
+	[ResourceKey(ukey)]
 	public class CallbackMessage : MessageBase<String>
 	{
+		public const string ukey = ProcS.ResName + ":" + nameof(CallbackMessage);
+
 		public CallbackMessage(String tag) : base(tag)
 		{
 			
@@ -29,8 +34,10 @@ namespace A2v10.ProcS
 		public IDynamicObject Result { get; set; }
 	}
 
+	[ResourceKey(ukey)]
 	public class WaitCallbackMessage : MessageBase<String>
 	{
+		public const string ukey = ProcS.ResName + ":" + nameof(WaitCallbackMessage);
 		public WaitCallbackMessage(Guid bookmark, String tag, String corrVal)
 			: base($"{tag}:{corrVal}")
 		{
@@ -45,8 +52,11 @@ namespace A2v10.ProcS
 		public String CorrelationValue { get; set; }
 	}
 
+	[ResourceKey(ukey)]
 	public class CorrelatedCallbackMessage : MessageBase<String>
 	{
+		public const string ukey = ProcS.ResName + ":" + nameof(CorrelatedCallbackMessage);
+
 		public CorrelatedCallbackMessage(String tag, String corrVal) 
 			: base($"{tag}:{corrVal}")
 		{
@@ -58,7 +68,9 @@ namespace A2v10.ProcS
 
 	public class RegisterCallbackSaga : SagaBaseDispatched<String, RegisterCallbackMessage, CallbackMessage>
 	{
-		public RegisterCallbackSaga() : base(nameof(RegisterCallbackSaga))
+		public const string ukey = ProcS.ResName + ":" + nameof(RegisterCallbackSaga);
+
+		public RegisterCallbackSaga() : base(ukey)
 		{
 
 		}
@@ -89,7 +101,9 @@ namespace A2v10.ProcS
 
 	public class CallbackCorrelationSaga : SagaBaseDispatched<String, WaitCallbackMessage, CorrelatedCallbackMessage>
 	{
-		public CallbackCorrelationSaga() : base(nameof(CallbackCorrelationSaga))
+		public const string ukey = ProcS.ResName + ":" + nameof(CallbackCorrelationSaga);
+
+		public CallbackCorrelationSaga() : base(ukey)
 		{
 
 		}

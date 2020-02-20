@@ -7,6 +7,7 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
+	[ResourceKey(ProcS.ResName + ":" + nameof(WaitApiCallback))]
 	public class WaitApiCallback : IActivity
 	{
 		public String Tag { get; set; }

@@ -7,8 +7,10 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS.Plugin
 {
+	[ResourceKey(ukey)]
 	public class TaskPluginActionMessage : MessageBase<CorrelationId<Int32>>
 	{
+		public const string ukey = "com.a2.procs.test:" + nameof(TaskPluginActionMessage);
 		public Guid Id { get; }
 		public TaskPluginActionMessage(Guid instanceId, CorrelationId<Int32> correlationId) : base(correlationId)
 		{
@@ -19,11 +21,13 @@ namespace A2v10.ProcS.Plugin
 
 	class TestPluginActionSaga : SagaBaseDispatched<CorrelationId<Int32>, TaskPluginActionMessage>
 	{
-		public TestPluginActionSaga() : base(nameof(TestPluginActionSaga))
+		public const string ukey = "com.a2.procs.test:" + nameof(TestPluginActionSaga);
+
+		public TestPluginActionSaga() : base(ukey)
 		{
 		}
 
-		public TestPluginActionSaga(String kind) : base(nameof(TestPluginActionSaga))
+		public TestPluginActionSaga(String kind) : base(ukey)
 		{
 		}
 
@@ -42,7 +46,8 @@ namespace A2v10.ProcS.Plugin
 		{
 			var factory = new ConstructSagaFactory<TestPluginActionSaga>(nameof(TestPluginActionSaga));
 			rmgr.RegisterResourceFactory(factory.SagaKind, new SagaResourceFactory(factory));
-			smgr.RegisterSagaFactory<TaskPluginActionMessage>(factory);
+			rmgr.RegisterResources(TestPluginActionSaga.GetHandledTypes());
+			smgr.RegisterSagaFactory(factory, TestPluginActionSaga.GetHandledTypes());
 		}
 	}
 }

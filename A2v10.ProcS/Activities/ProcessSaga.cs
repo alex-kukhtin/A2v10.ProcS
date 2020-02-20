@@ -6,8 +6,10 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
+	[ResourceKey(ukey)]
 	public class SetBookmarkMessage : MessageBase<Guid>
 	{
+		public const string ukey = ProcS.ResName + ":" + nameof(SetBookmarkMessage);
 		public SetBookmarkMessage(Guid id, IResultMessage resultMessage) : base(id)
 		{
 			Id = id;
@@ -18,8 +20,10 @@ namespace A2v10.ProcS
 		public IResultMessage ResultMessage { get; }
 	}
 
+	[ResourceKey(ukey)]
 	public class ResumeBookmarkMessage : MessageBase<Guid>
 	{
+		public const string ukey = ProcS.ResName + ":" + nameof(ResumeBookmarkMessage);
 		public ResumeBookmarkMessage(Guid id, IDynamicObject result) : base(id)
 		{
 			Id = id;
@@ -32,7 +36,9 @@ namespace A2v10.ProcS
 
 	public class BookmarkSaga : SagaBaseDispatched<Guid, SetBookmarkMessage, ResumeBookmarkMessage>
 	{
-		public BookmarkSaga() : base(nameof(BookmarkSaga))
+		public const string ukey = ProcS.ResName + ":" + nameof(BookmarkSaga);
+
+		public BookmarkSaga() : base(ukey)
 		{
 		}
 
@@ -53,8 +59,10 @@ namespace A2v10.ProcS
 		}
 	}
 
+	[ResourceKey(ukey)]
 	public class ContinueActivityMessage : MessageBase<Guid>, IResultMessage
 	{
+		public const string ukey = ProcS.ResName + ":" + nameof(ContinueActivityMessage);
 		public Guid InstanceId { get; }
 		public IDynamicObject Result { get; set; }
 		public String Bookmark { get; }
@@ -73,8 +81,11 @@ namespace A2v10.ProcS
 		}
 	}
 
+	[ResourceKey(ukey)]
 	public class StartProcessMessage : MessageBase<Guid>
 	{
+		public const string ukey = ProcS.ResName + ":" + nameof(StartProcessMessage);
+
 		public Guid ParentId { get; }
 		public String ProcessId { get; set; }
 		public IDynamicObject Parameters { get; set; }
@@ -87,7 +98,9 @@ namespace A2v10.ProcS
 
 	public class ProcessSaga : SagaBaseDispatched<String, StartProcessMessage, ContinueActivityMessage>
 	{
-		public ProcessSaga() : base(nameof(ProcessSaga))
+		public const string ukey = ProcS.ResName + ":" + nameof(ProcessSaga);
+
+		public ProcessSaga() : base(ukey)
 		{
 		}
 
