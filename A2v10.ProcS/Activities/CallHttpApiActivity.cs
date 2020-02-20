@@ -11,10 +11,19 @@ namespace A2v10.ProcS
 		public String Url { get; set; }
 		public String Method { get; set; }
 
+		public String CodeBefore { get; set; }
+		public String CodeAfter { get; set; }
+
 		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
 			if (context.IsContinue)
+			{
+
+				context.ExecuteScript(CodeAfter);
 				return ActivityExecutionResult.Complete;
+			}
+
+			context.ExecuteScript(CodeBefore);
 			var request = new CallApiRequestMessage()
 			{
 				Id = context.Instance.Id,

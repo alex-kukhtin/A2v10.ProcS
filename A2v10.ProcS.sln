@@ -64,6 +64,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "composite", "composite", "{53CA889E-F35B-48AB-8240-91C9140D6366}"
 	ProjectSection(SolutionItems) = preProject
 		Workflows\composite\parallel.json = Workflows\composite\parallel.json
+		Workflows\composite\parallelApi.json = Workflows\composite\parallelApi.json
 		Workflows\composite\sequence.json = Workflows\composite\sequence.json
 	EndProjectSection
 EndProject

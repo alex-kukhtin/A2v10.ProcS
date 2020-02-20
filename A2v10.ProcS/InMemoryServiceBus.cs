@@ -127,7 +127,7 @@ namespace A2v10.ProcS
 		private Boolean ProcessItem(ServiceBusItem item)
 		{
 			var saga = _sagaKeeper.GetSagaForMessage(item.Message, out ISagaKeeperKey key, out Boolean isNew);
-			if (saga == null) 
+			if (saga == null)
 				return false;
 			Func<Task> task = async () =>
 			{
