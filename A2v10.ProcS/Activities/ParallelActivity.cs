@@ -2,8 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
-
 using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
@@ -58,15 +58,20 @@ namespace A2v10.ProcS
 		}
 
 		#region IStorable
+
+		const string waitingName = "waiting";
 		public IDynamicObject Store()
 		{
-			throw new NotImplementedException();
+			dynamic dd = new ExpandoObject();
+			dd.waiting = _waiting;
+			return new DynamicObject(dd);
 		}
-
 		public void Restore(IDynamicObject store)
 		{
-			throw new NotImplementedException();
+			dynamic dd = store.Root;
+			_waiting = dd.waiting;
 		}
+
 		#endregion
 	}
 }

@@ -61,14 +61,14 @@ namespace A2v10.ProcS
 
 		public void SetValue(String name, IDynamicObject val)
 		{
-			_engine.SetValue(name, val.RawValue);
+			_engine.SetValue(name, val.Root);
 		}
 
 		public T GetValueFromObject<T>(IDynamicObject obj, String expression)
 		{
 			if (obj == null || expression == null)
 				return default;
-			var val = Jint.Native.JsValue.FromObject(_engine, obj.RawValue);
+			var val = Jint.Native.JsValue.FromObject(_engine, obj.Root);
 			var func = _engine.Execute($"(reply) => ({expression})").GetCompletionValue();
 			var result = func.Invoke(val).ToObject();
 			if (result is T)
