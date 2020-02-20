@@ -110,12 +110,40 @@ namespace A2v10.ProcS
 			var d = _object as IDictionary<String, Object>;
 			if (d.TryGetValue(name, out Object val))
 			{
-				if (val is T tval) return tval;
-				throw new Exception($"Field \"{name}\" is not \"{typeof(T)}\"");
+				if (val is T tval) 
+					return tval;
+				return (T)Convert.ChangeType(val, typeof(T));
 			}
 			else {
 				throw new Exception($"There is no field \"{name}\" is DynamicObject");
 			}
+		}
+
+		public IDynamicObject GetDynamicObject(String name)
+		{
+			var d = _object as IDictionary<String, Object>;
+			if (d.TryGetValue(name, out Object val))
+			{
+				if (val is ExpandoObject eo)
+					return new DynamicObject(eo);
+				else if (val is DynamicObject dobj)
+					return dobj;
+				else
+					throw new Exception($"The field \"{name}\" is not a DynamicObject");
+			}
+			return null;
+		}
+
+		public T GetOrDefault<T>(String name)
+		{
+			var d = _object as IDictionary<String, Object>;
+			if (d.TryGetValue(name, out Object val))
+			{
+				if (val is T tval) 
+					return tval;
+				return default;
+			}
+			return default;
 		}
 
 		public T Eval<T>(String expression, T fallback = default, Boolean throwIfError = false)

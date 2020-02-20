@@ -59,7 +59,7 @@ namespace A2v10.ProcS
 
 		#region IStorable
 
-		const String waitingName = "waiting";
+		const String waitingName = "Waiting";
 
 		public IDynamicObject Store()
 		{

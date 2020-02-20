@@ -9,6 +9,8 @@ namespace A2v10.ProcS.Infrastructure
 		T Eval<T>(String expression, T fallback = default, Boolean throwIfError = false);
 		void Set(String name, Object val);
 		T Get<T>(String name);
+		T GetOrDefault<T>(String name);
+		IDynamicObject GetDynamicObject(String name);
 
 		String ToJson();
 		Boolean IsEmpty { get; }

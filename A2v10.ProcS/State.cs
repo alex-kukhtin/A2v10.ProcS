@@ -88,15 +88,15 @@ namespace A2v10.ProcS
 		public IDynamicObject Store()
 		{
 			var ret = new DynamicObject();
-			if (OnEntry is IStorable entryStorable)
+			if (OnEntry is IStorable storable)
 			{
-				var data = entryStorable.Store();
+				var data = storable.Store();
 				if (!data.IsEmpty)
 					ret.Set(nameof(OnEntry), data);
 			}
-			if (OnExit is IStorable exitStorable)
+			if (OnExit is IStorable storable1)
 			{
-				var data = exitStorable.Store();
+				var data = storable1.Store();
 				if (!data.IsEmpty)
 					ret.Set(nameof(OnExit), data);
 			}
@@ -105,7 +105,13 @@ namespace A2v10.ProcS
 
 		public void Restore(IDynamicObject store)
 		{
-			throw new NotImplementedException();
+			var entry = store.GetDynamicObject(nameof(OnEntry));
+			if (entry != null && OnEntry is IStorable storable)
+				storable.Restore(entry);
+
+			var exit = store.GetDynamicObject(nameof(OnExit));
+			if (exit != null && OnExit is IStorable storable1)
+				storable1.Restore(exit);
 		}
 		#endregion
 	}
