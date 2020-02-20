@@ -51,15 +51,17 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task ParallelApi()
 		{
-			(IWorkflowEngine engine, _, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
+			(IWorkflowEngine engine, IRepository repository, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
 
 			var prms = new DynamicObject();
 			prms.Set("value", 1);
 
 			var instance = await engine.StartWorkflow(new Identity("composite/parallelApi.json"), prms);
+			var id = instance.Id;
 
 			bus.Process();
 
+			instance = await repository.Get(id);
 			Assert.AreEqual(null, instance.CurrentState);
 			var r = instance.GetResult();
 			Assert.AreEqual(15, r.Eval<Int32>("counter"));

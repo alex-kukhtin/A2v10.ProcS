@@ -13,8 +13,11 @@ namespace A2v10.ProcS.Tests
 {
 	public class InstanceItem
 	{
-		public IInstance Instance;
 		public String WorkflowState;
+		public String InstanceData;
+		public String InstanceResult;
+		public String CurrentState;
+		public IIdentity WorkflowIdentity;
 	}
 
 	public class FakeStorage : IWorkflowStorage, IInstanceStorage
@@ -39,20 +42,31 @@ namespace A2v10.ProcS.Tests
 			throw new NotImplementedException(nameof(Create));
 		}
 
-		public Task<IInstance> Load(Guid instanceId)
+		public async Task<IInstance> Load(Guid instanceId)
 		{
 			if (_instances.TryGetValue(instanceId, out InstanceItem item))
 			{
-				//var workflow = await WorkflowFromStorage(instance.Workflow.GetIdentity());
-				//workflow.SetState()
-				//instance.Workflow = workflow;
+				var workflow = await WorkflowFromStorage(item.WorkflowIdentity);
+
+				Instance instance = new Instance()
+				{
+					Id = Guid.NewGuid(),
+					Workflow = workflow,
+					CurrentState = item.CurrentState
+				};
+
 				if (item.WorkflowState != null)
 				{
 					var workflowState = DynamicObject.FromJson(item.WorkflowState);
-					item.Instance.Workflow.Restore(workflowState);
+					instance.Workflow.Restore(workflowState);
 				}
 
-				return Task.FromResult(item.Instance);
+				if (item.InstanceData != null)
+					instance.Data = DynamicObject.FromJson(item.InstanceData);
+				if (item.InstanceResult != null)
+					instance.Result = DynamicObject.FromJson(item.InstanceResult);
+
+				return instance;
 			}
 			throw new ArgumentOutOfRangeException(instanceId.ToString());
 		}
@@ -67,14 +81,18 @@ namespace A2v10.ProcS.Tests
 				stateJson = state.ToJson();
 			}
 
-			if (_instances.ContainsKey(instance.Id))
-				_instances[instance.Id].WorkflowState = stateJson;
-			else
-				_instances.Add(instance.Id, new InstanceItem()
+			InstanceItem item = null;
+			if (!_instances.TryGetValue(instance.Id, out item)) {
+				item = new InstanceItem()
 				{
-					Instance = instance,
-					WorkflowState = stateJson
-				});
+					WorkflowIdentity = instance.Workflow.GetIdentity()
+				};
+				_instances.Add(instance.Id, item);
+			}
+			item.WorkflowState = stateJson;
+			item.CurrentState = instance.CurrentState;
+			item.InstanceData = instance.GetData().ToJson();
+			item.InstanceResult = instance.GetResult().ToJson();
 			return Task.FromResult(0);
 		}
 

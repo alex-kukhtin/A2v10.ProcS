@@ -19,15 +19,15 @@ namespace A2v10.ProcS.Tests
 			// master p1 = p1, p2 = p1 * 2
 			// slave p1 = p1 + 5, p2 = p2 + 10;
 
-			(WorkflowEngine engine, _, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
+			(WorkflowEngine engine, IRepository repository, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
 			var prms = engine.CreateDynamicObject();
 			prms.Set("value", 10);
 			var instance = await engine.StartWorkflow("startprocess/master.json", prms);
+			var id = instance.Id;
 
 			bus.Process();
 
-			var result = instance.GetResult();
-
+			instance = await repository.Get(id);
 			Assert.AreEqual(15, instance.GetResult().Eval<Int32>("value.p1"));
 			Assert.AreEqual(30, instance.GetResult().Eval<Int32>("value.p2"));
 		}
@@ -38,24 +38,25 @@ namespace A2v10.ProcS.Tests
 			// master p1 = p1, p2 = p1 * 2
 			// slave p1 = p1 + 5, p2 = p2 + 10;
 
-			(WorkflowEngine engine, _, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
+			(WorkflowEngine engine, IRepository repository, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
 			
 			var prms1 = engine.CreateDynamicObject();
 			prms1.Set("value", 10);
 			var instance1 = await engine.StartWorkflow("startprocess/master.json", prms1);
+			var id1 = instance1.Id;
 
 			var prms2 = engine.CreateDynamicObject();
 			prms2.Set("value", 20);
 			var instance2 = await engine.StartWorkflow("startprocess/master.json", prms2);
+			var id2 = instance2.Id;
 
 			bus.Process();
 
-			var result1 = instance1.GetResult();
+			instance1 = await repository.Get(id1);
+			instance2 = await repository.Get(id2);
 
 			Assert.AreEqual(15, instance1.GetResult().Eval<Int32>("value.p1"));
 			Assert.AreEqual(30, instance1.GetResult().Eval<Int32>("value.p2"));
-
-			var result2 = instance1.GetResult();
 
 			Assert.AreEqual(25, instance2.GetResult().Eval<Int32>("value.p1"));
 			Assert.AreEqual(50, instance2.GetResult().Eval<Int32>("value.p2"));

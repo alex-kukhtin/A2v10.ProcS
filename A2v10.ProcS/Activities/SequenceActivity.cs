@@ -59,7 +59,6 @@ namespace A2v10.ProcS
 					storable.Restore(elem);
 				}
 			}
-			int z = 55;
 		}
 		#endregion
 	}

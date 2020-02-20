@@ -70,7 +70,13 @@ namespace A2v10.ProcS
 
 		public void Restore(IDynamicObject store)
 		{
-			_waiting = store.Get<List<Boolean>>(waitingName);
+
+			var elems = store.Get<List<Object>>(waitingName);
+			_waiting.Clear();
+			foreach (var el in elems)
+			{
+				_waiting.Add((Boolean) el);
+			}
 		}
 
 		#endregion

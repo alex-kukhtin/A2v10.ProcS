@@ -18,10 +18,11 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleWait()
 		{
-			(WorkflowEngine engine, _, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
+			var (engine, repository, bus) = ProcessEngine.CreateEngine();
 
 			var data = engine.CreateDynamicObject();
 			var instance = await engine.StartWorkflow(new Identity("callback.json"), data);
+			var id = instance.Id;
 
 			var resp = new CallbackMessage("pseudopay") {
 				Result = DynamicObject.FromJson("{ \"paymentId\": 123 }")
@@ -30,6 +31,7 @@ namespace A2v10.ProcS.Tests
 			bus.Send(resp);
 			bus.Process();
 
+			instance = await repository.Get(id);
 			Assert.AreEqual(null, instance.CurrentState);
 		}
 	}
