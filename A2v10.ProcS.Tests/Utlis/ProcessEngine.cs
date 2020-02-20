@@ -14,7 +14,7 @@ namespace A2v10.ProcS.Tests
 {
 	public static class ProcessEngine
 	{
-		public static (WorkflowEngine engine, IWorkflowStorage storage, InMemoryServiceBus bus) CreateEngine()
+		public static (WorkflowEngine engine, IRepository repository, InMemoryServiceBus bus) CreateEngine()
 		{
 			var storage = new FakeStorage();
 			var pmr = new PluginManager(null);
@@ -43,7 +43,7 @@ namespace A2v10.ProcS.Tests
 			var repository = new Repository(storage, storage);
 			var bus = new InMemoryServiceBus(taskManager, keeper, repository, scriptEngine);
 			var engine = new WorkflowEngine(repository, bus, scriptEngine);
-			return (engine, storage, bus);
+			return (engine, repository, bus);
 		}
 
 		static String GetPluginPath()

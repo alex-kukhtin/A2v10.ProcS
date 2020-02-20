@@ -69,6 +69,8 @@ namespace A2v10.ProcS
 
 		public static IDynamicObject From<T>(T data) where T : class
 		{
+			if (data is ExpandoObject eo)
+				return new DynamicObject(eo);
 			var settings = new JsonSerializerSettings();
 			settings.ContractResolver = new InterfaceContractResolver<T>();
 			settings.Converters.Add(new StringEnumConverter());
@@ -88,13 +90,15 @@ namespace A2v10.ProcS
 
 		public static IDynamicObject FromJson(String json)
 		{
-			if (String.IsNullOrEmpty(json))
+			if (String.IsNullOrEmpty(json) || json == "{}")
 				return new DynamicObject();
 			return new DynamicObject(JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter()));
 		}
 
 		public String ToJson()
 		{
+			if (IsEmpty)
+				return null;
 			return JsonConvert.SerializeObject(_object);
 		}
 

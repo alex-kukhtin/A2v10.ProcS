@@ -60,6 +60,6 @@ namespace A2v10.ProcS
 		public IDynamicObject Data { get; set; }
 		public IDynamicObject Parameters { get; set; }
 		public IDynamicObject Environment { get; set; }
-		public IDynamicObject Result { get; }
+		public IDynamicObject Result { get; set; }
 	}
 }
