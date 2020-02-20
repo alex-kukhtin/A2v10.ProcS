@@ -16,6 +16,7 @@ namespace A2v10.ProcS.Tests
 		public String WorkflowState;
 		public String InstanceData;
 		public String InstanceResult;
+		public String InstanceParams;
 		public String CurrentState;
 		public IIdentity WorkflowIdentity;
 	}
@@ -65,6 +66,8 @@ namespace A2v10.ProcS.Tests
 					instance.Data = DynamicObject.FromJson(item.InstanceData);
 				if (item.InstanceResult != null)
 					instance.Result = DynamicObject.FromJson(item.InstanceResult);
+				if (item.InstanceParams != null)
+					instance.Parameters = DynamicObject.FromJson(item.InstanceParams);
 
 				return instance;
 			}
@@ -93,6 +96,7 @@ namespace A2v10.ProcS.Tests
 			item.CurrentState = instance.CurrentState;
 			item.InstanceData = instance.GetData().ToJson();
 			item.InstanceResult = instance.GetResult().ToJson();
+			item.InstanceParams = instance.GetParameters().ToJson();
 			return Task.FromResult(0);
 		}
 
