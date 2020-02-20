@@ -51,11 +51,23 @@ namespace A2v10.ProcS
 
 	public class DynamicObject : IDynamicObject
 	{
-		private readonly ExpandoObject _object;
+		private ExpandoObject _object;
 
+#pragma warning disable IDE1006 // Naming Styles
 		private IDictionary<String, Object> _dictionary => _object;
+#pragma warning restore IDE1006 // Naming Styles
 
-		public Object Root => _object;
+		public static implicit operator DynamicObject(ExpandoObject dobj)
+		{
+			return new DynamicObject(dobj);
+		}
+
+		public static implicit operator ExpandoObject(DynamicObject dobj)
+		{
+			return dobj.Root;
+		}
+
+		public ExpandoObject Root => _object;
 
 		public DynamicObject()
 		{
@@ -71,8 +83,10 @@ namespace A2v10.ProcS
 		{
 			if (data is ExpandoObject eo)
 				return new DynamicObject(eo);
-			var settings = new JsonSerializerSettings();
-			settings.ContractResolver = new InterfaceContractResolver<T>();
+			var settings = new JsonSerializerSettings()
+			{
+				ContractResolver = new InterfaceContractResolver<T>()
+			};
 			settings.Converters.Add(new StringEnumConverter());
 			var json = JsonConvert.SerializeObject(data, settings);
 			return FromJson(json);
@@ -95,6 +109,15 @@ namespace A2v10.ProcS
 			return new DynamicObject(JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter()));
 		}
 
+		public void AssignFrom(String name, IDynamicObject source)
+		{
+			var dobj = source.GetDynamicObject(name);
+			if (dobj != null)
+				_object = dobj.Root;
+			else
+				Clear();
+		}
+
 		public String ToJson()
 		{
 			if (IsEmpty)
@@ -108,6 +131,8 @@ namespace A2v10.ProcS
 			switch (val)
 			{
 				case IDynamicObject doVal:
+					if (doVal.IsEmpty)
+						return;
 					valueToSet = doVal.Root;
 					break;
 			}
@@ -128,6 +153,24 @@ namespace A2v10.ProcS
 			else {
 				throw new Exception($"There is no field \"{name}\" is DynamicObject");
 			}
+		}
+
+		public List<T> GetListOrNull<T>(String name)
+		{
+			if (this.TryGetValue(name, out Object val))
+			{
+				if (val is IList<Object> listObj)
+				{
+					var list = new List<T>();
+					foreach (var el in listObj)
+					{
+						var ne = (T)Convert.ChangeType(el, typeof(T));
+						list.Add(ne);
+					}
+					return list;
+				}
+			}
+			return null;
 		}
 
 		public IDynamicObject GetDynamicObject(String name)
@@ -209,27 +252,29 @@ namespace A2v10.ProcS
 			return currentContext;
 		}
 
-		public void Add(string key, object value)
+		public void Add(String key, Object value)
 		{
+			if (value is IDynamicObject dobj)
+				value = dobj.Root;
 			_dictionary.Add(key, value);
 		}
 
-		public bool ContainsKey(string key)
+		public Boolean ContainsKey(String key)
 		{
 			return _dictionary.ContainsKey(key);
 		}
 
-		public bool Remove(string key)
+		public Boolean Remove(String key)
 		{
 			return _dictionary.Remove(key);
 		}
 
-		public bool TryGetValue(string key, out object value)
+		public Boolean TryGetValue(String key, out Object value)
 		{
 			return _dictionary.TryGetValue(key, out value);
 		}
 
-		public void Add(KeyValuePair<string, object> item)
+		public void Add(KeyValuePair<String, Object> item)
 		{
 			_dictionary.Add(item);
 		}
@@ -239,22 +284,22 @@ namespace A2v10.ProcS
 			_dictionary.Clear();
 		}
 
-		public bool Contains(KeyValuePair<string, object> item)
+		public Boolean Contains(KeyValuePair<String, Object> item)
 		{
 			return _dictionary.Contains(item);
 		}
 
-		public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
+		public void CopyTo(KeyValuePair<String, Object>[] array, Int32 arrayIndex)
 		{
 			_dictionary.CopyTo(array, arrayIndex);
 		}
 
-		public bool Remove(KeyValuePair<string, object> item)
+		public Boolean Remove(KeyValuePair<String, Object> item)
 		{
 			return _dictionary.Remove(item);
 		}
 
-		public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+		public IEnumerator<KeyValuePair<String, Object>> GetEnumerator()
 		{
 			return _dictionary.GetEnumerator();
 		}
@@ -269,17 +314,17 @@ namespace A2v10.ProcS
 			return (_object as IDynamicMetaObjectProvider).GetMetaObject(parameter);
 		}
 
-		public Boolean IsEmpty => (_object == null) || (_object as IDictionary<string, object>).Count == 0;
+		public Boolean IsEmpty => (_object == null) || (_object as IDictionary<String, Object>).Count == 0;
 
-		public ICollection<string> Keys => _dictionary.Keys;
+		public ICollection<String> Keys => _dictionary.Keys;
 
-		public ICollection<object> Values => _dictionary.Values;
+		public ICollection<Object> Values => _dictionary.Values;
 
-		public int Count => _dictionary.Count;
+		public Int32 Count => _dictionary.Count;
 
-		public bool IsReadOnly => _dictionary.IsReadOnly;
+		public Boolean IsReadOnly => _dictionary.IsReadOnly;
 
-		public object this[string key] {
+		public Object this[String key] {
 			get => _dictionary[key];
 			set { _dictionary[key] = value; }
 		}

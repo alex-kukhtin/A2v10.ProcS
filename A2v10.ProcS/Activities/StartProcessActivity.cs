@@ -12,8 +12,6 @@ namespace A2v10.ProcS
 		public String Process { get; set; }
 		public String ParameterExpression { get; set; } // params <=
 
-		CorrelationId<Guid> CorrelationId = new CorrelationId<Guid>(Guid.NewGuid());
-
 		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
 			if (context.IsContinue)

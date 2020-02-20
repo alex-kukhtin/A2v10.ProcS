@@ -47,7 +47,32 @@ namespace A2v10.ProcS
 		{
 			return Result;
 		}
+
 		#endregion
+
+		#region IStorable
+		public IDynamicObject Store()
+		{
+			var d = new DynamicObject();
+			d.Set(nameof(Data), Data);
+			d.Set(nameof(Parameters), Parameters);
+			d.Set(nameof(Result), Result);
+			d.Set(nameof(CurrentState), CurrentState);
+			d.Set(nameof(IsComplete), IsComplete);
+			return d;
+		}
+
+		public void Restore(IDynamicObject store)
+		{
+			IsComplete = store.GetOrDefault<Boolean>(nameof(IsComplete));
+			CurrentState = store.GetOrDefault<String>(nameof(CurrentState));
+			Result.AssignFrom(nameof(Result), store);
+			Parameters.AssignFrom(nameof(Parameters), store);
+			Data.AssignFrom(nameof(Data), store);
+
+		}
+		#endregion
+
 
 		public Instance()
 		{

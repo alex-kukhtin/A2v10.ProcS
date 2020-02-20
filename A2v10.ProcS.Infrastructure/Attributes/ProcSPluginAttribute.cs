@@ -9,7 +9,7 @@ namespace A2v10.ProcS.Infrastructure
 
 	public sealed class ProcSPluginAttribute : Attribute
 	{
-		private Type pluginType;
+		private readonly Type pluginType;
 
 		public IPlugin CreatePlugin()
 		{

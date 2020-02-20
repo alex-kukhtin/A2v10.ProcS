@@ -29,13 +29,14 @@ namespace A2v10.ProcS.SqlServer
 					{
 						if (await rdr.ReadAsync()) {
 							// TODO: Name->FieldNo
-							var id = rdr.GetGuid(0);
-							var process = rdr.GetString(1);
-							var version = rdr.GetInt32(2);
-							var inst = new Instance()
+							//var id = rdr.GetGuid(0);
+							//var process = rdr.GetString(1);
+							//var version = rdr.GetInt32(2);
+							/*var inst = new Instance()
 							{
 								Id = id
 							};
+							*/
 						}
 					}
 				}

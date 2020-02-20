@@ -68,21 +68,6 @@ namespace A2v10.ProcS
 			return Transitions.Where(kv => kv.Value.Evaluate(context)).Select(kv => kv.Value).FirstOrDefault();
 		}
 
-		 Task<ActivityExecutionResult> EnterState(IExecuteContext context)
-		{
-			if (OnEntry == null)
-				return Task.FromResult(ActivityExecutionResult.Complete);
-			OnEntry.Execute(context);
-			return Task.FromResult(ActivityExecutionResult.Complete);
-		}
-
-		Task ExitState(IExecuteContext context)
-		{
-			if (OnExit == null)
-				return Task.CompletedTask;
-			OnExit.Execute(context);
-			return Task.CompletedTask;
-		}
 
 		#region IStorable
 		public IDynamicObject Store()

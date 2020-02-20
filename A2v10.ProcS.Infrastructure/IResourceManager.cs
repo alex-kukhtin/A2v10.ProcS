@@ -39,7 +39,7 @@ namespace A2v10.ProcS.Infrastructure
 	}
 
 	[AttributeUsage(AttributeTargets.Class)]
-	public class ResourceKeyAttribute : Attribute
+	public sealed class ResourceKeyAttribute : Attribute
 	{
 		public ResourceKeyAttribute(String key)
 		{

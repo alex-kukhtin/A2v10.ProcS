@@ -13,12 +13,8 @@ namespace A2v10.ProcS.Tests
 {
 	public class InstanceItem
 	{
-		public Boolean IsComplete;
 		public String WorkflowState;
 		public String InstanceData;
-		public String InstanceResult;
-		public String InstanceParams;
-		public String CurrentState;
 		public IIdentity WorkflowIdentity;
 	}
 
@@ -48,12 +44,11 @@ namespace A2v10.ProcS.Tests
 		{
 			if (_instances.TryGetValue(instanceId, out InstanceItem item))
 			{
+
 				Instance instance = new Instance()
 				{
 					Id = instanceId,
-					Workflow = await WorkflowFromStorage(item.WorkflowIdentity),
-					CurrentState = item.CurrentState,
-					IsComplete = item.IsComplete
+					Workflow = await WorkflowFromStorage(item.WorkflowIdentity)
 				};
 
 				if (item.WorkflowState != null)
@@ -61,12 +56,8 @@ namespace A2v10.ProcS.Tests
 					var workflowState = DynamicObject.FromJson(item.WorkflowState);
 					instance.Workflow.Restore(workflowState);
 				}
-				if (item.InstanceData != null)
-					instance.Data = DynamicObject.FromJson(item.InstanceData);
-				if (item.InstanceResult != null)
-					instance.Result = DynamicObject.FromJson(item.InstanceResult);
-				if (item.InstanceParams != null)
-					instance.Parameters = DynamicObject.FromJson(item.InstanceParams);
+
+				instance.Restore(DynamicObject.FromJson(item.InstanceData));
 
 				return instance;
 			}
@@ -83,20 +74,16 @@ namespace A2v10.ProcS.Tests
 				stateJson = state.ToJson();
 			}
 
-			InstanceItem item = null;
-			if (!_instances.TryGetValue(instance.Id, out item)) {
+			if (!_instances.TryGetValue(instance.Id, out InstanceItem item))
+			{
 				item = new InstanceItem()
 				{
 					WorkflowIdentity = instance.Workflow.GetIdentity()
 				};
 				_instances.Add(instance.Id, item);
 			}
-			item.IsComplete = instance.IsComplete;
 			item.WorkflowState = stateJson;
-			item.CurrentState = instance.CurrentState;
-			item.InstanceData = instance.GetData().ToJson();
-			item.InstanceResult = instance.GetResult().ToJson();
-			item.InstanceParams = instance.GetParameters().ToJson();
+			item.InstanceData =  instance.Store().ToJson();
 			return Task.FromResult(0);
 		}
 

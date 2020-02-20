@@ -14,7 +14,7 @@ namespace A2v10.ProcS
 
 		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
-			TimeSpan span = TimeSpan.Parse(Duration);
+			//TimeSpan span = TimeSpan.Parse(Duration);
 			//String bookmark = Guid.NewGuid().ToString();
 			// TODO
 			return ActivityExecutionResult.Idle;

@@ -15,7 +15,7 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleRun()
 		{
-			var (engine, storage, _) = ProcessEngine.CreateEngine();
+			var (engine, _, _) = ProcessEngine.CreateEngine();
 
 			var instance = await engine.StartWorkflow("delay.json");
 			var stm = instance.Workflow as StateMachine;

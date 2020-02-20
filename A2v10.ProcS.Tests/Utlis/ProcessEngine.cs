@@ -51,7 +51,7 @@ namespace A2v10.ProcS.Tests
 			newPathes.Add($"bin");
 			newPathes.Add(debugRelease);
 			newPathes.Add("netstandard2.0");
-			return (newPathes[0] == "" ? new String(Path.DirectorySeparatorChar, 1) : "") + Path.Combine(newPathes.ToArray());
+			return (!String.IsNullOrEmpty(newPathes[0]) ? String.Empty : new String(Path.DirectorySeparatorChar, 1)) + Path.Combine(newPathes.ToArray());
 		}
 	}
 }

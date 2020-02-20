@@ -4,7 +4,7 @@ using System;
 
 namespace A2v10.ProcS.Infrastructure
 {
-	public interface IInstance
+	public interface IInstance: IStorable
 	{
 		Guid Id { get; }
 		Guid ParentInstanceId { get; }

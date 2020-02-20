@@ -23,7 +23,7 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		[HttpGet]
 		public async Task Get()
 		{
-			var st = await stor.WorkflowFromStorage(new Identity("ChatBotExample.json"));
+			await stor.WorkflowFromStorage(new Identity("ChatBotExample.json"));
 		}
 	}
 }

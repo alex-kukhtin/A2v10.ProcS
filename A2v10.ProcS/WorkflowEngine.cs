@@ -35,7 +35,7 @@ namespace A2v10.ProcS
 		public Task<IInstance> StartWorkflow(String processId, IDynamicObject prms = null)
 		{
 			var identity = new Identity(processId);
-			return Run(identity, prms != null ? prms : null);
+			return Run(identity, prms ?? null);
 		}
 
 		public async Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, IDynamicObject result)

@@ -16,13 +16,14 @@ namespace A2v10.ProcS
 		public ServiceBusItem(IMessage message)
 		{
 			Message = message;
-			After = new ServiceBusItem[0];
+			After = Array.Empty<ServiceBusItem>();
 		}
 
 		public ServiceBusItem(IMessage message, IEnumerable<ServiceBusItem> after)
 		{
 			Message = message;
-			if (after == null) After = new ServiceBusItem[0];
+			if (after == null) 
+				After = Array.Empty<ServiceBusItem>();
 			else After = after.ToArray();
 		}
 
@@ -129,7 +130,7 @@ namespace A2v10.ProcS
 			var saga = _sagaKeeper.GetSagaForMessage(item.Message, out ISagaKeeperKey key, out Boolean isNew);
 			if (saga == null)
 				return false;
-			Func<Task> task = async () =>
+			async Task task()
 			{
 				using (var scriptContext = _scriptEngine.CreateContext())
 				{
@@ -138,7 +139,7 @@ namespace A2v10.ProcS
 				}
 				Send(item.After);
 				_sagaKeeper.SagaUpdate(saga, key);
-			};
+			}
 			_taskManager.AddTask(task);
 			return true;
 		}

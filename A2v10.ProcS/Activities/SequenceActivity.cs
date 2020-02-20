@@ -51,7 +51,7 @@ namespace A2v10.ProcS
 		{
 			_currentAction = store.Get<Int32>(currentActionName);
 			var activities = store.Get<List<Object>>(nameof(Activities));
-			for (int i=0; i<activities.Count; i++)
+			for (Int32 i=0; i<activities.Count; i++)
 			{
 				var elem = DynamicObject.From(activities[i]);
 				if (elem != null && Activities[i] is IStorable storable)
