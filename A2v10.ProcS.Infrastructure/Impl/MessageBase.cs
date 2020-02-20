@@ -14,5 +14,15 @@ namespace A2v10.ProcS.Infrastructure
 		public CorrelationId<CorrelationT> CorrelationId { get; }
 
 		ICorrelationId IMessage.CorrelationId => CorrelationId;
+
+		public virtual void Restore(IDynamicObject store)
+		{
+			
+		}
+
+		public virtual IDynamicObject Store()
+		{
+			return null;
+		}
 	}
 }

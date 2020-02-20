@@ -17,20 +17,20 @@ namespace A2v10.ProcS.Tests
 		public static (WorkflowEngine engine, IRepository repository, InMemoryServiceBus bus) CreateEngine()
 		{
 			var storage = new FakeStorage();
-			var mgr = new SagaManager(null);
-
-			mgr.RegisterSagaFactory<SetBookmarkMessage, ResumeBookmarkMessage>(new ConstructSagaFactory<BookmarkSaga>(nameof(BookmarkSaga)));
-			mgr.RegisterSagaFactory<StartProcessMessage, ContinueActivityMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
-
-			mgr.RegisterSagaFactory<CallApiRequestMessage, CallApiResponseMessage>(new ConstructSagaFactory<CallHttpApiSaga>(nameof(CallHttpApiSaga)));
-			mgr.RegisterSagaFactory<RegisterCallbackMessage, CallbackMessage>(new ConstructSagaFactory<RegisterCallbackSaga>(nameof(RegisterCallbackSaga)));
-			mgr.RegisterSagaFactory<WaitCallbackMessage, CorrelatedCallbackMessage>(new ConstructSagaFactory<CallbackCorrelationSaga>(nameof(CallbackCorrelationSaga)));
+			var pmr = new PluginManager(null);
 
 			String pluginPath = GetPluginPath();
-
 			var configuration = new ConfigurationBuilder().Build();
+			pmr.LoadPlugins(pluginPath, configuration);
 
-			mgr.LoadPlugins(pluginPath, configuration);
+			var rm = new ResourceManager(null);
+			pmr.RegisterResources(rm);
+			
+			var mgr = new SagaManager(null);
+			ProcS.RegisterSagas(rm, mgr);
+			pmr.RegisterSagas(rm, mgr);
+
+			
 
 			var taskManager = new SyncTaskManager();
 			var keeper = new InMemorySagaKeeper(mgr.Resolver);

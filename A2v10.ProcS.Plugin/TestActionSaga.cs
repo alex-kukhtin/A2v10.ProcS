@@ -38,10 +38,11 @@ namespace A2v10.ProcS.Plugin
 
 	class TestPluginSagaRegistrar : ISagaRegistrar
 	{
-		public void Register(ISagaManager mgr)
+		public void Register(IResourceManager rmgr, ISagaManager smgr)
 		{
 			var factory = new ConstructSagaFactory<TestPluginActionSaga>(nameof(TestPluginActionSaga));
-			mgr.RegisterSagaFactory<TaskPluginActionMessage>(factory);
+			rmgr.RegisterResourceFactory(factory.SagaKind, new SagaResourceFactory(factory));
+			smgr.RegisterSagaFactory<TaskPluginActionMessage>(factory);
 		}
 	}
 }

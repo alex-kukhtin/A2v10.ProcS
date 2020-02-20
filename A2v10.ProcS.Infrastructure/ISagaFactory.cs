@@ -18,7 +18,7 @@ namespace A2v10.ProcS.Infrastructure
 			SagaKind = kind;
 		}
 
-		public String SagaKind { get; private set; }
+		public String SagaKind { get; }
 
 		protected abstract ISaga CreateSagaInternal();
 

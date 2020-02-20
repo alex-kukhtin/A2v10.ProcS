@@ -62,6 +62,12 @@ namespace A2v10.ProcS.WebApi.Host
 
 			services.AddSingleton<ISagaKeeper, InMemorySagaKeeper>();
 
+			services.AddSingleton<PluginManager>();
+			services.AddSingleton(CreatePluginManager);
+
+			services.AddSingleton<ResourceManager>();
+			services.AddSingleton(CreateResourceManager);
+
 			services.AddSingleton<SagaManager>();
 			services.AddSingleton(CreateSagaManager);
 
@@ -78,13 +84,27 @@ namespace A2v10.ProcS.WebApi.Host
 		private ISagaManager CreateSagaManager(IServiceProvider serviceProvider)
 		{
 			var mgr = serviceProvider.GetService<SagaManager>();
+			var rm = serviceProvider.GetService<IResourceManager>();
+			ProcS.RegisterSagas(rm, mgr);
+			var pl = serviceProvider.GetService<IPluginManager>();
+			pl.RegisterSagas(rm, mgr);
 
-			mgr.RegisterSagaFactory<SetBookmarkMessage, ResumeBookmarkMessage>(new ConstructSagaFactory<BookmarkSaga>(nameof(BookmarkSaga)));
-			mgr.RegisterSagaFactory<StartProcessMessage,ContinueActivityMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
+			return mgr;
+		}
 
-			mgr.RegisterSagaFactory<CallApiRequestMessage, CallApiResponseMessage>(new ConstructSagaFactory<CallHttpApiSaga>(nameof(CallHttpApiSaga)));
-			mgr.RegisterSagaFactory<RegisterCallbackMessage, CallbackMessage>(new ConstructSagaFactory<RegisterCallbackSaga>(nameof(RegisterCallbackSaga)));
-			mgr.RegisterSagaFactory<WaitCallbackMessage, CorrelatedCallbackMessage>(new ConstructSagaFactory<CallbackCorrelationSaga>(nameof(CallbackCorrelationSaga)));
+		private IResourceManager CreateResourceManager(IServiceProvider serviceProvider)
+		{
+			var mgr = serviceProvider.GetService<ResourceManager>();
+
+			var pl = serviceProvider.GetService<IPluginManager>();
+			pl.RegisterResources(mgr);
+
+			return mgr;
+		}
+
+		private IPluginManager CreatePluginManager(IServiceProvider serviceProvider)
+		{
+			var mgr = serviceProvider.GetService<PluginManager>();
 
 			foreach (var path in GetPluginPathes())
 			{
