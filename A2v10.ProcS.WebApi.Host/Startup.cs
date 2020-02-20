@@ -84,15 +84,8 @@ namespace A2v10.ProcS.WebApi.Host
 		private ISagaManager CreateSagaManager(IServiceProvider serviceProvider)
 		{
 			var mgr = serviceProvider.GetService<SagaManager>();
-
-			mgr.RegisterSagaFactory<SetBookmarkMessage, ResumeBookmarkMessage>(new ConstructSagaFactory<BookmarkSaga>(nameof(BookmarkSaga)));
-			mgr.RegisterSagaFactory<StartProcessMessage,ContinueActivityMessage>(new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga)));
-
-			mgr.RegisterSagaFactory<CallApiRequestMessage, CallApiResponseMessage>(new ConstructSagaFactory<CallHttpApiSaga>(nameof(CallHttpApiSaga)));
-			mgr.RegisterSagaFactory<RegisterCallbackMessage, CallbackMessage>(new ConstructSagaFactory<RegisterCallbackSaga>(nameof(RegisterCallbackSaga)));
-			mgr.RegisterSagaFactory<WaitCallbackMessage, CorrelatedCallbackMessage>(new ConstructSagaFactory<CallbackCorrelationSaga>(nameof(CallbackCorrelationSaga)));
-
 			var rm = serviceProvider.GetService<IResourceManager>();
+			ProcS.RegisterSagas(rm, mgr);
 			var pl = serviceProvider.GetService<IPluginManager>();
 			pl.RegisterSagas(rm, mgr);
 

@@ -68,6 +68,18 @@ namespace A2v10.ProcS
 			resources.Add(key, factory);
 		}
 
+		private String GetKey(Type type)
+		{
+			var att = type.GetCustomAttribute<ResourceKeyAttribute>();
+			if (att == null) throw new Exception("Resource must have ResourceKeyAttribute");
+			return att.Key;
+		}
+
+		public void RegisterResource(Type type)
+		{
+			RegisterResourceFactory(GetKey(type), new TypeResourceFactory(type));
+		}
+
 		public void RegisterResource<T>(String key) where T : IStorable, new()
 		{
 			RegisterResourceFactory(key, new GenericResourceFactory<T>());
@@ -75,9 +87,45 @@ namespace A2v10.ProcS
 
 		public void RegisterResource<T>() where T : IStorable, new()
 		{
-			var att = typeof(T).GetCustomAttribute<ResourceKeyAttribute>();
-			if (att == null) throw new Exception("Resource must have ResourceKeyAttribute");
-			RegisterResource<T>(att.Key);
+			RegisterResource<T>(GetKey(typeof(T)));
+		}
+
+		public void RegisterResources(IEnumerable<Type> types)
+		{
+			foreach (var t in types)
+			{
+				RegisterResource(t);
+			}
+		}
+
+		public void RegisterResources<T1, T2>()
+			where T1 : IStorable, new()
+			where T2 : IStorable, new()
+		{
+			RegisterResource<T1>();
+			RegisterResource<T2>();
+		}
+
+		public void RegisterResources<T1, T2, T3>()
+			where T1 : IStorable, new()
+			where T2 : IStorable, new()
+			where T3 : IStorable, new()
+		{
+			RegisterResource<T1>();
+			RegisterResource<T2>();
+			RegisterResource<T3>();
+		}
+
+		public void RegisterResources<T1, T2, T3, T4>()
+			where T1 : IStorable, new()
+			where T2 : IStorable, new()
+			where T3 : IStorable, new()
+			where T4 : IStorable, new()
+		{
+			RegisterResource<T1>();
+			RegisterResource<T2>();
+			RegisterResource<T3>();
+			RegisterResource<T4>();
 		}
 
 		public IStorable Wrap(IStorable obj)
