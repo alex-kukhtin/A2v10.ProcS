@@ -27,9 +27,12 @@ namespace A2v10.ProcS
 
 		public Task<ExecuteResult> Execute(IExecuteContext context)
 		{
-			if (States == null || States.Count == 0)
-				return Task.FromResult(ExecuteResult.Complete);
 			var instance = context.Instance;
+			if (States == null || States.Count == 0)
+			{
+				instance.IsComplete = true;
+				return Task.FromResult(ExecuteResult.Complete);
+			}
 			if (String.IsNullOrEmpty(instance.CurrentState))
 			{
 				if (String.IsNullOrEmpty(InitialState))
@@ -46,6 +49,8 @@ namespace A2v10.ProcS
 			{
 				if (instance.CurrentState == null)
 				{
+					context.Instance.IsComplete = true;
+					await context.SaveInstance();
 					context.ProcessComplete(context.Bookmark);
 					return ExecuteResult.Complete;
 				}
@@ -65,5 +70,25 @@ namespace A2v10.ProcS
 		{
 			return DoContinue(context.Instance, context);
 		}
+
+		#region IStorable
+		
+		public IDynamicObject Store()
+		{
+			var stmStore = new DynamicObject();
+			foreach (var stx in States)
+			{
+				var stateStore = stx.Value.Store();
+				if (!stateStore.IsEmpty)
+					stmStore.Set(stx.Key, stateStore);
+			}
+			return stmStore;
+		}
+
+		public void Restore(IDynamicObject store)
+		{
+			throw new NotImplementedException();
+		}
+		#endregion
 	}
 }

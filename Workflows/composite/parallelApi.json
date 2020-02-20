@@ -19,7 +19,6 @@
 								"CodeAfter": "data.counter += Math.round(reply.main.temp - 273.0)"
 							},
 							{
-								"Id": 2
 								"$type": "A2v10.ProcS.CallHttpApiActivity, A2v10.ProcS",
 								"Url": "https://samples.openweathermap.org/data/2.5/weather?q=London&appid=b6907d289e10d714a6e88b30761fae22",
 								"Method": "Get",

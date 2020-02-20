@@ -51,7 +51,13 @@ namespace A2v10.ProcS.Tests
 
 		public Task Save(IInstance instance)
 		{
-			//IDynamicObject state = instance.Workflow.GetState();
+			IDynamicObject state = instance.Workflow.Store();
+			if (state != null)
+			{
+				String stateJson = state.ToJson();
+				int z = 55;
+			}
+
 
 			if (_instances.ContainsKey(instance.Id))
 				_instances[instance.Id] = instance;

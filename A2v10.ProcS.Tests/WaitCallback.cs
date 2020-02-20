@@ -24,7 +24,7 @@ namespace A2v10.ProcS.Tests
 			var instance = await engine.StartWorkflow(new Identity("callback.json"), data);
 
 			var resp = new CallbackMessage("pseudopay") {
-				Result = DynamicObject.From("{ \"paymentId\": 123 }")
+				Result = DynamicObject.FromJson("{ \"paymentId\": 123 }")
 			};
 
 			bus.Send(resp);
