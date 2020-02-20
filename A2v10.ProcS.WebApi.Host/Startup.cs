@@ -62,6 +62,12 @@ namespace A2v10.ProcS.WebApi.Host
 
 			services.AddSingleton<ISagaKeeper, InMemorySagaKeeper>();
 
+			services.AddSingleton<PluginManager>();
+			services.AddSingleton(CreatePluginManager);
+
+			services.AddSingleton<ResourceManager>();
+			services.AddSingleton(CreateResourceManager);
+
 			services.AddSingleton<SagaManager>();
 			services.AddSingleton(CreateSagaManager);
 
@@ -85,6 +91,27 @@ namespace A2v10.ProcS.WebApi.Host
 			mgr.RegisterSagaFactory<CallApiRequestMessage, CallApiResponseMessage>(new ConstructSagaFactory<CallHttpApiSaga>(nameof(CallHttpApiSaga)));
 			mgr.RegisterSagaFactory<RegisterCallbackMessage, CallbackMessage>(new ConstructSagaFactory<RegisterCallbackSaga>(nameof(RegisterCallbackSaga)));
 			mgr.RegisterSagaFactory<WaitCallbackMessage, CorrelatedCallbackMessage>(new ConstructSagaFactory<CallbackCorrelationSaga>(nameof(CallbackCorrelationSaga)));
+
+			var rm = serviceProvider.GetService<IResourceManager>();
+			var pl = serviceProvider.GetService<IPluginManager>();
+			pl.RegisterSagas(rm, mgr);
+
+			return mgr;
+		}
+
+		private IResourceManager CreateResourceManager(IServiceProvider serviceProvider)
+		{
+			var mgr = serviceProvider.GetService<ResourceManager>();
+
+			var pl = serviceProvider.GetService<IPluginManager>();
+			pl.RegisterResources(mgr);
+
+			return mgr;
+		}
+
+		private IPluginManager CreatePluginManager(IServiceProvider serviceProvider)
+		{
+			var mgr = serviceProvider.GetService<PluginManager>();
 
 			foreach (var path in GetPluginPathes())
 			{

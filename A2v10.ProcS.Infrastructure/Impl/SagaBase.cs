@@ -12,7 +12,7 @@ namespace A2v10.ProcS.Infrastructure
 		{
 			Kind = kind;
 		}
-		public String Kind { get; private set; }
+		public String Kind { get; }
 
 		public CorrelationId<CorrelationT> CorrelationId { get; } = new CorrelationId<CorrelationT>(default);
 
@@ -30,6 +30,16 @@ namespace A2v10.ProcS.Infrastructure
 
 		public Boolean IsComplete { get; set; }
 		public abstract Task Handle(IHandleContext context, IMessage message);
+
+		public virtual void Restore(IDynamicObject store)
+		{
+
+		}
+
+		public virtual IDynamicObject Store()
+		{
+			return null;
+		}
 	}
 
 	public abstract class SagaBaseDispatched<CorrelationT, MessageT1> : SagaBase<CorrelationT>

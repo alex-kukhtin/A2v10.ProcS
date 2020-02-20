@@ -9,7 +9,7 @@ namespace A2v10.ProcS.Infrastructure
 {
 	public interface ISagaRegistrar
 	{
-		void Register(ISagaManager mgr);
+		void Register(IResourceManager rmgr, ISagaManager smgr);
 	}
 
 	public interface ISagaManager
@@ -30,8 +30,6 @@ namespace A2v10.ProcS.Infrastructure
 			where TMessage4 : IMessage;
 		void RegisterSagaFactory(ISagaFactory factory, params Type[] types);
 		void RegisterSagaFactory(ISagaFactory factory, IEnumerable<Type> types);
-
-		void LoadPlugins(String path, IConfiguration configuration);
 
 		ISagaResolver Resolver { get; }
 	}

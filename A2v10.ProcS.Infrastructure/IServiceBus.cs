@@ -12,7 +12,7 @@ namespace A2v10.ProcS.Infrastructure
 		
 	}
 
-	public interface IMessage
+	public interface IMessage : IStorable
 	{
 		ICorrelationId CorrelationId { get; }
 	}
@@ -22,7 +22,7 @@ namespace A2v10.ProcS.Infrastructure
 		IDynamicObject Result { set; }
 	}
 
-	public interface ISaga
+	public interface ISaga : IStorable
 	{
 		String Kind { get; }
 		Boolean IsComplete { get; }

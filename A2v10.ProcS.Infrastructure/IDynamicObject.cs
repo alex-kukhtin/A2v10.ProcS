@@ -1,10 +1,12 @@
 ﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
 using System;
+using System.Collections.Generic;
+using System.Dynamic;
 
 namespace A2v10.ProcS.Infrastructure
 {
-	public interface IDynamicObject
+	public interface IDynamicObject : IDictionary<String, Object>, IDynamicMetaObjectProvider
 	{
 		T Eval<T>(String expression, T fallback = default, Boolean throwIfError = false);
 		void Set(String name, Object val);

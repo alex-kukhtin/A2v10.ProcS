@@ -9,8 +9,6 @@ using Newtonsoft.Json.Converters;
 using A2v10.ProcS.Infrastructure;
 using Newtonsoft.Json.Serialization;
 using System.Reflection;
-using System.Collections;
-using System.Linq.Expressions;
 
 namespace A2v10.ProcS
 {
@@ -53,8 +51,6 @@ namespace A2v10.ProcS
 	{
 		private readonly ExpandoObject _object;
 
-		private IDictionary<String, Object> _dictionary => _object;
-
 		public Object Root => _object;
 
 		public DynamicObject()
@@ -80,12 +76,10 @@ namespace A2v10.ProcS
 		{
 			return new DynamicObject(data);
 		}
+<<<<<<< Updated upstream
 
-		public static IDynamicObject From(IDynamicObject data)
-		{
-			return FromJson(data.ToJson());
-		}
-
+=======
+>>>>>>> Stashed changes
 		public static IDynamicObject FromJson(String json)
 		{
 			if (String.IsNullOrEmpty(json))
@@ -107,48 +101,24 @@ namespace A2v10.ProcS
 					valueToSet = doVal.Root;
 					break;
 			}
-			if (this.ContainsKey(name))
-				this[name] = valueToSet;
+			var d = _object as IDictionary<String, Object>;
+			if (d.ContainsKey(name))
+				d[name] = valueToSet;
 			else
-				this.Add(name, valueToSet);
+				d.Add(name, valueToSet);
 		}
 
 		public T Get<T>(String name)
 		{
-			if (this.TryGetValue(name, out Object val))
+			var d = _object as IDictionary<String, Object>;
+			if (d.TryGetValue(name, out Object val))
 			{
-				if (val is T tval) 
-					return tval;
-				return (T)Convert.ChangeType(val, typeof(T));
+				if (val is T tval) return tval;
+				throw new Exception($"Field \"{name}\" is not \"{typeof(T)}\"");
 			}
 			else {
 				throw new Exception($"There is no field \"{name}\" is DynamicObject");
 			}
-		}
-
-		public IDynamicObject GetDynamicObject(String name)
-		{
-			if (this.TryGetValue(name, out Object val))
-			{
-				if (val is ExpandoObject eo)
-					return new DynamicObject(eo);
-				else if (val is DynamicObject dobj)
-					return dobj;
-				else
-					throw new Exception($"The field \"{name}\" is not a DynamicObject");
-			}
-			return null;
-		}
-
-		public T GetOrDefault<T>(String name)
-		{
-			if (this.TryGetValue(name, out Object val))
-			{
-				if (val is T tval) 
-					return tval;
-				return default;
-			}
-			return default;
 		}
 
 		public T Eval<T>(String expression, T fallback = default, Boolean throwIfError = false)
@@ -171,15 +141,16 @@ namespace A2v10.ProcS
 				if (currentContext == null)
 					return null;
 				String prop = exp.Trim();
+				var d = currentContext as IDictionary<String, Object>;
 				if (prop.Contains("["))
 				{
 					var match = _arrFind.Match(prop);
 					prop = match.Groups[1].Value;
-					if ((_dictionary != null) && this.ContainsKey(prop))
+					if ((d != null) && d.ContainsKey(prop))
 					{
-						if (this[prop] is IList<ExpandoObject> listExp)
+						if (d[prop] is IList<ExpandoObject> listExp)
 							currentContext = listExp[Int32.Parse(match.Groups[2].Value)];
-						else if (this[prop] is Object[] arrObj)
+						else if (d[prop] is Object[] arrObj)
 							currentContext = arrObj[Int32.Parse(match.Groups[2].Value)];
 					}
 					else
@@ -191,8 +162,8 @@ namespace A2v10.ProcS
 				}
 				else
 				{
-					if ((_dictionary != null) && this.ContainsKey(prop))
-						currentContext = this[prop];
+					if ((d != null) && d.ContainsKey(prop))
+						currentContext = d[prop];
 					else
 					{
 						if (throwIfError)
@@ -204,79 +175,6 @@ namespace A2v10.ProcS
 			return currentContext;
 		}
 
-		public void Add(string key, object value)
-		{
-			_dictionary.Add(key, value);
-		}
-
-		public bool ContainsKey(string key)
-		{
-			return _dictionary.ContainsKey(key);
-		}
-
-		public bool Remove(string key)
-		{
-			return _dictionary.Remove(key);
-		}
-
-		public bool TryGetValue(string key, out object value)
-		{
-			return _dictionary.TryGetValue(key, out value);
-		}
-
-		public void Add(KeyValuePair<string, object> item)
-		{
-			_dictionary.Add(item);
-		}
-
-		public void Clear()
-		{
-			_dictionary.Clear();
-		}
-
-		public bool Contains(KeyValuePair<string, object> item)
-		{
-			return _dictionary.Contains(item);
-		}
-
-		public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
-		{
-			_dictionary.CopyTo(array, arrayIndex);
-		}
-
-		public bool Remove(KeyValuePair<string, object> item)
-		{
-			return _dictionary.Remove(item);
-		}
-
-		public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
-		{
-			return _dictionary.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return _dictionary.GetEnumerator();
-		}
-
-		public DynamicMetaObject GetMetaObject(Expression parameter)
-		{
-			return (_object as IDynamicMetaObjectProvider).GetMetaObject(parameter);
-		}
-
-		public Boolean IsEmpty => (_object == null) || (_object as IDictionary<string, object>).Count == 0;
-
-		public ICollection<string> Keys => _dictionary.Keys;
-
-		public ICollection<object> Values => _dictionary.Values;
-
-		public int Count => _dictionary.Count;
-
-		public bool IsReadOnly => _dictionary.IsReadOnly;
-
-		public object this[string key] {
-			get => _dictionary[key];
-			set { _dictionary[key] = value; }
-		}
+		public Boolean IsEmpty => (_object == null) || (_object as IDictionary<String, Object>).Count == 0;
 	}
 }
