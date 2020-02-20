@@ -30,5 +30,22 @@ namespace A2v10.ProcS.Tests
 			var r = instance.GetResult();
 			Assert.AreEqual(37, r.Eval<Int32>("counter"));
 		}
+
+		[TestMethod]
+		public async Task SimpleParallel()
+		{
+			(IWorkflowEngine engine, _, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
+
+			var prms = new DynamicObject();
+			prms.Set("value", 1);
+
+			var instance = await engine.StartWorkflow(new Identity("composite/parallel.json"), prms);
+
+			bus.Process();
+
+			Assert.AreEqual(null, instance.CurrentState);
+			var r = instance.GetResult();
+			Assert.AreEqual(4, r.Eval<Int32>("counter"));
+		}
 	}
 }

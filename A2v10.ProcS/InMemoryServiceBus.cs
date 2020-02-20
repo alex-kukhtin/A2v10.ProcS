@@ -129,9 +129,7 @@ namespace A2v10.ProcS
 			var saga = _sagaKeeper.GetSagaForMessage(item.Message, out ISagaKeeperKey key, out Boolean isNew);
 			if (saga == null) 
 				return false;
-			// ЭТА ШТУКА НЕ РАБОТАЕТ.
-			// new Task НЕ компилирует async в stateMachine. Поэтому задача выполняется до первого await'а
-			var task = new Task(async () =>
+			Func<Task> task = async () =>
 			{
 				using (var scriptContext = _scriptEngine.CreateContext())
 				{
@@ -140,7 +138,7 @@ namespace A2v10.ProcS
 				}
 				Send(item.After);
 				_sagaKeeper.SagaUpdate(saga, key);
-			});
+			};
 			_taskManager.AddTask(task);
 			return true;
 		}
