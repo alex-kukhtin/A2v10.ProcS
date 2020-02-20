@@ -12,6 +12,7 @@ namespace A2v10.ProcS.Infrastructure
 		void RegisterResource(Type type);
 		void RegisterResource<T>() where T : new();
 		void RegisterResources(IEnumerable<Type> types);
+		void RegisterResources(params Type[] types);
 		void RegisterResources<T1,T2>()
 			where T1 : new()
 			where T2 : new();
@@ -36,7 +37,7 @@ namespace A2v10.ProcS.Infrastructure
 
 	public interface IResourceFactory
 	{
-		Object Create();
+		Object Create(IDynamicObject data);
 	}
 
 	[AttributeUsage(AttributeTargets.Class)]
@@ -48,5 +49,14 @@ namespace A2v10.ProcS.Infrastructure
 		}
 
 		public String Key { get; }
+	}
+
+	[AttributeUsage(AttributeTargets.Constructor)]
+	public class RestoreWithAttribute : Attribute
+	{
+		public RestoreWithAttribute()
+		{
+			
+		}
 	}
 }

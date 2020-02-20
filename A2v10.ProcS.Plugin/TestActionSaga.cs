@@ -12,6 +12,7 @@ namespace A2v10.ProcS.Plugin
 	{
 		public const string ukey = "com.a2.procs.test:" + nameof(TaskPluginActionMessage);
 		public Guid Id { get; }
+        [RestoreWith]
 		public TaskPluginActionMessage(Guid instanceId, CorrelationId<Int32> correlationId) : base(correlationId)
 		{
 			Id = instanceId;
@@ -44,7 +45,7 @@ namespace A2v10.ProcS.Plugin
 	{
 		public void Register(IResourceManager rmgr, ISagaManager smgr)
 		{
-			var factory = new ConstructSagaFactory<TestPluginActionSaga>(nameof(TestPluginActionSaga));
+			var factory = new ConstructSagaFactory<TestPluginActionSaga>(TestPluginActionSaga.ukey);
 			rmgr.RegisterResourceFactory(factory.SagaKind, new SagaResourceFactory(factory));
 			rmgr.RegisterResources(TestPluginActionSaga.GetHandledTypes());
 			smgr.RegisterSagaFactory(factory, TestPluginActionSaga.GetHandledTypes());

@@ -1,6 +1,7 @@
 ﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
 using System;
+using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -16,21 +17,58 @@ namespace A2v10.ProcS
 	public class TypeResourceFactory : IResourceFactory
 	{
 		private readonly Type type;
+		private readonly (ConstructorInfo c, ParameterInfo[] prms) ct;
 
 		public TypeResourceFactory(Type type)
 		{
 			this.type = type;
+			var cts = type.GetConstructors();
+			var found = false;
+            foreach (var ct in cts)
+            {
+				var att = ct.GetCustomAttribute<RestoreWithAttribute>();
+				if (att != null)
+				{
+					found = true;
+					this.ct = (ct, ct.GetParameters());
+				}
+            }
+            if (!found)
+            {
+                foreach (var ct in cts)
+                {
+					var p = ct.GetParameters();
+                    if (p.Length == 0)
+                    {
+						found = true;
+						this.ct = (ct, ct.GetParameters());
+					}
+                }
+            }
+			if (!found) throw new Exception("Resource must have Constructor without parameters or Constructor marked with RestoreWithAttribute");
 		}
 
-		public Object Create()
+		public Object Create(IDynamicObject data)
 		{
-			return Activator.CreateInstance(type);
+			var prms = new object[ct.prms.Length];
+			var i = 0;
+            foreach (var p in ct.prms)
+            {
+				if (!data.ContainsKey(p.Name))
+                    throw new Exception($"There is no value for constructor parameter {p.Name}");
+				var dt = data[p.Name];
+				if (!p.ParameterType.IsAssignableFrom(dt.GetType()))
+					dt = Convert.ChangeType(dt, p.ParameterType);
+				prms[i] = dt;
+                i++;
+			}
+			return Activator.CreateInstance(type, prms);
 		}
 	}
 
 	public class GenericResourceFactory<T> : IResourceFactory where T : new()
 	{
-		public Object Create()
+		public Object Create(IDynamicObject data)
 		{
 			return new T();
 		}
@@ -45,7 +83,7 @@ namespace A2v10.ProcS
 			this.fact = fact;
 		}
 
-		public Object Create()
+		public Object Create(IDynamicObject data)
 		{
 			return fact.CreateSaga();
 		}
@@ -94,6 +132,11 @@ namespace A2v10.ProcS
 			{
 				RegisterResource(t);
 			}
+		}
+
+		public void RegisterResources(params Type[] types)
+		{
+			RegisterResources(types as IEnumerable<Type>);
 		}
 
 		public void RegisterResources<T1, T2>()
@@ -158,7 +201,7 @@ namespace A2v10.ProcS
 			if (!resources.ContainsKey(key))
 				throw new Exception($"Resource {key} is not registred");
 			var fact = resources[key];
-			var obj = fact.Create();
+			var obj = fact.Create(res.Object);
 			if (obj is IStorable sto)
 				sto.Restore(res.Object);
 			return obj;

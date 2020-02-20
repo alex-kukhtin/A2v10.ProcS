@@ -4,7 +4,7 @@ using System;
 
 namespace A2v10.ProcS.Infrastructure
 {
-	public class MessageBase<CorrelationT> : IMessage where CorrelationT : IEquatable<CorrelationT>
+	public abstract class MessageBase<CorrelationT> : IMessage where CorrelationT : IEquatable<CorrelationT>
 	{
 		public MessageBase(CorrelationT correlationId)
 		{

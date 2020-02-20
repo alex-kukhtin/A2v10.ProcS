@@ -43,20 +43,17 @@ namespace A2v10.ProcS
 				conf = config.GetSection(ass.GetName().Name);
 			}
 
-			public void RegisterResources(IResourceManager mgr, IServiceProvider serviceProvider)
+			public void RegisterResources(IResourceManager rmgr, ISagaManager smgr, IServiceProvider serviceProvider)
 			{
 				foreach (var probe in ass.GetTypes())
 				{
-					var att = probe.GetCustomAttribute<ResourceKeyAttribute>();
-					if (att == null) continue;
-					mgr.RegisterResourceFactory(att.Key, new TypeResourceFactory(probe));
-				}
-			}
-
-			public void RegisterSagas(IResourceManager rmgr, ISagaManager smgr, IServiceProvider serviceProvider)
-			{
-				foreach (var probe in ass.GetTypes())
-				{
+					var IActivity = probe.GetInterface("IActivity");
+                    if (IActivity != null)
+                    {
+						var att = probe.GetCustomAttribute<ResourceKeyAttribute>();
+						if (att == null) continue;
+						rmgr.RegisterResourceFactory(att.Key, new TypeResourceFactory(probe));
+					}
 					var ISagaRegistrar = probe.GetInterface("ISagaRegistrar");
 					if (ISagaRegistrar != null)
 					{
@@ -112,20 +109,7 @@ namespace A2v10.ProcS
 			}
 		}
 
-		public void RegisterResources(IResourceManager mgr)
-		{
-			lock (this)
-			{
-				InitPlugins();
-			}
-			foreach (var p in _plugs.Values)
-			{
-				if (!p.IsValid) continue;
-				p.RegisterResources(mgr, serviceProvider);
-			}
-		}
-
-		public void RegisterSagas(IResourceManager rmgr, ISagaManager smgr)
+		public void RegisterResources(IResourceManager rmgr, ISagaManager smgr)
 		{
 			lock (this) {
 				InitPlugins();
@@ -133,7 +117,7 @@ namespace A2v10.ProcS
 			foreach (var p in _plugs.Values)
 			{
 				if (!p.IsValid) continue;
-				p.RegisterSagas(rmgr, smgr, serviceProvider);
+				p.RegisterResources(rmgr, smgr, serviceProvider);
 			}
 		}
 	}
