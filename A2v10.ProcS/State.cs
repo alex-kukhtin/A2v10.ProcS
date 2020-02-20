@@ -17,7 +17,7 @@ namespace A2v10.ProcS
 		Complete
 	}
 
-	public class State
+	public class State : IStorable
 	{
 		public String Description { get; set; }
 		public Dictionary<String, Transition>  Transitions { get; set; }
@@ -83,5 +83,30 @@ namespace A2v10.ProcS
 			OnExit.Execute(context);
 			return Task.CompletedTask;
 		}
+
+		#region IStorable
+		public IDynamicObject Store()
+		{
+			var ret = new DynamicObject();
+			if (OnEntry is IStorable entryStorable)
+			{
+				var data = entryStorable.Store();
+				if (!data.IsEmpty)
+					ret.Set(nameof(OnEntry), data);
+			}
+			if (OnExit is IStorable exitStorable)
+			{
+				var data = exitStorable.Store();
+				if (!data.IsEmpty)
+					ret.Set(nameof(OnExit), data);
+			}
+			return ret;
+		}
+
+		public void Restore(IDynamicObject store)
+		{
+			throw new NotImplementedException();
+		}
+		#endregion
 	}
 }

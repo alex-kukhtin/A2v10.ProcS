@@ -59,17 +59,18 @@ namespace A2v10.ProcS
 
 		#region IStorable
 
-		const string waitingName = "waiting";
+		const String waitingName = "waiting";
+
 		public IDynamicObject Store()
 		{
-			dynamic dd = new ExpandoObject();
-			dd.waiting = _waiting;
-			return new DynamicObject(dd);
+			var d = new DynamicObject();
+			d.Set(waitingName, _waiting);
+			return d;
 		}
+
 		public void Restore(IDynamicObject store)
 		{
-			dynamic dd = store.Root;
-			_waiting = dd.waiting;
+			_waiting = store.Get<List<Boolean>>(waitingName);
 		}
 
 		#endregion

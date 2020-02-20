@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace A2v10.ProcS.Infrastructure
 {
-	public interface IWorkflowDefinition
+	public interface IWorkflowDefinition : IStorable
 	{
 		Task Run(IExecuteContext context);
 		Task Continue(IExecuteContext context);

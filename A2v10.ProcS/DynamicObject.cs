@@ -60,7 +60,7 @@ namespace A2v10.ProcS
 
 		public DynamicObject(ExpandoObject expando)
 		{
-			_object = expando;
+			_object = expando ?? new ExpandoObject();
 		}
 
 		public static IDynamicObject From<T>(T data) where T : class
@@ -69,18 +69,24 @@ namespace A2v10.ProcS
 			settings.ContractResolver = new InterfaceContractResolver<T>();
 			settings.Converters.Add(new StringEnumConverter());
 			var json = JsonConvert.SerializeObject(data, settings);
-			return From(json);
+			return FromJson(json);
 		}
 		
 		public static IDynamicObject From(ExpandoObject data)
 		{
 			return new DynamicObject(data);
 		}
-		public static IDynamicObject From(String json)
+
+		public static IDynamicObject FromJson(String json)
 		{
 			if (String.IsNullOrEmpty(json))
 				return new DynamicObject();
 			return new DynamicObject(JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter()));
+		}
+
+		public String ToJson()
+		{
+			return JsonConvert.SerializeObject(_object);
 		}
 
 		public void Set(String name, Object val)
@@ -165,5 +171,7 @@ namespace A2v10.ProcS
 			}
 			return currentContext;
 		}
+
+		public Boolean IsEmpty => (_object == null) || (_object as IDictionary<String, Object>).Count == 0;
 	}
 }

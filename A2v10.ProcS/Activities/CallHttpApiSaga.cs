@@ -77,7 +77,7 @@ namespace A2v10.ProcS
 					IDynamicObject result;
 					if (contentType == "application/json")
 					{
-						result = DynamicObject.From(json);
+						result = DynamicObject.FromJson(json);
 					} 
 					else
 					{

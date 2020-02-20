@@ -28,15 +28,19 @@ namespace A2v10.ProcS
 			}
 		}
 
+		const String currentActionName = "current";
+
 		#region IStorable
 		public IDynamicObject Store()
 		{
-			throw new NotImplementedException();
+			var ret = new DynamicObject();
+			ret.Set(currentActionName, _currentAction);
+			return ret;
 		}
 
 		public void Restore(IDynamicObject store)
 		{
-			throw new NotImplementedException();
+			_currentAction = store.Get<Int32>(currentActionName);
 		}
 		#endregion
 	}
