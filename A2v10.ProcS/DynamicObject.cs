@@ -175,15 +175,16 @@ namespace A2v10.ProcS
 				if (currentContext == null)
 					return null;
 				String prop = exp.Trim();
+				var d = currentContext as IDictionary<String, Object>;
 				if (prop.Contains("["))
 				{
 					var match = _arrFind.Match(prop);
 					prop = match.Groups[1].Value;
-					if ((_dictionary != null) && this.ContainsKey(prop))
+					if ((d != null) && d.ContainsKey(prop))
 					{
-						if (this[prop] is IList<ExpandoObject> listExp)
+						if (d[prop] is IList<ExpandoObject> listExp)
 							currentContext = listExp[Int32.Parse(match.Groups[2].Value)];
-						else if (this[prop] is Object[] arrObj)
+						else if (d[prop] is Object[] arrObj)
 							currentContext = arrObj[Int32.Parse(match.Groups[2].Value)];
 					}
 					else
@@ -195,8 +196,8 @@ namespace A2v10.ProcS
 				}
 				else
 				{
-					if ((_dictionary != null) && this.ContainsKey(prop))
-						currentContext = this[prop];
+					if ((d != null) && d.ContainsKey(prop))
+						currentContext = d[prop];
 					else
 					{
 						if (throwIfError)
