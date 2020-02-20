@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq;
 using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
@@ -19,30 +20,41 @@ namespace A2v10.ProcS
 
 		public ContinueActivityCondition ContinueWhen { get; set; }
 
-		Int32 _waiting = 0;
+		List<Boolean> _waiting = new List<Boolean>();
 
 		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
 			if (context.IsContinue)
 			{
-				if (ContinueWhen == ContinueActivityCondition.Any)
-					return ActivityExecutionResult.Complete;
-
-				_waiting -= 1;
-				if (_waiting == 0)
-					return ActivityExecutionResult.Complete;
-				return ActivityExecutionResult.Idle;
+				for (var i=0; i<_waiting.Count; i++)
+				{
+					if (_waiting[i])
+					{
+						var result = Activities[i].Execute(context);
+						if (result == ActivityExecutionResult.Complete)
+							_waiting[i] = false;
+					}
+				}
+				switch (ContinueWhen) {
+					case ContinueActivityCondition.Any:
+						return _waiting.Any(x => !x) ? ActivityExecutionResult.Complete : ActivityExecutionResult.Idle;
+					case ContinueActivityCondition.All:
+						return _waiting.All(x => !x) ? ActivityExecutionResult.Complete : ActivityExecutionResult.Idle;
+				}
 			}
 
 			if (Activities == null || Activities.Count == 0)
 				return ActivityExecutionResult.Complete;
+
 			foreach (var activity in Activities)
 			{
 				var result = activity.Execute(context);
 				if (result == ActivityExecutionResult.Idle)
-					_waiting += 1;
+					_waiting.Add(true);
+				else
+					_waiting.Add(false);
 			}
-			return (_waiting > 0) ? ActivityExecutionResult.Idle : ActivityExecutionResult.Complete;
+			return _waiting.Any(x => x) ? ActivityExecutionResult.Idle : ActivityExecutionResult.Complete;
 		}
 
 		#region IStorable

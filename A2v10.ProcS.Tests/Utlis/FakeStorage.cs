@@ -11,6 +11,10 @@ using Newtonsoft.Json.Serialization;
 
 namespace A2v10.ProcS.Tests
 {
+	public class InstanceItem
+	{
+	}
+
 	public class FakeStorage : IWorkflowStorage, IInstanceStorage
 	{
 		private readonly Dictionary<Guid, IInstance> _instances = new Dictionary<Guid, IInstance>();
@@ -33,19 +37,22 @@ namespace A2v10.ProcS.Tests
 			throw new NotImplementedException(nameof(Create));
 		}
 
-		public async Task<IInstance> Load(Guid instanceId)
+		public Task<IInstance> Load(Guid instanceId)
 		{
 			if (_instances.TryGetValue(instanceId, out IInstance instance))
 			{
-				var workflow = await WorkflowFromStorage(instance.Workflow.GetIdentity());
-				instance.Workflow = workflow;
-				return instance;
+				//var workflow = await WorkflowFromStorage(instance.Workflow.GetIdentity());
+				//workflow.SetState()
+				//instance.Workflow = workflow;
+				return Task.FromResult(instance);
 			}
 			throw new ArgumentOutOfRangeException(instanceId.ToString());
 		}
 
 		public Task Save(IInstance instance)
 		{
+			//IDynamicObject state = instance.Workflow.GetState();
+
 			if (_instances.ContainsKey(instance.Id))
 				_instances[instance.Id] = instance;
 			else
