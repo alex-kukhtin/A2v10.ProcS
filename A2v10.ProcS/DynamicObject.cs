@@ -8,61 +8,42 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using A2v10.ProcS.Infrastructure;
 using Newtonsoft.Json.Serialization;
+using System.Reflection;
 
 namespace A2v10.ProcS
 {
-	internal class InterfaceContractResolver<T1> : InterfaceContractResolver where T1 : class
+	internal class InterfaceContractResolver<T> : DefaultContractResolver where T : class
 	{
-		public InterfaceContractResolver() : base(typeof(T1))
+		private readonly List<Type> types;
+
+		public InterfaceContractResolver()
 		{
-			
-		}
-	}
-
-	internal class InterfaceContractResolver<T1, T2> : InterfaceContractResolver where T1 : class where T2 : class
-	{
-		public InterfaceContractResolver() : base(typeof(T1), typeof(T2))
-		{
-
-		}
-	}
-
-	internal class InterfaceContractResolver<T1, T2, T3> : InterfaceContractResolver where T1 : class where T2 : class where T3 : class
-	{
-		public InterfaceContractResolver() : base(typeof(T1), typeof(T2), typeof(T3))
-		{
-
-		}
-	}
-
-	internal class InterfaceContractResolver<T1, T2, T3, T4> : InterfaceContractResolver where T1 : class where T2 : class where T3 : class where T4 : class
-	{
-		public InterfaceContractResolver() : base(typeof(T1), typeof(T2), typeof(T3), typeof(T4))
-		{
-
-		}
-	}
-
-
-	internal class InterfaceContractResolver : DefaultContractResolver
-	{
-		private Type[] types;
-
-		public InterfaceContractResolver(params Type[] types)
-		{
-			this.types = types;
+			types = new List<Type>(new Type[] { typeof(T) });
 		}
 
-		protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+		protected override List<MemberInfo> GetSerializableMembers(Type objectType)
 		{
+			List<MemberInfo> list = null;
+			var found = false;
 			foreach (var t in types)
 			{
-				if (t.IsAssignableFrom(type))
+				if (t.IsAssignableFrom(objectType))
 				{
-					return base.CreateProperties(t, memberSerialization);
+					list = base.GetSerializableMembers(t);
+					found = true;
+					break;
 				}
 			}
-			return base.CreateProperties(type, memberSerialization);
+			if (!found) list = base.GetSerializableMembers(objectType);
+			foreach (var itm in list)
+			{
+				if (itm.MemberType == MemberTypes.Property)
+				{
+					var type = (itm as PropertyInfo).PropertyType;
+					if (type.IsInterface) types.Add(type);
+				}
+			}
+			return list;
 		}
 	}
 
@@ -70,7 +51,7 @@ namespace A2v10.ProcS
 	{
 		private readonly ExpandoObject _object;
 
-		public Object RawValue => _object;
+		public Object Root => _object;
 
 		public DynamicObject()
 		{
@@ -82,63 +63,33 @@ namespace A2v10.ProcS
 			_object = expando;
 		}
 
-		public static IDynamicObject From<RT>(RT data, params Type[] types) where RT : class
-		{
-			var settings = new JsonSerializerSettings();
-			settings.ContractResolver = new InterfaceContractResolver(types);
-			settings.Converters.Add(new StringEnumConverter());
-			var json = JsonConvert.SerializeObject(data);
-			return From(json);
-		}
-
-		public static IDynamicObject From<RT, T1>(RT data) where RT : class where T1 : class
-		{
-			return From(data, typeof(T1));
-		}
-
-		public static IDynamicObject From<RT, T1, T2>(RT data) where RT : class where T1 : class where T2 : class
-		{
-			return From(data, typeof(T1), typeof(T2));
-		}
-
-		public static IDynamicObject From<RT, T1, T2, T3>(RT data) where RT : class where T1 : class where T2 : class where T3 : class
-		{
-			return From(data, typeof(T1), typeof(T2), typeof(T3));
-		}
-
-		public static IDynamicObject From<RT, T1, T2, T3, T4>(RT data) where RT : class where T1 : class where T2 : class where T3 : class where T4 : class
-		{
-			return From(data, typeof(T1), typeof(T2), typeof(T3), typeof(T4));
-		}
-
 		public static IDynamicObject From<T>(T data) where T : class
 		{
-			switch (data)
-			{
-				case ExpandoObject expando:
-					return new DynamicObject(expando);
-				case IDynamicObject dyna:
-					return dyna;
-				case String json:
-					{
-						if (String.IsNullOrEmpty(json))
-							return new DynamicObject();
-						return new DynamicObject(JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter()));
-					}
-				default:
-                    {
-						return From(data, new Type[0]);
-					}
-			}
+			var settings = new JsonSerializerSettings();
+			settings.ContractResolver = new InterfaceContractResolver<T>();
+			settings.Converters.Add(new StringEnumConverter());
+			var json = JsonConvert.SerializeObject(data, settings);
+			return From(json);
+		}
+		
+		public static IDynamicObject From(ExpandoObject data)
+		{
+			return new DynamicObject(data);
+		}
+		public static IDynamicObject From(String json)
+		{
+			if (String.IsNullOrEmpty(json))
+				return new DynamicObject();
+			return new DynamicObject(JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter()));
 		}
 
-		public void Set<T>(String name, T val)
+		public void Set(String name, Object val)
 		{
 			Object valueToSet = val;
 			switch (val)
 			{
 				case IDynamicObject doVal:
-					valueToSet = doVal.RawValue;
+					valueToSet = doVal.Root;
 					break;
 			}
 			var d = _object as IDictionary<String, Object>;
@@ -153,10 +104,12 @@ namespace A2v10.ProcS
 			var d = _object as IDictionary<String, Object>;
 			if (d.TryGetValue(name, out Object val))
 			{
-				if (val is T)
-					return (T)val;
+				if (val is T tval) return tval;
+				throw new Exception($"Field \"{name}\" is not \"{typeof(T)}\"");
 			}
-			return default;
+			else {
+				throw new Exception($"There is no field \"{name}\" is DynamicObject");
+			}
 		}
 
 		public T Eval<T>(String expression, T fallback = default, Boolean throwIfError = false)

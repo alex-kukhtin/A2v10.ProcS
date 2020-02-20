@@ -7,7 +7,8 @@ namespace A2v10.ProcS.Infrastructure
 	public interface IDynamicObject
 	{
 		T Eval<T>(String expression, T fallback = default, Boolean throwIfError = false);
-		void Set<T>(String name, T val);
-		Object RawValue { get; }
+		void Set(String name, Object val);
+		T Get<T>(String name);
+		Object Root { get; }
 	}
 }
