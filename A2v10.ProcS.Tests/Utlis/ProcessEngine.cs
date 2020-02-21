@@ -24,11 +24,10 @@ namespace A2v10.ProcS.Tests
 			pmr.LoadPlugins(pluginPath, configuration);
 
 			var rm = new ResourceManager(null);
-			pmr.RegisterResources(rm);
 			
 			var mgr = new SagaManager(null);
 			ProcS.RegisterSagas(rm, mgr);
-			pmr.RegisterSagas(rm, mgr);
+			pmr.RegisterResources(rm, mgr);
 
 			
 

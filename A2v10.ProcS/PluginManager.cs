@@ -31,6 +31,22 @@ namespace A2v10.ProcS
 
 			public Boolean IsValid => valid;
 
+			public String Name => attr.Name;
+
+			public Boolean IsFromCurrentAssembly()
+			{
+				return ass == Assembly.GetExecutingAssembly();
+			}
+
+			public T GetPlugin<T>() where T : class, IPlugin
+			{
+				if (!valid) throw new Exception($"Assembly {ass.FullName} does not contain Valid ProcS plugin");
+				if (!init) throw new Exception($"Plugin {attr.Name} is not Initialized");
+				if (attr.PluginType == null) throw new Exception($"Plugin {attr.Name} does not have Plugin class");
+				if (!typeof(T).IsAssignableFrom(attr.PluginType)) throw new Exception($"Plugin {attr.Name} class type {attr.PluginType} is not assignable to {typeof(T)}");
+				return plugin as T;
+			}
+
 			public InternalPlugin(String file, IConfiguration config)
 			{
 				init = false;
@@ -40,20 +56,17 @@ namespace A2v10.ProcS
 				conf = config.GetSection(ass.GetName().Name);
 			}
 
-			public void RegisterResources(IResourceManager mgr, IServiceProvider serviceProvider)
+			public void RegisterResources(IResourceManager rmgr, ISagaManager smgr, IServiceProvider serviceProvider)
 			{
 				foreach (var probe in ass.GetTypes())
 				{
-					var att = probe.GetCustomAttribute<ResourceKeyAttribute>();
-					if (att == null) continue;
-					mgr.RegisterResourceFactory(att.Key, new TypeResourceFactory(probe));
-				}
-			}
-
-			public void RegisterSagas(IResourceManager rmgr, ISagaManager smgr, IServiceProvider serviceProvider)
-			{
-				foreach (var probe in ass.GetTypes())
-				{
+					var IActivity = probe.GetInterface("IActivity");
+                    if (IActivity != null)
+                    {
+						var att = probe.GetCustomAttribute<ResourceKeyAttribute>();
+						if (att == null) continue;
+						rmgr.RegisterResourceFactory(att.Key, new TypeResourceFactory(probe));
+					}
 					var ISagaRegistrar = probe.GetInterface("ISagaRegistrar");
 					if (ISagaRegistrar != null)
 					{
@@ -109,20 +122,7 @@ namespace A2v10.ProcS
 			}
 		}
 
-		public void RegisterResources(IResourceManager mgr)
-		{
-			lock (this)
-			{
-				InitPlugins();
-			}
-			foreach (var p in _plugs.Values)
-			{
-				if (!p.IsValid) continue;
-				p.RegisterResources(mgr, serviceProvider);
-			}
-		}
-
-		public void RegisterSagas(IResourceManager rmgr, ISagaManager smgr)
+		public void RegisterResources(IResourceManager rmgr, ISagaManager smgr)
 		{
 			lock (this) {
 				InitPlugins();
@@ -130,8 +130,40 @@ namespace A2v10.ProcS
 			foreach (var p in _plugs.Values)
 			{
 				if (!p.IsValid) continue;
-				p.RegisterSagas(rmgr, smgr, serviceProvider);
+				p.RegisterResources(rmgr, smgr, serviceProvider);
 			}
+		}
+
+		public T GetCurrentPlugin<T>() where T : class, IPlugin
+		{
+			foreach (var pl in _plugs.Values)
+			{
+				if (pl.IsFromCurrentAssembly())
+				{
+					lock (this)
+					{
+						pl.Init(serviceProvider);
+					}
+					return pl.GetPlugin<T>();
+				}
+			}
+			throw new Exception("There is no Plugin in current assembly");
+		}
+
+		public T GetPlugin<T>(String name) where T : class, IPlugin
+		{
+			foreach (var pl in _plugs.Values)
+			{
+				if (pl.Name == name)
+				{
+					lock (this)
+					{
+						pl.Init(serviceProvider);
+					}
+					return pl.GetPlugin<T>();
+				}
+			}
+			throw new Exception($"There is no Plugin {name}");
 		}
 	}
 }

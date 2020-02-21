@@ -4,10 +4,11 @@ using System;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 
-[assembly: ProcSPlugin]
+[assembly: ProcSPlugin("com.a2.procs.test")]
 
 namespace A2v10.ProcS.Plugin
 {
+	[ResourceKey("com.a2.procs.test:" + nameof(TestPluginActivity))]
 	public class TestPluginActivity : IActivity
 	{
 		public Int32 CorrelationId { get; set; }

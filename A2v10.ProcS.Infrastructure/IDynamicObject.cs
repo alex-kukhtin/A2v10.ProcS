@@ -12,13 +12,12 @@ namespace A2v10.ProcS.Infrastructure
 		void Set(String name, Object val);
 		T Get<T>(String name);
 		T GetOrDefault<T>(String name);
-		List<T> GetListOrNull<T>(String name);
+		IEnumerable<T> GetEnumerableOrNull<T>(String name);
 
 		IDynamicObject GetDynamicObject(String name);
 
 		void AssignFrom(String name, IDynamicObject from);
 
-		String ToJson();
 		Boolean IsEmpty { get; }
 
 		ExpandoObject Root { get; }

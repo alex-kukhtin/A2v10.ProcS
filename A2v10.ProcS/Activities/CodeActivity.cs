@@ -6,6 +6,7 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
+	[ResourceKey(ProcS.ResName + ":" + nameof(CodeActivity))]
 	public class CodeActivity : IActivity
 	{
 		public String Code { get; set; }

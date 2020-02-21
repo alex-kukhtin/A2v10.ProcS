@@ -53,11 +53,11 @@ namespace A2v10.ProcS.Tests
 
 				if (item.WorkflowState != null)
 				{
-					var workflowState = DynamicObject.FromJson(item.WorkflowState);
+					var workflowState = DynamicObjectConverters.FromJson(item.WorkflowState);
 					instance.Workflow.Restore(workflowState);
 				}
 
-				instance.Restore(DynamicObject.FromJson(item.InstanceData));
+				instance.Restore(DynamicObjectConverters.FromJson(item.InstanceData));
 
 				return instance;
 			}

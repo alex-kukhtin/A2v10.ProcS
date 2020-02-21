@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using A2v10.ProcS.Infrastructure;
 
@@ -14,6 +13,7 @@ namespace A2v10.ProcS
 		Any
 	}
 
+	[ResourceKey(ProcS.ResName + ":" + nameof(ParallelActivity))]
 	public class ParallelActivity : IActivity, IStorable
 	{
 		public List<IActivity> Activities { get; set; }
@@ -70,9 +70,9 @@ namespace A2v10.ProcS
 
 		public void Restore(IDynamicObject store)
 		{
-			var elems = store.GetListOrNull<Boolean>(waitingName);
+			var elems = store.GetEnumerableOrNull<Boolean>(waitingName);
 			if (elems != null)
-				_waiting = elems;
+				_waiting = elems.ToList();
 			else
 				_waiting.Clear();
 		}

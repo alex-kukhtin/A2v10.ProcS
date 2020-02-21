@@ -42,7 +42,7 @@ namespace A2v10.ProcS.Tests.Unit
 			dyna.Set("Boolean", true);
 			String json = dyna.ToJson();
 
-			IDynamicObject dyna2 = DynamicObject.FromJson(json);
+			IDynamicObject dyna2 = DynamicObjectConverters.FromJson(json);
 			Assert.AreEqual(dyna2.Get<String>("String"), dyna.Get<String>("String"));
 			Assert.AreEqual(dyna2.Get<Int32>("Int32"), dyna.Get<Int32>("Int32"));
 			Assert.AreEqual(dyna2.Get<Boolean>("Boolean"), dyna.Get<Boolean>("Boolean"));

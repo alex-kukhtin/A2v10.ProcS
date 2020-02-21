@@ -2,11 +2,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
+	[ResourceKey(ProcS.ResName + ":" + nameof(SequenceActivity))]
 	public class SequenceActivity : IActivity, IStorable
 	{
 		public List<IActivity> Activities { get; set; }
@@ -53,7 +53,7 @@ namespace A2v10.ProcS
 			var activities = store.Get<List<Object>>(nameof(Activities));
 			for (Int32 i=0; i<activities.Count; i++)
 			{
-				var elem = DynamicObject.From(activities[i]);
+				var elem = DynamicObjectConverters.From(activities[i]);
 				if (elem != null && Activities[i] is IStorable storable)
 				{
 					storable.Restore(elem);

@@ -7,9 +7,11 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
-
+	[ResourceKey(ukey)]
 	public class CallApiRequestMessage : MessageBase<String>
 	{
+		public const string ukey = ProcS.ResName + ":" + nameof(CallApiRequestMessage);
+
 		public CallApiRequestMessage() : base(null)
 		{
 
@@ -20,8 +22,11 @@ namespace A2v10.ProcS
 		public String Url { get; set; }
 	}
 
+	[ResourceKey(ukey)]
 	public class CallApiResponseMessage : MessageBase<String>
 	{
+		public const string ukey = ProcS.ResName + ":" + nameof(CallApiResponseMessage);
+        [RestoreWith] 
 		public CallApiResponseMessage(String correlationId) : base(correlationId)
 		{
 			
@@ -33,7 +38,9 @@ namespace A2v10.ProcS
 
 	public class CallHttpApiSaga : SagaBaseDispatched<String, CallApiRequestMessage, CallApiResponseMessage>
 	{
-		public CallHttpApiSaga() : base(nameof(CallHttpApiSaga))
+		public const string ukey = ProcS.ResName + ":" + nameof(CallHttpApiSaga);
+
+		public CallHttpApiSaga() : base(ukey)
 		{
 		}
 
@@ -77,7 +84,7 @@ namespace A2v10.ProcS
 					IDynamicObject result;
 					if (contentType == "application/json")
 					{
-						result = DynamicObject.FromJson(json);
+						result = DynamicObjectConverters.FromJson(json);
 					} 
 					else
 					{

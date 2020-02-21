@@ -87,7 +87,7 @@ namespace A2v10.ProcS.WebApi.Host
 			var rm = serviceProvider.GetService<IResourceManager>();
 			ProcS.RegisterSagas(rm, mgr);
 			var pl = serviceProvider.GetService<IPluginManager>();
-			pl.RegisterSagas(rm, mgr);
+			pl.RegisterResources(rm, mgr);
 
 			return mgr;
 		}
@@ -96,8 +96,7 @@ namespace A2v10.ProcS.WebApi.Host
 		{
 			var mgr = serviceProvider.GetService<ResourceManager>();
 
-			var pl = serviceProvider.GetService<IPluginManager>();
-			pl.RegisterResources(mgr);
+			ProcS.RegisterActivities(mgr);
 
 			return mgr;
 		}

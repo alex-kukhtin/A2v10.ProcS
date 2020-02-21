@@ -25,7 +25,7 @@ namespace A2v10.ProcS.Tests
 			var id = instance.Id;
 
 			var resp = new CallbackMessage("pseudopay") {
-				Result = DynamicObject.FromJson("{ \"paymentId\": 123 }")
+				Result = DynamicObjectConverters.FromJson("{ \"paymentId\": 123 }")
 			};
 
 			bus.Send(resp);

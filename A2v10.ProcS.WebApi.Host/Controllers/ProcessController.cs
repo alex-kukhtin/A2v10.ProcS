@@ -40,7 +40,7 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		[Route("start")]
 		public async Task StartProcess([FromBody] StartProcessRequest prm)
 		{
-			await _engine.StartWorkflow(prm.ProcessId, DynamicObject.From(prm.Parameters));
+			await _engine.StartWorkflow(prm.ProcessId, DynamicObjectConverters.From(prm.Parameters));
 		}
 
 		[HttpPost]
@@ -48,7 +48,7 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		[Route("resume")]
 		public async Task Resume([FromBody] ResumeProcessRequest prm)
 		{
-			await _engine.ResumeWorkflow(prm.InstanceId, prm.Bookmark, DynamicObject.From(prm.Result));
+			await _engine.ResumeWorkflow(prm.InstanceId, prm.Bookmark, DynamicObjectConverters.From(prm.Result));
 		}
 	}
 }
