@@ -9,23 +9,26 @@ namespace A2v10.ProcS.Infrastructure
 
 	public sealed class ProcSPluginAttribute : Attribute
 	{
-		private readonly Type pluginType;
-
 		public IPlugin CreatePlugin()
 		{
-			if (pluginType == null) return null;
-			return Activator.CreateInstance(pluginType) as IPlugin;
+			if (PluginType == null) return null;
+			return Activator.CreateInstance(PluginType) as IPlugin;
 		}
 
-		public ProcSPluginAttribute()
+		public Type PluginType { get; }
+
+		public String Name { get; }
+
+		public ProcSPluginAttribute(String name)
 		{
-			pluginType = null;
+			Name = name;
+			PluginType = null;
 		}
 
-		public ProcSPluginAttribute(Type plugin)
+		public ProcSPluginAttribute(String name, Type plugin) : this(name)
 		{
 			if (!typeof(IPlugin).IsAssignableFrom(plugin)) throw new Exception("Plugin class must implement IPlugin");
-			pluginType = plugin;
+			PluginType = plugin;
 		}
 	}
 

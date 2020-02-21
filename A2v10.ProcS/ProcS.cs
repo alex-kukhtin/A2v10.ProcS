@@ -11,43 +11,51 @@ namespace A2v10.ProcS
 {
 	public static class ProcS
 	{
+		public const string ResName = "com.a2.procs";
+		
 		public static void RegisterSagas(IResourceManager resourceManager, ISagaManager sagaManager)
 		{
 			{
-				var fact = new ConstructSagaFactory<BookmarkSaga>(nameof(BookmarkSaga));
+				var fact = new ConstructSagaFactory<BookmarkSaga>(BookmarkSaga.ukey);
 				resourceManager.RegisterResourceFactory(fact.SagaKind, new SagaResourceFactory(fact));
 				sagaManager.RegisterSagaFactory<SetBookmarkMessage, ResumeBookmarkMessage>(fact);
-				//resourceManager.RegisterResources<SetBookmarkMessage, ResumeBookmarkMessage>();
+				resourceManager.RegisterResources(typeof(SetBookmarkMessage), typeof(ResumeBookmarkMessage));
 			}
 			{
-				var fact = new ConstructSagaFactory<ProcessSaga>(nameof(ProcessSaga));
+				var fact = new ConstructSagaFactory<ProcessSaga>(ProcessSaga.ukey);
 				resourceManager.RegisterResourceFactory(fact.SagaKind, new SagaResourceFactory(fact));
 				sagaManager.RegisterSagaFactory<StartProcessMessage, ContinueActivityMessage>(fact);
-				//resourceManager.RegisterResources<StartProcessMessage, ContinueActivityMessage>();
+				resourceManager.RegisterResources(typeof(StartProcessMessage), typeof(ContinueActivityMessage));
 			}
 			{
-				var fact = new ConstructSagaFactory<CallHttpApiSaga>(nameof(CallHttpApiSaga));
+				var fact = new ConstructSagaFactory<CallHttpApiSaga>(CallHttpApiSaga.ukey);
 				resourceManager.RegisterResourceFactory(fact.SagaKind, new SagaResourceFactory(fact));
 				sagaManager.RegisterSagaFactory<CallApiRequestMessage, CallApiResponseMessage>(fact);
-				//resourceManager.RegisterResources<CallApiRequestMessage, CallApiResponseMessage>();
+				resourceManager.RegisterResources(typeof(CallApiRequestMessage), typeof(CallApiResponseMessage));
 			}
 			{
-				var fact = new ConstructSagaFactory<RegisterCallbackSaga>(nameof(RegisterCallbackSaga));
+				var fact = new ConstructSagaFactory<RegisterCallbackSaga>(RegisterCallbackSaga.ukey);
 				resourceManager.RegisterResourceFactory(fact.SagaKind, new SagaResourceFactory(fact));
 				sagaManager.RegisterSagaFactory<RegisterCallbackMessage, CallbackMessage>(fact);
-				//resourceManager.RegisterResources<RegisterCallbackMessage, CallbackMessage>();
+				resourceManager.RegisterResources(typeof(RegisterCallbackMessage), typeof(CallbackMessage));
 			}
 			{
-				var fact = new ConstructSagaFactory<CallbackCorrelationSaga>(nameof(CallbackCorrelationSaga));
+				var fact = new ConstructSagaFactory<CallbackCorrelationSaga>(CallbackCorrelationSaga.ukey);
 				resourceManager.RegisterResourceFactory(fact.SagaKind, new SagaResourceFactory(fact));
 				sagaManager.RegisterSagaFactory<WaitCallbackMessage, CorrelatedCallbackMessage>(fact);
-				//resourceManager.RegisterResources<WaitCallbackMessage, CorrelatedCallbackMessage>();
+				resourceManager.RegisterResources(typeof(WaitCallbackMessage), typeof(CorrelatedCallbackMessage));
 			}
 		}
 
 		public static void RegisterActivities(IResourceManager resourceManager)
 		{
-
+			resourceManager.RegisterResource<CallHttpApiActivity>();
+			resourceManager.RegisterResource<CodeActivity>();
+			resourceManager.RegisterResource<Delay>();
+			resourceManager.RegisterResource<SequenceActivity>();
+			resourceManager.RegisterResource<ParallelActivity>();
+			resourceManager.RegisterResource<StartProcessActivity>();
+			resourceManager.RegisterResource<WaitApiCallback>();
 		}
 	}
 }

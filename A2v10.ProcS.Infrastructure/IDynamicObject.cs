@@ -18,7 +18,6 @@ namespace A2v10.ProcS.Infrastructure
 
 		void AssignFrom(String name, IDynamicObject from);
 
-		String ToJson();
 		Boolean IsEmpty { get; }
 
 		ExpandoObject Root { get; }
