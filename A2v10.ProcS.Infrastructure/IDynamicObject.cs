@@ -14,7 +14,6 @@ namespace A2v10.ProcS.Infrastructure
 		T GetOrDefault<T>(String name);
 		IDynamicObject GetDynamicObject(String name);
 
-		String ToJson();
 		Boolean IsEmpty { get; }
 
 		Object Root { get; }

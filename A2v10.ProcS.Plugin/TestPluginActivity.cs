@@ -4,7 +4,7 @@ using System;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 
-[assembly: ProcSPlugin]
+[assembly: ProcSPlugin("com.a2.procs.test")]
 
 namespace A2v10.ProcS.Plugin
 {

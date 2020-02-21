@@ -17,12 +17,20 @@ namespace A2v10.ProcS.Infrastructure
 
 		public virtual void Restore(IDynamicObject store)
 		{
-			
+
 		}
 
-		public virtual IDynamicObject Store()
+		public virtual void Store(IDynamicObject storage)
 		{
-			return null;
+
+		}
+
+		public IDynamicObject Store()
+		{
+			var obj = new DynamicObject();
+			obj.Set("correlationId", CorrelationId.Value);
+			Store(obj);
+			return obj;
 		}
 	}
 }

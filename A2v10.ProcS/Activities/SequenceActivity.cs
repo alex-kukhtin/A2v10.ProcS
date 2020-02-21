@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
@@ -54,7 +53,7 @@ namespace A2v10.ProcS
 			var activities = store.Get<List<Object>>(nameof(Activities));
 			for (int i=0; i<activities.Count; i++)
 			{
-				var elem = DynamicObject.From(activities[i]);
+				var elem = DynamicObjectConverters.From(activities[i]);
 				if (elem != null && Activities[i] is IStorable storable)
 				{
 					storable.Restore(elem);

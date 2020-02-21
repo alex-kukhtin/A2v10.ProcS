@@ -34,6 +34,22 @@ namespace A2v10.ProcS
 
 			public Boolean IsValid => valid;
 
+			public String Name => attr.Name;
+
+			public Boolean IsFromCurrentAssembly()
+			{
+				return ass == Assembly.GetExecutingAssembly();
+			}
+
+			public T GetPlugin<T>() where T : class, IPlugin
+			{
+				if (!valid) throw new Exception($"Assembly {ass.FullName} does not contain Valid ProcS plugin");
+				if (!init) throw new Exception($"Plugin {attr.Name} is not Initialized");
+				if (attr.PluginType == null) throw new Exception($"Plugin {attr.Name} does not have Plugin class");
+				if (!typeof(T).IsAssignableFrom(attr.PluginType)) throw new Exception($"Plugin {attr.Name} class type {attr.PluginType} is not assignable to {typeof(T)}");
+				return plugin as T;
+			}
+
 			public InternalPlugin(String file, IConfiguration config)
 			{
 				init = false;
@@ -119,6 +135,38 @@ namespace A2v10.ProcS
 				if (!p.IsValid) continue;
 				p.RegisterResources(rmgr, smgr, serviceProvider);
 			}
+		}
+
+		public T GetCurrentPlugin<T>() where T : class, IPlugin
+		{
+			foreach (var pl in _plugs.Values)
+			{
+				if (pl.IsFromCurrentAssembly())
+				{
+					lock (this)
+					{
+						pl.Init(serviceProvider);
+					}
+					return pl.GetPlugin<T>();
+				}
+			}
+			throw new Exception("There is no Plugin in current assembly");
+		}
+
+		public T GetPlugin<T>(String name) where T : class, IPlugin
+		{
+			foreach (var pl in _plugs.Values)
+			{
+				if (pl.Name == name)
+				{
+					lock (this)
+					{
+						pl.Init(serviceProvider);
+					}
+					return pl.GetPlugin<T>();
+				}
+			}
+			throw new Exception($"There is no Plugin {name}");
 		}
 	}
 }

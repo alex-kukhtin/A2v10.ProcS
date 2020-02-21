@@ -58,7 +58,7 @@ namespace A2v10.ProcS
                     throw new Exception($"There is no value for constructor parameter {p.Name}");
 				var dt = data[p.Name];
 				if (!p.ParameterType.IsAssignableFrom(dt.GetType()))
-					dt = Convert.ChangeType(dt, p.ParameterType);
+					dt = DynamicObject.ConvertTo(dt, p.ParameterType);
 				prms[i] = dt;
                 i++;
 			}
@@ -187,15 +187,27 @@ namespace A2v10.ProcS
 			return obj;
 		}
 
-		private Resource RestoreResource(IStorable src)
+		public Object Unwrap(IDynamicObject obj)
 		{
-			var d = src.Store();
+			var res = RestoreResource(obj);
+			var robj = Unwrap(res);
+			return robj;
+		}
+
+		private Resource RestoreResource(IDynamicObject obj)
+		{
 			var res = new Resource();
-			res.Restore(d);
+			res.Restore(obj);
 			return res;
 		}
 
-		private Object Unwrap(Resource res)
+		private Resource RestoreResource(IStorable src)
+		{
+			var d = src.Store();
+			return RestoreResource(d);
+		}
+
+		public Object Unwrap(Resource res)
 		{
 			var key = res.Key;
 			if (!resources.ContainsKey(key))
@@ -207,12 +219,30 @@ namespace A2v10.ProcS
 			return obj;
 		}
 
+		private T Generalyze<T>(Object obj, String key) where T : class
+		{
+			if (obj is T t) return t;
+			throw new Exception($"Resource {key} is not {typeof(T)}");
+		}
+
 		public T Unwrap<T>(IStorable src) where T : class
 		{
 			var res = RestoreResource(src);
 			var obj = Unwrap(res);
-			if (obj is T t) return t;
-			throw new Exception($"Resource {res.Key} is not {typeof(T)}");
+			return Generalyze<T>(obj, res.Key);
+		}
+
+		public T Unwrap<T>(Resource res) where T : class
+		{
+			var obj = Unwrap(res);
+			return Generalyze<T>(obj, res.Key);
+		}
+
+		public T Unwrap<T>(IDynamicObject obj) where T : class
+		{
+			var res = RestoreResource(obj);
+			var robj = Unwrap(res);
+			return Generalyze<T>(robj, res.Key);
 		}
 	}
 
@@ -236,14 +266,14 @@ namespace A2v10.ProcS
 
 		public IDynamicObject Store()
 		{
-			var d = DynamicObject.From(Object);
+			var d = DynamicObjectConverters.From(Object);
 			d.Set(key, Key);
 			return d;
 		}
 
 		public void Restore(IDynamicObject store)
 		{
-			var data = DynamicObject.From(store);
+			var data = DynamicObjectConverters.From(store);
 			Key = data.Get<String>(key);
 			data.Remove(key);
 			Object = data;
