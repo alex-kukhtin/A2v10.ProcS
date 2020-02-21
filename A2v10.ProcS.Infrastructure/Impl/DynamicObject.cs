@@ -9,11 +9,21 @@ namespace A2v10.ProcS.Infrastructure
 {
 	public class DynamicObject : IDynamicObject
 	{
-		private readonly ExpandoObject _object;
+		private ExpandoObject _object;
 
 		private IDictionary<String, Object> _dictionary => _object;
 
-		public Object Root => _object;
+		public ExpandoObject Root => _object;
+
+		public static implicit operator DynamicObject(ExpandoObject dobj)
+		{
+			return new DynamicObject(dobj);
+		}
+
+		public static implicit operator ExpandoObject(DynamicObject dobj)
+		{
+			return dobj.Root;
+		}
 
 		public DynamicObject()
 		{
@@ -85,6 +95,36 @@ namespace A2v10.ProcS.Infrastructure
 					return dobj;
 				else
 					throw new Exception($"The field \"{name}\" is not a DynamicObject");
+			}
+			return null;
+		}
+
+		public void AssignFrom(String name, IDynamicObject source)
+		{
+			var dobj = source.GetDynamicObject(name);
+			if (dobj != null)
+				_object = dobj.Root;
+			else
+				Clear();
+		}
+
+		private static IEnumerable<T> EnumerableConvert<T>(IEnumerable en)
+		{
+			foreach (var el in en)
+			{
+				var ne = ConvertTo<T>(el);
+				yield return ne;
+			}
+		}
+
+		public IEnumerable<T> GetEnumerableOrNull<T>(String name)
+		{
+			if (this.TryGetValue(name, out Object val))
+			{
+				if (val is IEnumerable en)
+				{
+					return EnumerableConvert<T>(en);
+				}
 			}
 			return null;
 		}
