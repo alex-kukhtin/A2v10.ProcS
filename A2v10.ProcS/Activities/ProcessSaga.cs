@@ -12,7 +12,7 @@ namespace A2v10.ProcS
 		public const string ukey = ProcS.ResName + ":" + nameof(SetBookmarkMessage);
 		[RestoreWith]
 		public SetBookmarkMessage(Guid correlationId) : base(correlationId)
-        {
+		{
 			Id = correlationId;
 		}
 		public SetBookmarkMessage(Guid id, IResultMessage resultMessage) : this(id)
@@ -28,9 +28,9 @@ namespace A2v10.ProcS
 	public class ResumeBookmarkMessage : MessageBase<Guid>
 	{
 		public const string ukey = ProcS.ResName + ":" + nameof(ResumeBookmarkMessage);
-        [RestoreWith]
-        public ResumeBookmarkMessage(Guid correlationId) : base(correlationId)
-        {
+		[RestoreWith]
+		public ResumeBookmarkMessage(Guid correlationId) : base(correlationId)
+		{
 			Id = correlationId;
 		}
 		public ResumeBookmarkMessage(Guid id, IDynamicObject result) : this(id)
@@ -75,11 +75,11 @@ namespace A2v10.ProcS
 		public IDynamicObject Result { get; set; }
 		public String Bookmark { get; }
 
-        [RestoreWith]
-        public ContinueActivityMessage(Guid correlationId) : base(correlationId)
-        {
+		[RestoreWith]
+		public ContinueActivityMessage(Guid correlationId) : base(correlationId)
+		{
 
-        }
+		}
 
 		public ContinueActivityMessage(Guid instanceId, String bookmark, IDynamicObject result): base(instanceId)
 		{
@@ -105,7 +105,7 @@ namespace A2v10.ProcS
 		public IDynamicObject Parameters { get; set; }
 
 
-        [RestoreWith]
+		[RestoreWith]
 		public StartProcessMessage(Guid parentId) : base(parentId)
 		{
 			ParentId = parentId;

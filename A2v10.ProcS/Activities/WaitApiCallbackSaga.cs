@@ -12,7 +12,7 @@ namespace A2v10.ProcS
 	{
 		public const string ukey = ProcS.ResName + ":" + nameof(RegisterCallbackMessage);
 
-        [RestoreWith]
+		[RestoreWith]
 		public RegisterCallbackMessage(String tag) : base(tag)
 		{
 			Tag = tag;
@@ -27,7 +27,7 @@ namespace A2v10.ProcS
 	{
 		public const string ukey = ProcS.ResName + ":" + nameof(CallbackMessage);
 
-        [RestoreWith]
+		[RestoreWith]
 		public CallbackMessage(String tag) : base(tag)
 		{
 			
@@ -41,7 +41,7 @@ namespace A2v10.ProcS
 	{
 		public const string ukey = ProcS.ResName + ":" + nameof(WaitCallbackMessage);
 
-        [RestoreWith]
+		[RestoreWith]
 		public WaitCallbackMessage(Guid bookmark, String tag, String corrVal)
 			: base($"{tag}:{corrVal}")
 		{
@@ -61,7 +61,7 @@ namespace A2v10.ProcS
 	{
 		public const string ukey = ProcS.ResName + ":" + nameof(CorrelatedCallbackMessage);
 
-        [RestoreWith]
+		[RestoreWith]
 		public CorrelatedCallbackMessage(String tag, String corrVal) 
 			: base($"{tag}:{corrVal}")
 		{

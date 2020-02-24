@@ -12,7 +12,7 @@ namespace A2v10.ProcS.Plugin
 	{
 		public const string ukey = "com.a2.procs.test:" + nameof(TaskPluginActionMessage);
 		public Guid Id { get; }
-        [RestoreWith]
+		[RestoreWith]
 		public TaskPluginActionMessage(Guid instanceId, CorrelationId<Int32> correlationId) : base(correlationId)
 		{
 			Id = instanceId;

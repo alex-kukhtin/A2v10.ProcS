@@ -31,18 +31,18 @@ namespace A2v10.ProcS
 		public IServiceBusItem[] After { get; private set; }
 	}
 
-    public class InMemoryBus : IMessageBus
-    {
+	public class InMemoryBus : IMessageBus
+	{
 		private readonly ConcurrentQueue<IServiceBusItem> _messages = new ConcurrentQueue<IServiceBusItem>();
 
-        public Task Send(IServiceBusItem item)
-        {
+		public Task Send(IServiceBusItem item)
+		{
 			_messages.Enqueue(item);
 			return Task.CompletedTask;
 		}
 
-        public Task<Boolean> Pick(Func<IServiceBusItem, Boolean> proc)
-        {
+		public Task<Boolean> Pick(Func<IServiceBusItem, Boolean> proc)
+		{
 			if (_messages.TryDequeue(out var message))
 			{
 				if (!proc(message)) _messages.Enqueue(message);
@@ -52,8 +52,8 @@ namespace A2v10.ProcS
 		}
 	}
 
-    public abstract class ServiceBusBase : IServiceBus
-    {
+	public abstract class ServiceBusBase : IServiceBus
+	{
 		private readonly ISagaKeeper _sagaKeeper;
 		private readonly IScriptEngine _scriptEngine;
 		private readonly IMessageBus _bus = new InMemoryBus();
@@ -71,14 +71,14 @@ namespace A2v10.ProcS
 
 		protected abstract void SignalUpdate();
 
-        private IPromise SendInternal(IServiceBusItem item)
-        {
+		private IPromise SendInternal(IServiceBusItem item)
+		{
 			async Task task()
 			{
 				await _bus.Send(item);
 			}
 			return _taskManager.AddTask(task);
-        }
+		}
 
 		protected void Send(IServiceBusItem item)
 		{
@@ -152,7 +152,7 @@ namespace A2v10.ProcS
 	public class ServiceBus : ServiceBusBase
 	{
 		public ServiceBus(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine)
-            : base(taskManager, sagaKeeper, repository, scriptEngine)
+			: base(taskManager, sagaKeeper, repository, scriptEngine)
 		{
 			
 		}
@@ -212,13 +212,13 @@ namespace A2v10.ProcS
 		private volatile TaskCompletionSource<bool> ts = null;
 
 		public async Task Run(CancellationToken token)
-        {
+		{
 			while (!token.IsCancellationRequested)
-            {
+			{
 				await Process(token);
 				rwl.AcquireWriterLock(0);
-                try
-                {
+				try
+				{
 					ts = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 				}
 				finally

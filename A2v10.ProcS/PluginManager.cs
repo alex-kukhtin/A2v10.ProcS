@@ -61,8 +61,8 @@ namespace A2v10.ProcS
 				foreach (var probe in ass.GetTypes())
 				{
 					var IActivity = probe.GetInterface("IActivity");
-                    if (IActivity != null)
-                    {
+					if (IActivity != null)
+					{
 						var att = probe.GetCustomAttribute<ResourceKeyAttribute>();
 						if (att == null) continue;
 						rmgr.RegisterResourceFactory(att.Key, new TypeResourceFactory(probe));

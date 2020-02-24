@@ -26,7 +26,7 @@ namespace A2v10.ProcS
 	public class CallApiResponseMessage : MessageBase<String>
 	{
 		public const string ukey = ProcS.ResName + ":" + nameof(CallApiResponseMessage);
-        [RestoreWith] 
+		[RestoreWith] 
 		public CallApiResponseMessage(String correlationId) : base(correlationId)
 		{
 			
