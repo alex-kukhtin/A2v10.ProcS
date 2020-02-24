@@ -5,8 +5,20 @@ using System.Threading.Tasks;
 
 namespace A2v10.ProcS.Infrastructure
 {
-	public interface ITaskManager
+    public interface IPromise
+    {
+        IPromise Done(Action action);
+        IPromise Catch(Action<Exception> action);
+    }
+
+    public interface IPromise<T>
+    {
+        IPromise<T> Done(Action<T> action);
+        IPromise<T> Catch(Action<Exception> action);
+    }
+
+    public interface ITaskManager
 	{
-		void AddTask(Func<Task> task);
+		IPromise AddTask(Func<Task> task);
 	}
 }

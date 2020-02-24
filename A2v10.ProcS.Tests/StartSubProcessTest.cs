@@ -19,13 +19,13 @@ namespace A2v10.ProcS.Tests
 			// master p1 = p1, p2 = p1 * 2
 			// slave p1 = p1 + 5, p2 = p2 + 10;
 
-			(WorkflowEngine engine, IRepository repository, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
+			(WorkflowEngine engine, IRepository repository, ServiceBus bus) = ProcessEngine.CreateEngine();
 			var prms = engine.CreateDynamicObject();
 			prms.Set("value", 10);
 			var instance = await engine.StartWorkflow("startprocess/master.json", prms);
 			var id = instance.Id;
 
-			bus.Process();
+			await bus.Process();
 
 			instance = await repository.Get(id);
 			Assert.AreEqual(15, instance.GetResult().Eval<Int32>("value.p1"));
@@ -38,7 +38,7 @@ namespace A2v10.ProcS.Tests
 			// master p1 = p1, p2 = p1 * 2
 			// slave p1 = p1 + 5, p2 = p2 + 10;
 
-			(WorkflowEngine engine, IRepository repository, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
+			(WorkflowEngine engine, IRepository repository, ServiceBus bus) = ProcessEngine.CreateEngine();
 			
 			var prms1 = engine.CreateDynamicObject();
 			prms1.Set("value", 10);
@@ -50,7 +50,7 @@ namespace A2v10.ProcS.Tests
 			var instance2 = await engine.StartWorkflow("startprocess/master.json", prms2);
 			var id2 = instance2.Id;
 
-			bus.Process();
+			await bus.Process();
 
 			instance1 = await repository.Get(id1);
 			instance2 = await repository.Get(id2);

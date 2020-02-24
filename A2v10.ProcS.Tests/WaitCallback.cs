@@ -29,7 +29,7 @@ namespace A2v10.ProcS.Tests
 			};
 
 			bus.Send(resp);
-			bus.Process();
+			await bus.Process();
 
 			instance = await repository.Get(id);
 			Assert.AreEqual(null, instance.CurrentState);

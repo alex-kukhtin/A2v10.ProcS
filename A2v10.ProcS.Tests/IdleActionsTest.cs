@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using A2v10.ProcS.Infrastructure;
+using System.Threading;
 
 namespace A2v10.ProcS.Tests
 {
@@ -25,7 +26,7 @@ namespace A2v10.ProcS.Tests
 			var stm = instance.Workflow as StateMachine;
 			Assert.IsInstanceOfType(stm.States["S1"].OnEntry, typeof(CallHttpApiActivity));
 
-			bus.Process();
+			await bus.Process(CancellationToken.None);
 
 			instance = await repository.Get(id);
 			Assert.AreEqual(null, instance.CurrentState);

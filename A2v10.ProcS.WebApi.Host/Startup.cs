@@ -55,7 +55,7 @@ namespace A2v10.ProcS.WebApi.Host
 
 			services.AddSingleton<IScriptEngine, ScriptEngine>();
 			services.AddSingleton<IRepository, Repository>();
-			services.AddSingleton<InMemoryServiceBus>();
+			services.AddSingleton<ServiceBus>();
 			services.AddSingleton(CreateServiceBus);
 
 			services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
@@ -76,7 +76,7 @@ namespace A2v10.ProcS.WebApi.Host
 
 		private static IServiceBus CreateServiceBus(IServiceProvider serviceProvider)
 		{
-			var bus = serviceProvider.GetService<InMemoryServiceBus>();
+			var bus = serviceProvider.GetService<ServiceBus>();
 			new Thread(bus.Start).Start();
 			return bus;
 		}

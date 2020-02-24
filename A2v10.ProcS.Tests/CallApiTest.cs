@@ -23,7 +23,7 @@ namespace A2v10.ProcS.Tests
 			var instance = await engine.StartWorkflow(new Identity("callapi/openweather.json"), prms);
 			var id = instance.Id;
 
-			bus.Process();
+			await bus.Process();
 
 			instance = await repository.Get(id);
 			var result = instance.GetResult();

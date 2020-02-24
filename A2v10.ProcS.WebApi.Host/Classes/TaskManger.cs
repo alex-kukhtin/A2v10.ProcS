@@ -9,17 +9,25 @@ namespace A2v10.ProcS.WebApi.Host.Classes
 {
 	public class TaskManager : ITaskManager
 	{
-		private readonly List<Task> tasks;
+		private readonly List<(Task, Promise)> promises;
 
 		public TaskManager()
 		{
-			tasks = new List<Task>();
+			promises = new List<(Task, Promise)>();
 		}
 
-		public void AddTask(Func<Task> task)
+		public IPromise AddTask(Func<Task> task)
 		{
-			var running = Task.Run(task);
-			tasks.Add(running);
+			var p = new Promise();
+			
+			var t = Task.Run(task).ContinueWith(t =>
+			{
+				if (t.IsCompleted) p.SignalDone();
+				if (t.IsFaulted) p.SignalEception(t.Exception);
+				if (t.IsCanceled) p.SignalEception(new TaskCanceledException(t));
+			});
+			promises.Add((t, p));
+			return p;
 		}
 	}
 }
