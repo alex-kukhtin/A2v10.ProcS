@@ -31,32 +31,10 @@ namespace A2v10.ProcS
 		public IServiceBusItem[] After { get; private set; }
 	}
 
-	public class InMemoryBus : IMessageBus
-	{
-		private readonly ConcurrentQueue<IServiceBusItem> _messages = new ConcurrentQueue<IServiceBusItem>();
-
-		public Task Send(IServiceBusItem item)
-		{
-			_messages.Enqueue(item);
-			return Task.CompletedTask;
-		}
-
-		public Task<Boolean> Pick(Func<IServiceBusItem, Boolean> proc)
-		{
-			if (_messages.TryDequeue(out var message))
-			{
-				if (!proc(message)) _messages.Enqueue(message);
-				return Task.FromResult(true);
-			}
-			return Task.FromResult(false);
-		}
-	}
-
 	public abstract class ServiceBusBase : IServiceBus
 	{
 		private readonly ISagaKeeper _sagaKeeper;
 		private readonly IScriptEngine _scriptEngine;
-		private readonly IMessageBus _bus = new InMemoryBus();
 		private readonly ITaskManager _taskManager;
 
 		private readonly IRepository _repository;
@@ -75,7 +53,7 @@ namespace A2v10.ProcS
 		{
 			async Task task()
 			{
-				await _bus.Send(item);
+				await _sagaKeeper.SendMessage(item);
 			}
 			return _taskManager.AddTask(task);
 		}
@@ -126,26 +104,28 @@ namespace A2v10.ProcS
 
 		public async Task Process(CancellationToken token)
 		{
-			while (!token.IsCancellationRequested && await _bus.Pick(ProcessItem)) ;
+			while (!token.IsCancellationRequested)
+			{
+				var sk = await _sagaKeeper.PickSaga();
+				if (sk.Key == null) break;
+				ProcessItem(sk);
+			}
 		}
 
-		private Boolean ProcessItem(IServiceBusItem item)
+		private void ProcessItem(PickedSaga item)
 		{
-			var saga = _sagaKeeper.GetSagaForMessage(item.Message, out ISagaKeeperKey key, out Boolean isNew);
-			if (saga == null)
-				return false;
 			async Task task()
 			{
+				var saga = item.Saga;
 				using (var scriptContext = _scriptEngine.CreateContext())
 				{
 					var hc = new HandleContext(this, _repository, scriptContext);
-					await saga.Handle(hc, item.Message);
+					await saga.Handle(hc, item.ServiceBusItem.Message);
 				}
-				Send(item.After);
-				_sagaKeeper.SagaUpdate(saga, key);
+				Send(item.ServiceBusItem.After);
+				await _sagaKeeper.ReleaseSaga(item);
 			}
 			_taskManager.AddTask(task);
-			return true;
 		}
 	}
 

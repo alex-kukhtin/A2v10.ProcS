@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
@@ -65,7 +66,7 @@ namespace A2v10.ProcS
 			this.sagaResolver = sagaResolver;
 		}
 
-		public ISaga GetSagaForMessage(IMessage message, out ISagaKeeperKey key, out Boolean isNew)
+		private ISaga GetSagaForMessage(IMessage message, out ISagaKeeperKey key, out Boolean isNew)
 		{
 			var sagaFactory = sagaResolver.GetSagaFactory(message.GetType());
 			key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
@@ -80,7 +81,7 @@ namespace A2v10.ProcS
 			return null;
 		}
 
-		public void SagaUpdate(ISaga saga, ISagaKeeperKey key)
+		private void SagaUpdate(ISaga saga, ISagaKeeperKey key)
 		{
 			if (saga.IsComplete || saga.CorrelationId == null || !saga.CorrelationId.Equals(key.CorrelationId))
 			{
@@ -91,6 +92,36 @@ namespace A2v10.ProcS
 				var ns = new SagaState(saga);
 				sagas.AddOrUpdate(new SagaKeeperKey(saga), ns, (k, s) => ns);
 			}
+		}
+
+		private readonly ConcurrentQueue<IServiceBusItem> _messages = new ConcurrentQueue<IServiceBusItem>();
+
+		public Task SendMessage(IServiceBusItem item)
+		{
+			_messages.Enqueue(item);
+			return Task.CompletedTask;
+		}
+
+		public Task<PickedSaga> PickSaga()
+		{
+			while (_messages.TryDequeue(out var message))
+			{
+				var saga = GetSagaForMessage(message.Message, out ISagaKeeperKey key, out Boolean isNew);
+				if (saga == null)
+				{
+					_messages.Enqueue(message);
+					continue;
+				}
+				return Task.FromResult(new PickedSaga(key, saga, message));
+			}
+			return Task.FromResult(new PickedSaga(false));
+		}
+
+		public Task ReleaseSaga(PickedSaga picked)
+		{
+			if (!picked.Available) throw new Exception("Saga is not picked");
+			SagaUpdate(picked.Saga, picked.Key);
+			return Task.CompletedTask;
 		}
 	}
 }
