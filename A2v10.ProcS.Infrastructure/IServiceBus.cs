@@ -36,4 +36,16 @@ namespace A2v10.ProcS.Infrastructure
 		void Send(IEnumerable<IMessage> messages);
 		void SendSequence(IEnumerable<IMessage> messages);
 	}
+
+	public interface IMessageBus
+	{
+		Task Send(IServiceBusItem item);
+		Task<Boolean> Pick(Func<IServiceBusItem, Boolean> proc);
+	}
+
+	public interface IServiceBusItem
+	{
+		IMessage Message { get; }
+		IServiceBusItem[] After { get; }
+	}
 }

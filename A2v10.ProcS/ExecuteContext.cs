@@ -50,7 +50,7 @@ namespace A2v10.ProcS
 
 		public void ContinueProcess(Guid id, String bookmark, String json)
 		{
-			ContinueProcess(id, bookmark, DynamicObjectConverters.FromJson(json));
+            ContinueProcess(id, bookmark, DynamicObjectConverters.FromJson(json));
 		}
 
 		public void ContinueProcess(Guid id, String bookmark, IDynamicObject result)

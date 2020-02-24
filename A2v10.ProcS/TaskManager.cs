@@ -9,9 +9,20 @@ namespace A2v10.ProcS
 {
 	public class SyncTaskManager : ITaskManager
 	{
-		public void AddTask(Func<Task> task)
+		public IPromise AddTask(Func<Task> task)
 		{
-			Task.Run(task).Wait();
+			var p = new Promise();
+			try
+			{
+				Task.Run(task).Wait();
+			}
+            catch (Exception e)
+            {
+				p.SignalEception(e);
+				return p;
+            }
+			p.SignalDone();
+			return p;
 		}
 	}
 }

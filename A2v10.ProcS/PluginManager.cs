@@ -154,6 +154,7 @@ namespace A2v10.ProcS
 		{
 			foreach (var pl in _plugs.Values)
 			{
+				if (!pl.IsValid) continue;
 				if (pl.Name == name)
 				{
 					lock (this)

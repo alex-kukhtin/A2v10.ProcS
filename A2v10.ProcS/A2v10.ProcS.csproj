@@ -20,4 +20,7 @@
     <ProjectReference Include="..\A2v10.ProcS.Infrastructure\A2v10.ProcS.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove=".DS_Store" />
+  </ItemGroup>
 </Project>

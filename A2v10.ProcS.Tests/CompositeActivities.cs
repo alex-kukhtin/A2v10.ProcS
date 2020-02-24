@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,14 +17,14 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleSequence()
 		{
-			(IWorkflowEngine engine, _, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
+			(IWorkflowEngine engine, _, ServiceBus bus) = ProcessEngine.CreateEngine();
 
 			var prms = new DynamicObject();
 			prms.Set("value", 1);
 
 			var instance = await engine.StartWorkflow(new Identity("composite/sequence.json"), prms);
 
-			bus.Process();
+			await bus.Process(CancellationToken.None);
 
 			Assert.AreEqual(null, instance.CurrentState);
 			var r = instance.GetResult();
@@ -33,14 +34,14 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task SimpleParallel()
 		{
-			(IWorkflowEngine engine, _, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
+			(IWorkflowEngine engine, _, ServiceBus bus) = ProcessEngine.CreateEngine();
 
 			var prms = new DynamicObject();
 			prms.Set("value", 1);
 
 			var instance = await engine.StartWorkflow(new Identity("composite/parallel.json"), prms);
 
-			bus.Process();
+			await bus.Process();
 
 			Assert.AreEqual(null, instance.CurrentState);
 			var r = instance.GetResult();
@@ -50,7 +51,7 @@ namespace A2v10.ProcS.Tests
 		[TestMethod]
 		public async Task ParallelApi()
 		{
-			(IWorkflowEngine engine, IRepository repository, InMemoryServiceBus bus) = ProcessEngine.CreateEngine();
+			(IWorkflowEngine engine, IRepository repository, ServiceBus bus) = ProcessEngine.CreateEngine();
 
 			var prms = new DynamicObject();
 			prms.Set("value", 1);
@@ -58,7 +59,7 @@ namespace A2v10.ProcS.Tests
 			var instance = await engine.StartWorkflow(new Identity("composite/parallelApi.json"), prms);
 			var id = instance.Id;
 
-			bus.Process();
+			await bus.Process();
 
 			instance = await repository.Get(id);
 			Assert.AreEqual(null, instance.CurrentState);
