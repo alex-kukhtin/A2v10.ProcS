@@ -24,27 +24,27 @@ namespace A2v10.ProcS
 			this.type = type;
 			var cts = type.GetConstructors();
 			var found = false;
-            foreach (var ct in cts)
-            {
+			foreach (var ct in cts)
+			{
 				var att = ct.GetCustomAttribute<RestoreWithAttribute>();
 				if (att != null)
 				{
 					found = true;
 					this.ct = (ct, ct.GetParameters());
 				}
-            }
-            if (!found)
-            {
-                foreach (var ct in cts)
-                {
+			}
+			if (!found)
+			{
+				foreach (var ct in cts)
+				{
 					var p = ct.GetParameters();
-                    if (p.Length == 0)
-                    {
+					if (p.Length == 0)
+					{
 						found = true;
 						this.ct = (ct, ct.GetParameters());
 					}
-                }
-            }
+				}
+			}
 			if (!found) throw new Exception("Resource must have Constructor without parameters or Constructor marked with RestoreWithAttribute");
 		}
 
@@ -52,15 +52,15 @@ namespace A2v10.ProcS
 		{
 			var prms = new object[ct.prms.Length];
 			var i = 0;
-            foreach (var p in ct.prms)
-            {
+			foreach (var p in ct.prms)
+			{
 				if (!data.ContainsKey(p.Name))
-                    throw new Exception($"There is no value for constructor parameter {p.Name}");
+					throw new Exception($"There is no value for constructor parameter {p.Name}");
 				var dt = data[p.Name];
 				if (!p.ParameterType.IsAssignableFrom(dt.GetType()))
 					dt = DynamicObject.ConvertTo(dt, p.ParameterType);
 				prms[i] = dt;
-                i++;
+				i++;
 			}
 			return Activator.CreateInstance(type, prms);
 		}

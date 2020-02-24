@@ -16,11 +16,11 @@ namespace A2v10.ProcS
 			{
 				Task.Run(task).Wait();
 			}
-            catch (Exception e)
-            {
+			catch (Exception e)
+			{
 				p.SignalEception(e);
 				return p;
-            }
+			}
 			p.SignalDone();
 			return p;
 		}
