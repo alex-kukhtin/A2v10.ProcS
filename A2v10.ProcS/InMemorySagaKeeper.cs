@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
@@ -52,7 +51,7 @@ namespace A2v10.ProcS
 		}
 
 		public ISaga Saga { get; }
-		public int HoldLevel;
+		public Int32 HoldLevel;
 	}
 
 	public class InMemorySagaKeeper : ISagaKeeper

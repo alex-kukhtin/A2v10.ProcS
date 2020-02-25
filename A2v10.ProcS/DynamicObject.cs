@@ -53,8 +53,10 @@ namespace A2v10.ProcS
 		{
 			if (data is ExpandoObject eo)
 				return new DynamicObject(eo);
-			var settings = new JsonSerializerSettings();
-			settings.ContractResolver = new InterfaceContractResolver<T>();
+			var settings = new JsonSerializerSettings()
+			{
+				ContractResolver = new InterfaceContractResolver<T>()
+			};
 			settings.Converters.Add(new StringEnumConverter());
 			var json = JsonConvert.SerializeObject(data, settings);
 			return FromJson(json);

@@ -4,8 +4,6 @@ using System;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 
-using System.Data.SqlClient;
-using System.Data;
 using A2v10.Data.Interfaces;
 
 namespace A2v10.ProcS.SqlServer
@@ -13,38 +11,35 @@ namespace A2v10.ProcS.SqlServer
 	public class SqlServerInstanceStorage : IInstanceStorage
 	{
 		private readonly IDbContext _dbContext;
-		public SqlServerInstanceStorage(IDbContext dbContext)
+		private readonly IWorkflowStorage _workflowStorage;
+		private const String Schema = "[A2v10.ProcS]";
+
+		public SqlServerInstanceStorage(IWorkflowStorage workflowStorage, IDbContext dbContext)
 		{
+			_workflowStorage = workflowStorage ?? throw new ArgumentNullException(nameof(workflowStorage));
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 		}
 
 		public async Task<IInstance> Load(Guid instanceId)
 		{
-			String cnnString = "";
-			using (var cnn = new SqlConnection(cnnString))
+			var prms = new DynamicObject();
+			prms.Set("Id", instanceId);
+			await foreach (var eo in _dbContext.ReadExpandoAsync(null, $"{Schema}.[Instance.Load]", prms))
 			{
-				await cnn.OpenAsync();
-				using (var cmd = cnn.CreateCommand())
+				var di = new DynamicObject(eo);
+				var identity = new Identity(di.Get<String>("Workflow"), di.Get<Int32>("Version"));
+				var inst = new Instance()
 				{
-					cmd.CommandText = "";
-					cmd.CommandType = CommandType.StoredProcedure;
-					using (var rdr = await cmd.ExecuteReaderAsync(CommandBehavior.SingleRow))
-					{
-						if (await rdr.ReadAsync()) {
-							// TODO: Name->FieldNo
-							//var id = rdr.GetGuid(0);
-							//var process = rdr.GetString(1);
-							//var version = rdr.GetInt32(2);
-							/*var inst = new Instance()
-							{
-								Id = id
-							};
-							*/
-						}
-					}
-				}
+					Id = instanceId,
+					Workflow = await _workflowStorage.WorkflowFromStorage(identity)
+				};
+				var instanceState = DynamicObjectConverters.FromJson(di.Get<String>("InstanceState"));
+				var workflowState = DynamicObjectConverters.FromJson(di.Get<String>("WorkflowState"));
+				inst.Restore(instanceState);
+				inst.Workflow.Restore(workflowState);
+				return inst;
 			}
-			throw new NotImplementedException("use InstanceFactory here");
+			throw new ArgumentOutOfRangeException($"Instance '{instanceId}' not found");
 		}
 
 		public async Task Save(IInstance instance)
@@ -52,15 +47,19 @@ namespace A2v10.ProcS.SqlServer
 			var identity = instance.Workflow.GetIdentity();
 			var instanceState = instance.Store();
 			var wfState = instance.Workflow.Store();
+
 			DynamicObject di = new DynamicObject();
+
 			di.Set("Id", instance.Id);
-			di.Set("Parent", instance.ParentInstanceId);
-			di.Set("Process", identity.ProcessId);
+			if (instance.ParentInstanceId != Guid.Empty)
+				di.Set("Parent", instance.ParentInstanceId);
+			di.Set("Workflow", identity.ProcessId);
 			di.Set("Version", identity.Version);
 			di.Set("IsComplete", instance.IsComplete);
 			di.Set("WorkflowState", wfState.ToJson());
 			di.Set("InstanceState", instanceState.ToJson());
-			await _dbContext.ExecuteExpandoAsync(null, "[A2v10.ProcS].[SaveInstance]", di.Root);
+
+			await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Instance.Save]", di.Root);
 		}
 	}
 }

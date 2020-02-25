@@ -1,14 +1,15 @@
 ﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using A2v10.ProcS.Infrastructure;
 using Microsoft.Extensions.Configuration;
+
+using A2v10.Data;
+using A2v10.Data.Interfaces;
+using A2v10.ProcS.Infrastructure;
+using A2v10.ProcS.SqlServer;
 
 namespace A2v10.ProcS.Tests
 {
@@ -29,13 +30,41 @@ namespace A2v10.ProcS.Tests
 			ProcS.RegisterSagas(rm, mgr);
 			pmr.RegisterResources(rm, mgr);
 
-			
-
 			var taskManager = new SyncTaskManager();
 			var keeper = new InMemorySagaKeeper(mgr.Resolver);
 			var scriptEngine = new ScriptEngine();
 			var repository = new Repository(storage, storage);
 			var bus = new ServiceBus(taskManager, keeper, repository, scriptEngine);
+			var engine = new WorkflowEngine(repository, bus, scriptEngine);
+			return (engine, repository, bus);
+		}
+
+		public static (WorkflowEngine engine, IRepository repository, ServiceBus bus) CreateSqlEngine()
+		{
+			var fullPath = Path.GetFullPath("../../../tests.config.json");
+
+			var configuration = new ConfigurationBuilder()
+				.AddJsonFile(fullPath)
+				.Build();
+
+			var profiler = new NullDataProfiler();
+			var localizer = new NullDataLocalizer();
+			var dbConfig = new DatabaseConfig(configuration);
+			var dbContext = new SqlDbContext(profiler, dbConfig, localizer);
+			var workflowStorage = new FileSystemWorkflowStorage();
+			var instanceStorage = new SqlServerInstanceStorage(workflowStorage, dbContext);
+			var repository = new Repository(workflowStorage, instanceStorage);
+
+			var taskManager = new SyncTaskManager();
+			var rm = new ResourceManager(null);
+
+			var mgr = new SagaManager(null);
+			ProcS.RegisterSagas(rm, mgr);
+			var keeper = new InMemorySagaKeeper(mgr.Resolver);
+
+			var scriptEngine = new ScriptEngine();
+			var bus = new ServiceBus(taskManager, keeper, repository, scriptEngine);
+
 			var engine = new WorkflowEngine(repository, bus, scriptEngine);
 			return (engine, repository, bus);
 		}

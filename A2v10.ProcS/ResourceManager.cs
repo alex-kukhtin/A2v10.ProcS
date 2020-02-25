@@ -50,7 +50,7 @@ namespace A2v10.ProcS
 
 		public Object Create(IDynamicObject data)
 		{
-			var prms = new object[ct.prms.Length];
+			var prms = new Object[ct.prms.Length];
 			var i = 0;
 			foreach (var p in ct.prms)
 			{
@@ -262,7 +262,7 @@ namespace A2v10.ProcS
 		public String Key { get; private set; }
 		public IDynamicObject Object { get; private set; }
 
-		private const string key = "$res";
+		private const String key = "$res";
 
 		public IDynamicObject Store()
 		{
