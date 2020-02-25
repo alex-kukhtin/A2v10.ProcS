@@ -136,13 +136,39 @@ begin
 	set transaction isolation level serializable;
 	set xact_abort on;
 
-	
 	begin tran
 	if not exists(select * from [A2v10.ProcS].Sagas where [Key] = @Key)
 		insert into [A2v10.ProcS].Sagas ([Key], [State]) values (@Key, @State)
 	select [Key], [State] from [A2v10.ProcS].Sagas where [Key] = @Key;
 	commit tran;
 	end
+go
+------------------------------------------------
+create or alter procedure [A2v10.ProcS].[Saga.Update]
+@Key nvarchar(255),
+@State nvarchar(max) = null,
+@Hold int = 0
+as
+begin
+	set nocount on;
+	set transaction isolation level serializable;
+	set xact_abort on;
+	update [A2v10.ProcS].Sagas set [State] = @State where [Key]=@Key;
+end
+go
+
+------------------------------------------------
+create or alter procedure [A2v10.ProcS].[Saga.Remove]
+@Key nvarchar(255),
+@State nvarchar(max) = null,
+@Hold int = 0
+as
+begin
+	set nocount on;
+	set transaction isolation level serializable;
+	set xact_abort on;
+	delete from [A2v10.ProcS].Sagas where [Key]=@Key;
+end
 go
 
 

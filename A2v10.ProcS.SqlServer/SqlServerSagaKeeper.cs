@@ -109,7 +109,7 @@ namespace A2v10.ProcS.SqlServer
 		{
 			var prms = new DynamicObject
 			{
-				{ "Kind", key.ToString() }
+				{ "Key", key.ToString() }
 			};
 			return _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Saga.Remove]", prms);
 		}

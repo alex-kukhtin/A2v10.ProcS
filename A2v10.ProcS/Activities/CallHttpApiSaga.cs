@@ -46,6 +46,16 @@ namespace A2v10.ProcS
 		}
 
 		public IDynamicObject Result { get; set; }
+
+		public override void Store(IDynamicObject storage)
+		{
+			storage.Set("Result", Result);
+		}
+
+		public override void Restore(IDynamicObject store)
+		{
+			Result = store.GetDynamicObject("Result");
+		}
 	}
 
 

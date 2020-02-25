@@ -73,14 +73,14 @@ namespace A2v10.ProcS
 	public class ContinueActivityMessage : MessageBase<Guid>, IResultMessage
 	{
 		public const String ukey = ProcS.ResName + ":" + nameof(ContinueActivityMessage);
-		public Guid InstanceId { get; }
+
+		public Guid InstanceId { get; private set; }
 		public IDynamicObject Result { get; set; }
-		public String Bookmark { get; }
+		public String Bookmark { get; private set; }
 
 		[RestoreWith]
 		public ContinueActivityMessage(Guid correlationId) : base(correlationId)
 		{
-
 		}
 
 		public ContinueActivityMessage(Guid instanceId, String bookmark, IDynamicObject result): base(instanceId)
@@ -95,6 +95,20 @@ namespace A2v10.ProcS
 			InstanceId = instanceId;
 			Bookmark = bookmark;
 		}
+
+		public override void Store(IDynamicObject store)
+		{
+			store.Set(nameof(InstanceId), InstanceId);
+			store.Set(nameof(Result), Result);
+			store.Set(nameof(Bookmark), Bookmark);
+		}
+
+		public override void Restore(IDynamicObject store)
+		{
+			InstanceId = store.Get<Guid>(nameof(InstanceId));
+			Result = store.GetDynamicObject(nameof(Result));
+			Bookmark = store.Get<String>(nameof(Bookmark));
+		}
 	}
 
 	[ResourceKey(ukey)]
@@ -102,15 +116,29 @@ namespace A2v10.ProcS
 	{
 		public const String ukey = ProcS.ResName + ":" + nameof(StartProcessMessage);
 
-		public Guid ParentId { get; }
+		public Guid ParentId { get; private set; }
 		public String ProcessId { get; set; }
 		public IDynamicObject Parameters { get; set; }
 
 
 		[RestoreWith]
-		public StartProcessMessage(Guid parentId) : base(parentId)
+		public StartProcessMessage(Guid correlationId) : base(correlationId)
 		{
-			ParentId = parentId;
+			ParentId = correlationId;
+		}
+
+		public override void Store(IDynamicObject store)
+		{
+			store.Set(nameof(ParentId), ParentId);
+			store.Set(nameof(ProcessId), ProcessId);
+			store.Set(nameof(Parameters), Parameters);
+		}
+
+		public override void Restore(IDynamicObject store)
+		{
+			ParentId = store.Get<Guid>(nameof(ParentId));
+			ProcessId = store.Get<String>(nameof(ProcessId));
+			Parameters = store.GetDynamicObject(nameof(Parameters));
 		}
 	}
 

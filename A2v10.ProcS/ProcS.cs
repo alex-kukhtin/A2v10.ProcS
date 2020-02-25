@@ -11,7 +11,7 @@ namespace A2v10.ProcS
 {
 	public static class ProcS
 	{
-		public const string ResName = "com.a2.procs";
+		public const String ResName = "com.a2v10.procs";
 		
 		public static void RegisterSagas(IResourceManager resourceManager, ISagaManager sagaManager)
 		{

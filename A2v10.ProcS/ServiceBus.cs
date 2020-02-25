@@ -116,14 +116,22 @@ namespace A2v10.ProcS
 		{
 			async Task task()
 			{
-				var saga = item.Saga;
-				using (var scriptContext = _scriptEngine.CreateContext())
+				try
 				{
-					var hc = new HandleContext(this, _repository, scriptContext);
-					await saga.Handle(hc, item.ServiceBusItem.Message);
+					var saga = item.Saga;
+					using (var scriptContext = _scriptEngine.CreateContext())
+					{
+						var hc = new HandleContext(this, _repository, scriptContext);
+						await saga.Handle(hc, item.ServiceBusItem.Message);
+					}
+					Send(item.ServiceBusItem.After);
+					await _sagaKeeper.ReleaseSaga(item);
+				} 
+				catch (Exception ex)
+				{
+					// TODO: ????
+					int z = 55;
 				}
-				Send(item.ServiceBusItem.After);
-				await _sagaKeeper.ReleaseSaga(item);
 			}
 			_taskManager.AddTask(task);
 		}
