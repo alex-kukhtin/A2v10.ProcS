@@ -1,10 +1,6 @@
 ﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

@@ -194,27 +194,27 @@ namespace A2v10.ProcS.Infrastructure
 			return currentContext;
 		}
 
-		public void Add(string key, object value)
+		public void Add(String key, Object value)
 		{
 			_dictionary.Add(key, value);
 		}
 
-		public bool ContainsKey(string key)
+		public Boolean ContainsKey(String key)
 		{
 			return _dictionary.ContainsKey(key);
 		}
 
-		public bool Remove(string key)
+		public Boolean Remove(String key)
 		{
 			return _dictionary.Remove(key);
 		}
 
-		public bool TryGetValue(string key, out object value)
+		public Boolean TryGetValue(String key, out Object value)
 		{
 			return _dictionary.TryGetValue(key, out value);
 		}
 
-		public void Add(KeyValuePair<string, object> item)
+		public void Add(KeyValuePair<String, Object> item)
 		{
 			_dictionary.Add(item);
 		}
@@ -224,22 +224,22 @@ namespace A2v10.ProcS.Infrastructure
 			_dictionary.Clear();
 		}
 
-		public bool Contains(KeyValuePair<string, object> item)
+		public Boolean Contains(KeyValuePair<String, Object> item)
 		{
 			return _dictionary.Contains(item);
 		}
 
-		public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
+		public void CopyTo(KeyValuePair<String, Object>[] array, Int32 arrayIndex)
 		{
 			_dictionary.CopyTo(array, arrayIndex);
 		}
 
-		public bool Remove(KeyValuePair<string, object> item)
+		public Boolean Remove(KeyValuePair<String, Object> item)
 		{
 			return _dictionary.Remove(item);
 		}
 
-		public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+		public IEnumerator<KeyValuePair<String, Object>> GetEnumerator()
 		{
 			return _dictionary.GetEnumerator();
 		}
@@ -254,17 +254,17 @@ namespace A2v10.ProcS.Infrastructure
 			return (_object as IDynamicMetaObjectProvider).GetMetaObject(parameter);
 		}
 
-		public Boolean IsEmpty => (_object == null) || (_object as IDictionary<string, object>).Count == 0;
+		public Boolean IsEmpty => (_object == null) || (_object as IDictionary<String, Object>).Count == 0;
 
-		public ICollection<string> Keys => _dictionary.Keys;
+		public ICollection<String> Keys => _dictionary.Keys;
 
-		public ICollection<object> Values => _dictionary.Values;
+		public ICollection<Object> Values => _dictionary.Values;
 
-		public int Count => _dictionary.Count;
+		public Int32 Count => _dictionary.Count;
 
-		public bool IsReadOnly => _dictionary.IsReadOnly;
+		public Boolean IsReadOnly => _dictionary.IsReadOnly;
 
-		public object this[string key]
+		public Object this[String key]
 		{
 			get => _dictionary[key];
 			set { _dictionary[key] = value; }

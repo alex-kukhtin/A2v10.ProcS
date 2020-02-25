@@ -10,7 +10,7 @@ namespace A2v10.ProcS.Plugin
 	[ResourceKey(ukey)]
 	public class TaskPluginActionMessage : MessageBase<CorrelationId<Int32>>
 	{
-		public const string ukey = "com.a2.procs.test:" + nameof(TaskPluginActionMessage);
+		public const String ukey = "com.a2.procs.test:" + nameof(TaskPluginActionMessage);
 		public Guid Id { get; }
 		[RestoreWith]
 		public TaskPluginActionMessage(Guid instanceId, CorrelationId<Int32> correlationId) : base(correlationId)
@@ -22,7 +22,7 @@ namespace A2v10.ProcS.Plugin
 
 	class TestPluginActionSaga : SagaBaseDispatched<CorrelationId<Int32>, TaskPluginActionMessage>
 	{
-		public const string ukey = "com.a2.procs.test:" + nameof(TestPluginActionSaga);
+		public const String ukey = "com.a2.procs.test:" + nameof(TestPluginActionSaga);
 
 		public TestPluginActionSaga() : base(ukey)
 		{

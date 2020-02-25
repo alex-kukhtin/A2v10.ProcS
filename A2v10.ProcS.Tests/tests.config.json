@@ -1,0 +1,5 @@
+﻿{
+	"ConnectionStrings": {
+		"Default": "Data Source=localhost;Initial Catalog=ProcS;Integrated Security=True"
+	}
+}
