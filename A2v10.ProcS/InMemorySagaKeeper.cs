@@ -105,7 +105,7 @@ namespace A2v10.ProcS
 		{
 			while (_messages.TryDequeue(out var message))
 			{
-				var saga = GetSagaForMessage(message.Message, out ISagaKeeperKey key, out Boolean isNew);
+				var saga = GetSagaForMessage(message.Message, out ISagaKeeperKey key, out _);
 				if (saga == null)
 				{
 					_messages.Enqueue(message);
