@@ -28,22 +28,21 @@ namespace A2v10.ProcS.SqlServer
 		{
 			var prms = new DynamicObject();
 			prms.Set("Id", instanceId);
-			foreach (var eo in await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Instance.Load]", prms))
+			var eo = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Instance.Load]", prms);
+			if (eo == null)
+				throw new ArgumentOutOfRangeException($"Instance '{instanceId}' not found");
+			var di = new DynamicObject(eo);
+			var identity = new Identity(di.Get<String>("Workflow"), di.Get<Int32>("Version"));
+			var inst = new Instance()
 			{
-				var di = new DynamicObject(eo);
-				var identity = new Identity(di.Get<String>("Workflow"), di.Get<Int32>("Version"));
-				var inst = new Instance()
-				{
-					Id = instanceId,
-					Workflow = await _workflowStorage.WorkflowFromStorage(identity)
-				};
-				var instanceState = DynamicObjectConverters.FromJson(di.Get<String>("InstanceState"));
-				var workflowState = DynamicObjectConverters.FromJson(di.Get<String>("WorkflowState"));
-				inst.Restore(instanceState);
-				inst.Workflow.Restore(workflowState);
-				return inst;
-			}
-			throw new ArgumentOutOfRangeException($"Instance '{instanceId}' not found");
+				Id = instanceId,
+				Workflow = await _workflowStorage.WorkflowFromStorage(identity)
+			};
+			var instanceState = DynamicObjectConverters.FromJson(di.Get<String>("InstanceState"));
+			var workflowState = DynamicObjectConverters.FromJson(di.Get<String>("WorkflowState"));
+			inst.Restore(instanceState);
+			inst.Workflow.Restore(workflowState);
+			return inst;
 		}
 
 		public async Task Save(IInstance instance)

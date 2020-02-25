@@ -118,11 +118,15 @@ begin
 
 	declare @tmp table([Message] nvarchar(max), Id bigint);
 
+	with T
+	as (
+		select top 1 Id, [Message] from [A2v10.ProcS].MessageQueue where [State] = N'Init' order by Id
+	)
 	update [A2v10.ProcS].MessageQueue set [State] = N'Hold'
 	output inserted.[Message], inserted.Id into @tmp([Message], Id)
-	from [A2v10.ProcS].MessageQueue where [State] = N'Init';
+	from T inner join [A2v10.ProcS].MessageQueue q on T.Id = q.Id;
 
-	select [Message] from @tmp order by Id;
+	select [Message] from @tmp;
 end
 go
 
@@ -159,9 +163,7 @@ go
 
 ------------------------------------------------
 create or alter procedure [A2v10.ProcS].[Saga.Remove]
-@Key nvarchar(255),
-@State nvarchar(max) = null,
-@Hold int = 0
+@Key nvarchar(255)
 as
 begin
 	set nocount on;

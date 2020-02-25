@@ -24,19 +24,19 @@ namespace A2v10.ProcS.SqlServer
 
 		public async Task<PickedSaga> PickSaga()
 		{
-			foreach (var eo in await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Message.Peek]", null))
-			{
-				var dobj = new DynamicObject(eo);
+			var eo = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Message.Peek]", null);
+			if (eo == null)
+				return new PickedSaga(false);
 
-				var msgjson = dobj.Get<String>("Message");
-				var msgdo = DynamicObjectConverters.FromJson(msgjson);
-				var message = _resourceWrapper.Unwrap<IMessage>(msgdo);
+			var dobj = new DynamicObject(eo);
+
+			var msgjson = dobj.Get<String>("Message");
+			var msgdo = DynamicObjectConverters.FromJson(msgjson);
+			var message = _resourceWrapper.Unwrap<IMessage>(msgdo);
 				
-				(ISaga saga, ISagaKeeperKey key) = await GetSagaForMessage(message);
+			(ISaga saga, ISagaKeeperKey key) = await GetSagaForMessage(message);
 
-				return new PickedSaga(key, saga, new ServiceBusItem(message));
-			}
-			return new PickedSaga(false);
+			return new PickedSaga(key, saga, new ServiceBusItem(message));
 		}
 
 		private async Task<(ISaga saga, ISagaKeeperKey key)> GetSagaForMessage(IMessage message)
@@ -47,8 +47,8 @@ namespace A2v10.ProcS.SqlServer
 			{
 				{ "Key", key.ToString() }
 			};
-			var explist = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Saga.GetOrAdd]", prms);
-			var eo = explist[0];
+
+			var eo = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Saga.GetOrAdd]", prms);
 
 			var statejson = new DynamicObject(eo).Get<String>("State");
 			var saga = sagaFactory.CreateSaga();
@@ -101,7 +101,7 @@ namespace A2v10.ProcS.SqlServer
 			if (!saga.IsComplete)
 			{
 				var ns = new SagaState(saga);
-				await AddOrUpdate(new SagaKeeperKey(saga), ns);
+				await AddOrUpdate(key, ns);
 			}
 		}
 

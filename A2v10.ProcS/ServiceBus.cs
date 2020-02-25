@@ -107,7 +107,8 @@ namespace A2v10.ProcS
 			while (!token.IsCancellationRequested)
 			{
 				var sk = await _sagaKeeper.PickSaga();
-				if (sk.Key == null) break;
+				if (sk.Key == null) 
+					break;
 				ProcessItem(sk);
 			}
 		}
