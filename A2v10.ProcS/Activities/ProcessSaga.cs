@@ -72,7 +72,7 @@ namespace A2v10.ProcS
 	[ResourceKey(ukey)]
 	public class ContinueActivityMessage : MessageBase<Guid>, IResultMessage
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(ContinueActivityMessage);
+		public const String ukey = ProcS.ResName + ":" + nameof(ContinueActivityMessage);
 		public Guid InstanceId { get; }
 		public IDynamicObject Result { get; set; }
 		public String Bookmark { get; }
@@ -100,7 +100,7 @@ namespace A2v10.ProcS
 	[ResourceKey(ukey)]
 	public class StartProcessMessage : MessageBase<Guid>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(StartProcessMessage);
+		public const String ukey = ProcS.ResName + ":" + nameof(StartProcessMessage);
 
 		public Guid ParentId { get; }
 		public String ProcessId { get; set; }
@@ -116,7 +116,7 @@ namespace A2v10.ProcS
 
 	public class ProcessSaga : SagaBaseDispatched<String, StartProcessMessage, ContinueActivityMessage>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(ProcessSaga);
+		public const String ukey = ProcS.ResName + ":" + nameof(ProcessSaga);
 
 		public ProcessSaga() : base(ukey)
 		{

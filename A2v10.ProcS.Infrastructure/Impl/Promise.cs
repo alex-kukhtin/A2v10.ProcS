@@ -9,8 +9,8 @@ namespace A2v10.ProcS.Infrastructure
 {
 	public abstract class PromiseBase
 	{
-		protected bool isDone = false;
-		protected bool isFailed = false;
+		protected Boolean isDone = false;
+		protected Boolean isFailed = false;
 		protected Action<Exception> onException = null;
 		protected Exception exception = null;
 
@@ -26,14 +26,14 @@ namespace A2v10.ProcS.Infrastructure
 			}
 		}
 
-		protected bool SignalDoneCheck()
+		protected Boolean SignalDoneCheck()
 		{
 			if (isDone) return false;
 			if (isFailed) throw new Exception("Promise already failed");
 			return true;
 		}
 
-		protected bool DoneThrow()
+		protected Boolean DoneThrow()
 		{
 			throw new Exception("Can't subscribe more than one catchers");
 		}
@@ -142,7 +142,7 @@ namespace A2v10.ProcS.Infrastructure
 			promise = new Promise();
 			tasks = promises.Select(p =>
 			{
-				var cs = new TaskCompletionSource<bool>();
+				var cs = new TaskCompletionSource<Boolean>();
 				p.Done(() => cs.SetResult(true)).Catch(promise.SignalEception);
 				return cs.Task;
 			}).ToArray();

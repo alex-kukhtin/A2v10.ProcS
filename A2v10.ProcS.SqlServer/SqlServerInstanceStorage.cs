@@ -28,7 +28,7 @@ namespace A2v10.ProcS.SqlServer
 		{
 			var prms = new DynamicObject();
 			prms.Set("Id", instanceId);
-			await foreach (var eo in _dbContext.ReadExpandoAsync(null, $"{Schema}.[Instance.Load]", prms))
+			foreach (var eo in await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Instance.Load]", prms))
 			{
 				var di = new DynamicObject(eo);
 				var identity = new Identity(di.Get<String>("Workflow"), di.Get<Int32>("Version"));

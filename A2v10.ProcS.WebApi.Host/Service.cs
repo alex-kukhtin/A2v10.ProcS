@@ -21,7 +21,7 @@ namespace A2v10.ProcS.WebApi.Host
 {
 	public class Service : BackgroundService
 	{
-		private ServiceBusAsync bus;
+		private readonly ServiceBusAsync bus;
 
 		public IResourceManager ResourceManager { get; }
 		public ISagaManager SagaManager { get; }

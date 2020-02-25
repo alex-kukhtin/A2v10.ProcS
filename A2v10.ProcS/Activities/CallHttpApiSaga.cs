@@ -13,7 +13,7 @@ namespace A2v10.ProcS
 		public const String ukey = ProcS.ResName + ":" + nameof(CallApiRequestMessage);
 
 		[RestoreWith]
-		public CallApiRequestMessage(Guid id) : base(id)
+		public CallApiRequestMessage(Guid correlationId) : base(correlationId)
 		{
 		}
 
@@ -37,7 +37,7 @@ namespace A2v10.ProcS
 	[ResourceKey(ukey)]
 	public class CallApiResponseMessage : MessageBase<Guid>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(CallApiResponseMessage);
+		public const String ukey = ProcS.ResName + ":" + nameof(CallApiResponseMessage);
 
 		[RestoreWith] 
 		public CallApiResponseMessage(Guid correlationId) : base(correlationId)

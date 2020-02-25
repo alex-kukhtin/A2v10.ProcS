@@ -189,7 +189,7 @@ namespace A2v10.ProcS
 		}
 
 		private readonly ReaderWriterLock rwl = new ReaderWriterLock();
-		private volatile TaskCompletionSource<bool> ts = null;
+		private volatile TaskCompletionSource<Boolean> ts = null;
 
 		public async Task Run(CancellationToken token)
 		{
@@ -199,7 +199,7 @@ namespace A2v10.ProcS
 				rwl.AcquireWriterLock(0);
 				try
 				{
-					ts = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+					ts = new TaskCompletionSource<Boolean>(TaskCreationOptions.RunContinuationsAsynchronously);
 				}
 				finally
 				{

@@ -24,28 +24,41 @@ namespace A2v10.ProcS.SqlServer
 
 		public async Task<PickedSaga> PickSaga()
 		{
-			await foreach (var eo in _dbContext.ReadExpandoAsync(null, $"{Schema}.[Message.Peek]", null))
+			foreach (var eo in await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Message.Peek]", null))
 			{
 				var dobj = new DynamicObject(eo);
+
 				var msgjson = dobj.Get<String>("Message");
 				var msgdo = DynamicObjectConverters.FromJson(msgjson);
 				var message = _resourceWrapper.Unwrap<IMessage>(msgdo);
+				
+				(ISaga saga, ISagaKeeperKey key) = await GetSagaForMessage(message);
 
-				var saga = GetSagaForMessage(message, out ISagaKeeperKey key, out Boolean isNew);
-				if (saga == null)
-				{
-
-				}
 				return new PickedSaga(key, saga, new ServiceBusItem(message));
 			}
 			return new PickedSaga(false);
 		}
 
-		private ISaga GetSagaForMessage(IMessage message, out ISagaKeeperKey key, out Boolean isNew)
+		private async Task<(ISaga saga, ISagaKeeperKey key)> GetSagaForMessage(IMessage message)
 		{
 			var sagaFactory = _sagaResolver.GetSagaFactory(message.GetType());
-			key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
-			isNew = false;
+			var key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
+			var prms = new DynamicObject()
+			{
+				{ "Key", key.ToString() }
+			};
+			var explist = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Saga.GetOrAdd]", prms);
+			var eo = explist[0];
+
+			var statejson = new DynamicObject(eo).Get<String>("State");
+			var saga = sagaFactory.CreateSaga();
+			saga.Restore(DynamicObjectConverters.FromJson(statejson));
+
+			return (saga, key);
+		}
+
+
+
 			/*
 			var state = sagas.GetOrAdd(key, k =>
 			{
@@ -55,8 +68,6 @@ namespace A2v10.ProcS.SqlServer
 			if (Interlocked.CompareExchange(ref state.HoldLevel, 1, 0) == 0)
 				return state.Saga;
 			*/
-			return null;
-		}
 
 		public Task ReleaseSaga(PickedSaga picked)
 		{
@@ -96,15 +107,22 @@ namespace A2v10.ProcS.SqlServer
 
 		Task RemoveSaga(ISagaKeeperKey key)
 		{
-			DynamicObject prms = new DynamicObject();
-			prms.Add("Kind", key.SagaKind);
-			prms.Add("correlationId", key.CorrelationId.ToString());
+			var prms = new DynamicObject
+			{
+				{ "Kind", key.ToString() }
+			};
 			return _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Saga.Remove]", prms);
 		}
 
 		Task AddOrUpdate(ISagaKeeperKey key, SagaState state)
 		{
-			return Task.FromResult(0);
+			var prms = new DynamicObject
+			{
+				{ "Key", key.ToString() },
+				{ "State", DynamicObjectConverters.ToJson(state.Saga.Store()) },
+				{ "Hold", state.HoldLevel }
+			};
+			return _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Saga.Update]", prms);
 		}
 	}
 }

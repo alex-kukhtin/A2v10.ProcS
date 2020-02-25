@@ -53,11 +53,10 @@ namespace A2v10.ProcS.Infrastructure
 	}
 
 	[AttributeUsage(AttributeTargets.Constructor)]
-	public class RestoreWithAttribute : Attribute
+	public sealed class RestoreWithAttribute : Attribute
 	{
 		public RestoreWithAttribute()
 		{
-			
 		}
 	}
 }

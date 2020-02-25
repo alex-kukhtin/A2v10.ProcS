@@ -47,7 +47,17 @@ begin
 	)
 end
 go
-
+------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.ProcS' and TABLE_NAME=N'Sagas')
+begin
+	create table [A2v10.ProcS].Sagas
+	(
+		[Key] nvarchar(255) not null constraint PK_Sagas primary key,
+		[State] nvarchar(max) null,
+		DateCreated datetime2 not null constraint DF_Sagas_DateCreated default(getutcdate())
+	);
+end
+go
 ------------------------------------------------
 create or alter procedure [A2v10.ProcS].[Instance.Save]
 @Id uniqueidentifier,
@@ -98,10 +108,8 @@ begin
 	insert into [A2v10.ProcS].MessageQueue ([Message]) values (@Message)
 end
 go
-
 ------------------------------------------------
 create or alter procedure [A2v10.ProcS].[Message.Peek]
-@Message nvarchar(max)
 as
 begin
 	set nocount on;
@@ -118,6 +126,33 @@ begin
 end
 go
 
+------------------------------------------------
+create or alter procedure [A2v10.ProcS].[Saga.GetOrAdd]
+@Key nvarchar(255),
+@State nvarchar(max) = null
+as
+begin
+	set nocount on;
+	set transaction isolation level serializable;
+	set xact_abort on;
+
+	
+	begin tran
+	if not exists(select * from [A2v10.ProcS].Sagas where [Key] = @Key)
+		insert into [A2v10.ProcS].Sagas ([Key], [State]) values (@Key, @State)
+	select [Key], [State] from [A2v10.ProcS].Sagas where [Key] = @Key;
+	commit tran;
+	end
+go
+
+
 select * from [A2v10.ProcS].[MessageQueue] order by Id desc;
 select * from [A2v10.ProcS].Instances order by DateCreated desc
+select * from [A2v10.ProcS].[Sagas] order by DateCreated desc;
+
+/* 
+delete from [A2v10.ProcS].[MessageQueue];
+delete from [A2v10.ProcS].Instances;
+delete from [A2v10.ProcS].[Sagas];
+*/
 
