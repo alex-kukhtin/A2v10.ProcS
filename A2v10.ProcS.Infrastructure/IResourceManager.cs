@@ -33,6 +33,7 @@ namespace A2v10.ProcS.Infrastructure
 		IStorable Wrap(Object obj);
 		Object Unwrap(IStorable res);
 		T Unwrap<T>(IStorable res) where T : class;
+		T Unwrap<T>(IDynamicObject obj) where T : class;
 	}
 
 	public interface IResourceFactory

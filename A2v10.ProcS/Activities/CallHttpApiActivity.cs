@@ -25,9 +25,8 @@ namespace A2v10.ProcS
 			}
 
 			context.ExecuteScript(CodeBefore);
-			var request = new CallApiRequestMessage()
+			var request = new CallApiRequestMessage(context.Instance.Id)
 			{
-				Id = context.Instance.Id,
 				Url = context.Resolve(Url),
 				Method = context.Resolve(Method)
 			};

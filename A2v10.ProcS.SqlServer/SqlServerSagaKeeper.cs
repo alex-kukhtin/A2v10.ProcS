@@ -12,29 +12,50 @@ namespace A2v10.ProcS.SqlServer
 	{
 		private readonly ISagaResolver _sagaResolver;
 		private readonly IDbContext _dbContext;
-		private readonly IResourceManager _resourceManager;
+		private readonly IResourceWrapper _resourceWrapper;
 		private const String Schema = "[A2v10.ProcS]";
 
-		public SqlServerSagaKeeper(ISagaResolver sagaResolver, IDbContext dbContext, IResourceManager resourceManager)
+		public SqlServerSagaKeeper(ISagaResolver sagaResolver, IDbContext dbContext, IResourceWrapper resourceWrapper)
 		{
 			_sagaResolver = sagaResolver ?? throw new ArgumentNullException(nameof(sagaResolver));
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-			_resourceManager = resourceManager ?? throw new ArgumentNullException(nameof(resourceManager));
+			_resourceWrapper = resourceWrapper ?? throw new ArgumentNullException(nameof(resourceWrapper));
 		}
 
-		public Task<PickedSaga> PickSaga()
+		public async Task<PickedSaga> PickSaga()
 		{
-			//foreach (var eo in _dbContext.LoadExpandoAsync(null, "[A2v10.ProcS].[GetMessage]");
-			/*
-			await foreach (var x in _dbContext.ReadExpandoAsync(null, $"{Schema}.[Saga.Peek]", null) {
-				var dobj = new DynamicObject(x);
+			await foreach (var eo in _dbContext.ReadExpandoAsync(null, $"{Schema}.[Message.Peek]", null))
+			{
+				var dobj = new DynamicObject(eo);
 				var msgjson = dobj.Get<String>("Message");
 				var msgdo = DynamicObjectConverters.FromJson(msgjson);
-				var msg = _resourceManager.Unwrap<IMessage>(msgdo);
+				var message = _resourceWrapper.Unwrap<IMessage>(msgdo);
+
+				var saga = GetSagaForMessage(message, out ISagaKeeperKey key, out Boolean isNew);
+				if (saga == null)
+				{
+
+				}
+				return new PickedSaga(key, saga, new ServiceBusItem(message));
 			}
-			//throw new NotImplementedException();
+			return new PickedSaga(false);
+		}
+
+		private ISaga GetSagaForMessage(IMessage message, out ISagaKeeperKey key, out Boolean isNew)
+		{
+			var sagaFactory = _sagaResolver.GetSagaFactory(message.GetType());
+			key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
+			isNew = false;
+			/*
+			var state = sagas.GetOrAdd(key, k =>
+			{
+				var saga = sagaFactory.CreateSaga();
+				return new SagaState(saga);
+			});
+			if (Interlocked.CompareExchange(ref state.HoldLevel, 1, 0) == 0)
+				return state.Saga;
 			*/
-			return Task.FromResult<PickedSaga>(new PickedSaga());
+			return null;
 		}
 
 		public Task ReleaseSaga(PickedSaga picked)
@@ -46,11 +67,18 @@ namespace A2v10.ProcS.SqlServer
 
 		public async Task SendMessage(IServiceBusItem item)
 		{
-			var toStore = item.Message.Store();
-			await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", item.Message.Store().Root);
+			var msg = _resourceWrapper.Wrap(item.Message).Store();
+			var json = DynamicObjectConverters.ToJson(msg);
+			var prm = new DynamicObject();
+			prm.Set("Message", json);
+			await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", prm);
 			if (item.After != null)
 				foreach (var a in item.After)
-					await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", a.Message.Store().Root);
+				{
+					json = DynamicObjectConverters.ToJson(_resourceWrapper.Wrap(a).Store());
+					prm.Set("Message", json);
+					await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", prm);
+				}
 		}
 
 		async Task SagaUpdate(ISaga saga, ISagaKeeperKey key)
@@ -71,7 +99,7 @@ namespace A2v10.ProcS.SqlServer
 			DynamicObject prms = new DynamicObject();
 			prms.Add("Kind", key.SagaKind);
 			prms.Add("correlationId", key.CorrelationId.ToString());
-			return _dbContext.ExecuteExpandoAsync(null, "[A2v10.ProcS].[RemoveSaga]", prms);
+			return _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Saga.Remove]", prms);
 		}
 
 		Task AddOrUpdate(ISagaKeeperKey key, SagaState state)

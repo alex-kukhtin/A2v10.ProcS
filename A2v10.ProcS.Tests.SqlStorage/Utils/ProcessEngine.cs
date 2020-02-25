@@ -28,13 +28,14 @@ namespace A2v10.ProcS.Tests.SqlStorage
 			var dbConfig = new DatabaseConfig(configuration);
 			var dbContext = new SqlDbContext(profiler, dbConfig, localizer);
 			var workflowStorage = new FileSystemWorkflowStorage();
-			var instanceStorage = new SqlServerInstanceStorage(workflowStorage, dbContext);
+			var taskManager = new SyncTaskManager();
+			
+			var rm = new ResourceManager(null);
+			var mgr = new SagaManager(null);
+
+			var instanceStorage = new SqlServerInstanceStorage(mgr.Resolver, workflowStorage, dbContext);
 			var repository = new Repository(workflowStorage, instanceStorage);
 
-			var taskManager = new SyncTaskManager();
-			var rm = new ResourceManager(null);
-
-			var mgr = new SagaManager(null);
 			ProcS.RegisterSagas(rm, mgr);
 
 			var keeper = new SqlServerSagaKeeper(mgr.Resolver, dbContext, rm);

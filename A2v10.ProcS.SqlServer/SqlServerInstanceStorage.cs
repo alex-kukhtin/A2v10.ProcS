@@ -12,12 +12,16 @@ namespace A2v10.ProcS.SqlServer
 	{
 		private readonly IDbContext _dbContext;
 		private readonly IWorkflowStorage _workflowStorage;
+		private readonly ISagaResolver _sagaResolver;
+
+
 		private const String Schema = "[A2v10.ProcS]";
 
-		public SqlServerInstanceStorage(IWorkflowStorage workflowStorage, IDbContext dbContext)
+		public SqlServerInstanceStorage(ISagaResolver sagaResolver, IWorkflowStorage workflowStorage, IDbContext dbContext)
 		{
 			_workflowStorage = workflowStorage ?? throw new ArgumentNullException(nameof(workflowStorage));
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+			_sagaResolver = sagaResolver ?? throw new ArgumentNullException(nameof(sagaResolver));
 		}
 
 		public async Task<IInstance> Load(Guid instanceId)
