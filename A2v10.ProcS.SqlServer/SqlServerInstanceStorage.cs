@@ -6,13 +6,16 @@ using A2v10.ProcS.Infrastructure;
 
 using System.Data.SqlClient;
 using System.Data;
+using A2v10.Data.Interfaces;
 
 namespace A2v10.ProcS.SqlServer
 {
 	public class SqlServerInstanceStorage : IInstanceStorage
 	{
-		public SqlServerInstanceStorage()
+		private readonly IDbContext _dbContext;
+		public SqlServerInstanceStorage(IDbContext dbContext)
 		{
+			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 		}
 
 		public async Task<IInstance> Load(Guid instanceId)
@@ -44,9 +47,20 @@ namespace A2v10.ProcS.SqlServer
 			throw new NotImplementedException("use InstanceFactory here");
 		}
 
-		public Task Save(IInstance instance)
+		public async Task Save(IInstance instance)
 		{
-			throw new NotImplementedException();
+			var identity = instance.Workflow.GetIdentity();
+			var instanceState = instance.Store();
+			var wfState = instance.Workflow.Store();
+			DynamicObject di = new DynamicObject();
+			di.Set("Id", instance.Id);
+			di.Set("Parent", instance.ParentInstanceId);
+			di.Set("Process", identity.ProcessId);
+			di.Set("Version", identity.Version);
+			di.Set("IsComplete", instance.IsComplete);
+			di.Set("WorkflowState", wfState.ToJson());
+			di.Set("InstanceState", instanceState.ToJson());
+			await _dbContext.ExecuteExpandoAsync(null, "[A2v10.ProcS].[SaveInstance]", di.Root);
 		}
 	}
 }
