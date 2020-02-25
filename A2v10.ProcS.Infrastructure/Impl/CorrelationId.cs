@@ -35,6 +35,12 @@ namespace A2v10.ProcS.Infrastructure
 			if (Value == null) return other.Value == null;
 			return Value.Equals(other.Value);
 		}
+
+		public override string ToString()
+		{
+			if (Value == null) return "null";
+			return Value.ToString();
+		}
 	}
 
 }

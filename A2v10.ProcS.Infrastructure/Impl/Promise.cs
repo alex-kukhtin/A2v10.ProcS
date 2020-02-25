@@ -16,11 +16,14 @@ namespace A2v10.ProcS.Infrastructure
 
 		public void SignalEception(Exception e)
 		{
-			if (isFailed) return;
-			if (isDone) throw new Exception("Promise already done");
-			exception = e;
-			isFailed = true;
-			onException?.Invoke(exception);
+			lock (this)
+			{
+				if (isFailed) return;
+				if (isDone) throw new Exception("Promise already done");
+				exception = e;
+				isFailed = true;
+				onException?.Invoke(exception);
+			}
 		}
 
 		protected bool SignalDoneCheck()
@@ -30,10 +33,19 @@ namespace A2v10.ProcS.Infrastructure
 			return true;
 		}
 
+		protected bool DoneThrow()
+		{
+			throw new Exception("Can't subscribe more than one catchers");
+		}
+
 		protected void BaseCatch(Action<Exception> action)
 		{
-			onException = action;
-			if (isDone) onException?.Invoke(exception);
+			lock (this)
+			{
+				if (onException != null) throw new Exception("Can't subscribe more than one catchers");
+				onException = action;
+				if (isFailed) onException?.Invoke(exception);
+			}
 		}
 	}
 
@@ -43,15 +55,22 @@ namespace A2v10.ProcS.Infrastructure
 
 		public void SignalDone()
 		{
-			if (!SignalDoneCheck()) return;
-			isDone = true;
-			onDone?.Invoke();
+			lock (this)
+			{
+				if (!SignalDoneCheck()) return;
+				isDone = true;
+				onDone?.Invoke();
+			}
 		}
 
 		public IPromise Done(Action action)
 		{
-			onDone = action;
-			if (isDone) onDone?.Invoke();
+			lock (this)
+			{
+				if (onDone != null) DoneThrow();
+				onDone = action;
+				if (isDone) onDone?.Invoke();
+			}
 			return this;
 		}
 
@@ -70,16 +89,23 @@ namespace A2v10.ProcS.Infrastructure
 
 		public void SignalDone(T res)
 		{
-			if (!SignalDoneCheck()) return;
-			result = res;
-			isDone = true;
-			onDone?.Invoke(result);
+			lock (this)
+			{
+				if (!SignalDoneCheck()) return;
+				result = res;
+				isDone = true;
+				onDone?.Invoke(result);
+			}
 		}
 
 		public IPromise<T> Done(Action<T> action)
 		{
-			onDone = action;
-			if (isDone) onDone?.Invoke(result);
+			lock (this)
+			{
+				if (onDone != null) DoneThrow();
+				onDone = action;
+				if (isDone) onDone?.Invoke(result);
+			}
 			return this;
 		}
 
@@ -91,8 +117,11 @@ namespace A2v10.ProcS.Infrastructure
 
 		public IPromise Done(Action action)
 		{
-			onDone = t => action();
-			if (isDone) onDone?.Invoke(result);
+			lock (this)
+			{
+				onDone = t => action();
+				if (isDone) onDone?.Invoke(result);
+			}
 			return this;
 		}
 
