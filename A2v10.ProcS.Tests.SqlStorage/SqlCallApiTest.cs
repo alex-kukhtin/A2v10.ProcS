@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace A2v10.ProcS.Tests
+namespace A2v10.ProcS.Tests.SqlStorage
 {
 	[TestClass]
 	[TestCategory("SqlServer storage")]

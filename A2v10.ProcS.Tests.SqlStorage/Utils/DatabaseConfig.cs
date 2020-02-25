@@ -4,7 +4,7 @@ using System;
 using Microsoft.Extensions.Configuration;
 using A2v10.Data.Interfaces;
 
-namespace A2v10.ProcS.Tests
+namespace A2v10.ProcS.Tests.SqlStorage
 {
 	public class DatabaseConfig : IDataConfiguration
 	{

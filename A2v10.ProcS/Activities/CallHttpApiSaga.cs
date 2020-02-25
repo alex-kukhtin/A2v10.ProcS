@@ -10,8 +10,9 @@ namespace A2v10.ProcS
 	[ResourceKey(ukey)]
 	public class CallApiRequestMessage : MessageBase<String>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(CallApiRequestMessage);
+		public const String ukey = ProcS.ResName + ":" + nameof(CallApiRequestMessage);
 
+		[RestoreWith]
 		public CallApiRequestMessage() : base(null)
 		{
 
@@ -20,12 +21,14 @@ namespace A2v10.ProcS
 		public Guid Id { get; set; }
 		public String Method { get; set; }
 		public String Url { get; set; }
+
 	}
 
 	[ResourceKey(ukey)]
 	public class CallApiResponseMessage : MessageBase<String>
 	{
 		public const string ukey = ProcS.ResName + ":" + nameof(CallApiResponseMessage);
+
 		[RestoreWith] 
 		public CallApiResponseMessage(String correlationId) : base(correlationId)
 		{
@@ -38,7 +41,7 @@ namespace A2v10.ProcS
 
 	public class CallHttpApiSaga : SagaBaseDispatched<String, CallApiRequestMessage, CallApiResponseMessage>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(CallHttpApiSaga);
+		public const String ukey = ProcS.ResName + ":" + nameof(CallHttpApiSaga);
 
 		public CallHttpApiSaga() : base(ukey)
 		{
@@ -48,6 +51,18 @@ namespace A2v10.ProcS
 
 		// serializable
 		private Guid _id;
+
+		public override IDynamicObject Store()
+		{
+			var d = new DynamicObject();
+			d.Set("Id", _id);
+			return d;
+		}
+
+		public override void Restore(IDynamicObject store)
+		{
+			_id = store.Get<Guid>("Id");
+		}
 
 		protected override async Task Handle(IHandleContext context, CallApiRequestMessage message)
 		{

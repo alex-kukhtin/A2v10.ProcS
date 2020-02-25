@@ -1,7 +1,6 @@
 ﻿// Copyright ©️ 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
 using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 
@@ -10,7 +9,7 @@ namespace A2v10.ProcS
 	[ResourceKey(ukey)]
 	public class RegisterCallbackMessage : MessageBase<String>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(RegisterCallbackMessage);
+		public const String ukey = ProcS.ResName + ":" + nameof(RegisterCallbackMessage);
 
 		[RestoreWith]
 		public RegisterCallbackMessage(String tag) : base(tag)
@@ -25,7 +24,7 @@ namespace A2v10.ProcS
 	[ResourceKey(ukey)]
 	public class CallbackMessage : MessageBase<String>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(CallbackMessage);
+		public const String ukey = ProcS.ResName + ":" + nameof(CallbackMessage);
 
 		[RestoreWith]
 		public CallbackMessage(String tag) : base(tag)
@@ -39,7 +38,7 @@ namespace A2v10.ProcS
 	[ResourceKey(ukey)]
 	public class WaitCallbackMessage : MessageBase<String>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(WaitCallbackMessage);
+		public const String ukey = ProcS.ResName + ":" + nameof(WaitCallbackMessage);
 
 		[RestoreWith]
 		public WaitCallbackMessage(Guid bookmark, String tag, String corrVal)
@@ -59,7 +58,7 @@ namespace A2v10.ProcS
 	[ResourceKey(ukey)]
 	public class CorrelatedCallbackMessage : MessageBase<String>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(CorrelatedCallbackMessage);
+		public const String ukey = ProcS.ResName + ":" + nameof(CorrelatedCallbackMessage);
 
 		[RestoreWith]
 		public CorrelatedCallbackMessage(String tag, String corrVal) 
@@ -73,7 +72,7 @@ namespace A2v10.ProcS
 
 	public class RegisterCallbackSaga : SagaBaseDispatched<String, RegisterCallbackMessage, CallbackMessage>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(RegisterCallbackSaga);
+		public const String ukey = ProcS.ResName + ":" + nameof(RegisterCallbackSaga);
 
 		public RegisterCallbackSaga() : base(ukey)
 		{
@@ -106,7 +105,7 @@ namespace A2v10.ProcS
 
 	public class CallbackCorrelationSaga : SagaBaseDispatched<String, WaitCallbackMessage, CorrelatedCallbackMessage>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(CallbackCorrelationSaga);
+		public const String ukey = ProcS.ResName + ":" + nameof(CallbackCorrelationSaga);
 
 		public CallbackCorrelationSaga() : base(ukey)
 		{

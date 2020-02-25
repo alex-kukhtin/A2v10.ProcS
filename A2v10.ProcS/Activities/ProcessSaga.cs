@@ -9,7 +9,8 @@ namespace A2v10.ProcS
 	[ResourceKey(ukey)]
 	public class SetBookmarkMessage : MessageBase<Guid>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(SetBookmarkMessage);
+		public const String ukey = ProcS.ResName + ":" + nameof(SetBookmarkMessage);
+
 		[RestoreWith]
 		public SetBookmarkMessage(Guid correlationId) : base(correlationId)
 		{
@@ -27,7 +28,8 @@ namespace A2v10.ProcS
 	[ResourceKey(ukey)]
 	public class ResumeBookmarkMessage : MessageBase<Guid>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(ResumeBookmarkMessage);
+		public const String ukey = ProcS.ResName + ":" + nameof(ResumeBookmarkMessage);
+
 		[RestoreWith]
 		public ResumeBookmarkMessage(Guid correlationId) : base(correlationId)
 		{
@@ -44,7 +46,7 @@ namespace A2v10.ProcS
 
 	public class BookmarkSaga : SagaBaseDispatched<Guid, SetBookmarkMessage, ResumeBookmarkMessage>
 	{
-		public const string ukey = ProcS.ResName + ":" + nameof(BookmarkSaga);
+		public const String ukey = ProcS.ResName + ":" + nameof(BookmarkSaga);
 
 		public BookmarkSaga() : base(ukey)
 		{

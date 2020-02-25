@@ -1,12 +1,12 @@
-﻿using A2v10.ProcS.Infrastructure;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace A2v10.ProcS.Tests
+using Newtonsoft.Json;
+
+using A2v10.ProcS.Infrastructure;
+
+namespace A2v10.ProcS.Tests.SqlStorage
 {
 	public class FileSystemWorkflowStorage : IWorkflowStorage
 	{

@@ -1,16 +1,10 @@
 ﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
 using System;
-using System.Linq;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 using A2v10.ProcS.Infrastructure;
-using Microsoft.Extensions.Configuration;
 
 namespace A2v10.ProcS
 {
@@ -45,7 +39,8 @@ namespace A2v10.ProcS
 					}
 				}
 			}
-			if (!found) throw new Exception("Resource must have Constructor without parameters or Constructor marked with RestoreWithAttribute");
+			if (!found) 
+				throw new Exception("Resource must have Constructor without parameters or Constructor marked with RestoreWithAttribute");
 		}
 
 		public Object Create(IDynamicObject data)

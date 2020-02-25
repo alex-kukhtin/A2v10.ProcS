@@ -44,6 +44,7 @@ begin
 	set nocount on;
 	set transaction isolation level serializable;
 	set xact_abort on;
+
 	merge [A2v10.ProcS].Instances as target
 	using (select Id=@Id) as source
 	on target.Id = source.Id
@@ -52,8 +53,8 @@ begin
 		target.WorkflowState = @WorkflowState,
 		target.InstanceState = @InstanceState
 	when not matched by target then 
-		insert(Id, Parent, Workflow, [Version])
-		values (@Id, @Parent, @Workflow, @Version)
+		insert(Id, Parent, Workflow, [Version], IsComplete, WorkflowState, InstanceState)
+		values (@Id, @Parent, @Workflow, @Version, @IsComplete, @WorkflowState, @InstanceState);
 end
 go
 
@@ -63,8 +64,13 @@ create or alter procedure [A2v10.ProcS].[Instance.Load]
 as
 begin
 	set nocount on;
-	set transaction isolation level serializable;
-	set xact_abort on;
+	set transaction isolation level read committed;
+
+	select Id, Parent, Workflow, [Version], IsComplete, WorkflowState, InstanceState
+	from [A2v10.ProcS].Instances where Id=@Id;
 end
 go
+
+
+select * from [A2v10.ProcS].Instances order by DateCreated desc
 

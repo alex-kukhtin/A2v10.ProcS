@@ -106,23 +106,11 @@ namespace A2v10.ProcS.Tests
 			var result = JsonConvert.DeserializeObject<StateMachine>(json, new JsonSerializerSettings()
 			{
 				TypeNameHandling = TypeNameHandling.Auto,
-				ContractResolver = new ActualContractResolver()
+				ContractResolver = new ActivityContractResolver()
 			}) as IWorkflowDefinition;
 			result.SetIdentity(identity);
 			return Task.FromResult(result);
 		}
 		#endregion
-	}
-
-	public class ActualContractResolver : DefaultContractResolver
-	{
-		public override JsonContract ResolveContract(Type type)
-		{
-			if (type == typeof(IActivity))
-			{
-				return base.ResolveContract(typeof(CodeActivity));
-			}
-			return base.ResolveContract(type);
-		}
 	}
 }
