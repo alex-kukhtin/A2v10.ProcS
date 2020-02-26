@@ -74,6 +74,8 @@ namespace A2v10.ProcS
 
 		public void ResumeBookmark(Guid id, IDynamicObject result)
 		{
+			if (id == Guid.Empty)
+				throw new ArgumentOutOfRangeException("ExecuteContext.ResumeBookmark. Bookmark is empty");
 			var msg = new ResumeBookmarkMessage(id, result);
 			_serviceBus.Send(msg);
 		}

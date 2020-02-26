@@ -14,15 +14,23 @@ namespace A2v10.ProcS
 		[RestoreWith]
 		public SetBookmarkMessage(Guid correlationId) : base(correlationId)
 		{
-			Id = correlationId;
 		}
 		public SetBookmarkMessage(Guid id, IResultMessage resultMessage) : this(id)
 		{
 			ResultMessage = resultMessage;
 		}
 
-		public Guid Id { get; }
-		public IResultMessage ResultMessage { get; }
+		public IResultMessage ResultMessage { get; private set; }
+
+		public override void Store(IDynamicObject store)
+		{
+			store.Set(nameof(ResultMessage), DynamicObjectConverters.From(ResultMessage));
+		}
+
+		public override void Restore(IDynamicObject store)
+		{
+			ResultMessage = store.GetDynamicObject(nameof(ResultMessage)).To<IResultMessage>();
+		}
 	}
 
 	[ResourceKey(ukey)]
@@ -35,13 +43,27 @@ namespace A2v10.ProcS
 		{
 			Id = correlationId;
 		}
-		public ResumeBookmarkMessage(Guid id, IDynamicObject result) : this(id)
+
+		public ResumeBookmarkMessage(Guid correlationId, IDynamicObject result) : this(correlationId)
 		{
+			Id = correlationId;
 			Result = result;
 		}
 
-		public Guid Id { get; }
-		public IDynamicObject Result { get; }
+		public Guid Id { get; private set; }
+		public IDynamicObject Result { get; private set; }
+
+		public override void Store(IDynamicObject store)
+		{
+			store.Set(nameof(Id), Id);
+			store.Set(nameof(Result), Result);
+		}
+
+		public override void Restore(IDynamicObject store)
+		{
+			Id = store.Get<Guid>(nameof(Id));
+			Result = store.GetDynamicObject(nameof(Result));
+		}
 	}
 
 	public class BookmarkSaga : SagaBaseDispatched<Guid, SetBookmarkMessage, ResumeBookmarkMessage>
@@ -66,6 +88,17 @@ namespace A2v10.ProcS
 			resultMessage.Result = message.Result;
 			context.SendMessage(resultMessage);
 			return Task.CompletedTask;
+		}
+
+		public override IDynamicObject Store()
+		{
+			var d = new DynamicObject();
+			d.Set(nameof(resultMessage), DynamicObjectConverters.From(resultMessage));
+			return d;
+		}
+		public override void Restore(IDynamicObject store)
+		{
+			resultMessage = store.GetDynamicObject(nameof(resultMessage)).To<IResultMessage>();
 		}
 	}
 

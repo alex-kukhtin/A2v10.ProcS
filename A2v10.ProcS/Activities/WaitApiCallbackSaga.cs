@@ -19,6 +19,18 @@ namespace A2v10.ProcS
 
 		public String Tag { get; set; }
 		public String CorrelationExpression { get; set; }
+
+		public override void Store(IDynamicObject store)
+		{
+			store.Set("tag", Tag); // !!! as constructor parameter name !!!
+			store.Set(nameof(CorrelationExpression), CorrelationExpression);
+		}
+
+		public override void Restore(IDynamicObject store)
+		{
+			Tag = store.Get<String>("tag");
+			CorrelationExpression = store.Get<String>(nameof(CorrelationExpression));
+		}
 	}
 
 	[ResourceKey(ukey)]
@@ -29,10 +41,23 @@ namespace A2v10.ProcS
 		[RestoreWith]
 		public CallbackMessage(String tag) : base(tag)
 		{
-			
+			Tag = tag;
 		}
 
+		public String Tag { get; set; }
 		public IDynamicObject Result { get; set; }
+
+		public override void Store(IDynamicObject store)
+		{
+			store.Set("tag", Tag); // !!! as constructor parameter name !!!
+			store.Set(nameof(Result), Result);
+		}
+
+		public override void Restore(IDynamicObject store)
+		{
+			Tag = store.Get<String>("tag");
+			Result = store.GetDynamicObject(nameof(Result));
+		}
 	}
 
 	[ResourceKey(ukey)]
@@ -53,6 +78,20 @@ namespace A2v10.ProcS
 
 		public String Tag { get; set; }
 		public String CorrelationValue { get; set; }
+
+		public override void Store(IDynamicObject store)
+		{
+			store.Set("bookmark", BookmarkId); // as ctor parameter name
+			store.Set("tag", Tag);
+			store.Set("corrVal", CorrelationValue);
+		}
+
+		public override void Restore(IDynamicObject store)
+		{
+			BookmarkId = store.Get<Guid>("bookmark");
+			Tag = store.Get<String>("tag");
+			CorrelationValue = store.Get<String>("corrVal");
+		}
 	}
 
 	[ResourceKey(ukey)]
@@ -61,13 +100,33 @@ namespace A2v10.ProcS
 		public const String ukey = ProcS.ResName + ":" + nameof(CorrelatedCallbackMessage);
 
 		[RestoreWith]
-		public CorrelatedCallbackMessage(String tag, String corrVal) 
-			: base($"{tag}:{corrVal}")
+		public CorrelatedCallbackMessage(String tag, String correlationId) 
+			: base(CorrelatedCallbackMessage.getBaseCorrelationId(tag, correlationId))
 		{
-
+			Tag = tag;
 		}
 
+		static String getBaseCorrelationId(String tag, String correlationId)
+		{
+			if (correlationId.StartsWith(tag))
+				return correlationId;
+			return $"{tag}:{correlationId}";
+		}
+
+		public String Tag;
 		public IDynamicObject Result { get; set; }
+
+		public override void Store(IDynamicObject store)
+		{
+			store.Set("tag", Tag); // !!! as constructor parameter name !!!
+			store.Set(nameof(Result), Result);
+		}
+
+		public override void Restore(IDynamicObject store)
+		{
+			Tag = store.Get<String>("tag");
+			Result = store.GetDynamicObject(nameof(Result));
+		}
 	}
 
 	public class RegisterCallbackSaga : SagaBaseDispatched<String, RegisterCallbackMessage, CallbackMessage>
@@ -101,6 +160,20 @@ namespace A2v10.ProcS
 			});
 			return Task.CompletedTask;
 		}
+
+		public override IDynamicObject Store()
+		{
+			var d = new DynamicObject();
+			d.Set(nameof(tag), tag);
+			d.Set(nameof(correlationExpression), correlationExpression);
+			return d;
+		}
+
+		public override void Restore(IDynamicObject store)
+		{
+			tag = store.Get<String>(nameof(tag));
+			correlationExpression = store.Get<String>(nameof(correlationExpression));
+		}
 	}
 
 	public class CallbackCorrelationSaga : SagaBaseDispatched<String, WaitCallbackMessage, CorrelatedCallbackMessage>
@@ -109,11 +182,22 @@ namespace A2v10.ProcS
 
 		public CallbackCorrelationSaga() : base(ukey)
 		{
-
 		}
 
 		// serializable
 		private Guid bookmark;
+
+		public override IDynamicObject Store()
+		{
+			var d = new DynamicObject();
+			d.Set(nameof(bookmark), bookmark);
+			return d;
+		}
+
+		public override void Restore(IDynamicObject store)
+		{
+			bookmark = store.Get<Guid>(nameof(bookmark));
+		}
 
 		protected override Task Handle(IHandleContext context, WaitCallbackMessage message)
 		{

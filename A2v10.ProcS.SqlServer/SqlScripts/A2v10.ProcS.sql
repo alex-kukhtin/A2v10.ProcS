@@ -40,6 +40,8 @@ begin
 	(
 		Id	bigint	not null constraint PK_MessageQueue primary key
 			constraint DF_MessageQueue_PK default(next value for [A2v10.ProcS].SQ_MessageQueue),
+		Parent bigint null
+			constraint FK_MessageQueue_Parent_MessageQueue references [A2v10.ProcS].MessageQueue(Id),
 		[Message] nvarchar(max),
 		[State] nvarchar(32) not null
 			constraint DF_MessageQueue_State default(N'Init'),
@@ -99,13 +101,21 @@ end
 go
 ------------------------------------------------
 create or alter procedure [A2v10.ProcS].[Message.Send]
-@Message nvarchar(max)
+@Message nvarchar(max),
+@Parent bigint = null,
+@RetId bigint output
 as
 begin
 	set nocount on;
 	set transaction isolation level serializable;
 	set xact_abort on;
-	insert into [A2v10.ProcS].MessageQueue ([Message]) values (@Message)
+	declare @rtable table(Id bigint);
+
+	insert into [A2v10.ProcS].MessageQueue ([Message], Parent, [State]) 
+	output inserted.Id into @rtable(id)
+	values (@Message, @Parent, case when @Parent is not null then N'Wait' else N'Init' end);
+
+	select top(1) @RetId = Id from @rtable;
 end
 go
 ------------------------------------------------
@@ -116,7 +126,7 @@ begin
 	set transaction isolation level serializable;
 	set xact_abort on;
 
-	declare @tmp table([Message] nvarchar(max), Id bigint);
+	declare @tmp table([Message] nvarchar(max), [After] nvarchar(max), Id bigint);
 
 	with T
 	as (
@@ -124,12 +134,17 @@ begin
 	)
 	update [A2v10.ProcS].MessageQueue set [State] = N'Hold'
 	output inserted.[Message], inserted.Id into @tmp([Message], Id)
-	from T inner join [A2v10.ProcS].MessageQueue q on T.Id = q.Id;
+	from T inner join [A2v10.ProcS].MessageQueue q on T.Id = q.Id 
 
-	select [Message] from @tmp;
+	declare @Id bigint;
+	select @Id = Id from @tmp;
+
+	-- queue dependent messages
+	update [A2v10.ProcS].MessageQueue set [State] = N'Init' where Parent = @Id and [State] = N'Wait';
+
+	select [Id], [Message] from @tmp;
 end
 go
-
 ------------------------------------------------
 create or alter procedure [A2v10.ProcS].[Saga.GetOrAdd]
 @Key nvarchar(255),

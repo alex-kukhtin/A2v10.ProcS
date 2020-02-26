@@ -10,7 +10,7 @@ namespace A2v10.ProcS.Infrastructure
 		{
 			CorrelationId = new CorrelationId<CorrelationT>(correlationId);
 		}
-
+		
 		public CorrelationId<CorrelationT> CorrelationId { get; }
 
 		ICorrelationId IMessage.CorrelationId => CorrelationId;

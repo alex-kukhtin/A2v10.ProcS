@@ -33,7 +33,8 @@ namespace A2v10.ProcS.SqlServer
 			var msgjson = dobj.Get<String>("Message");
 			var msgdo = DynamicObjectConverters.FromJson(msgjson);
 			var message = _resourceWrapper.Unwrap<IMessage>(msgdo);
-				
+			Int64 msgid = dobj.Get<Int64>("Id");
+
 			(ISaga saga, ISagaKeeperKey key) = await GetSagaForMessage(message);
 
 			return new PickedSaga(key, saga, new ServiceBusItem(message));
@@ -50,24 +51,13 @@ namespace A2v10.ProcS.SqlServer
 
 			var eo = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Saga.GetOrAdd]", prms);
 
-			var statejson = new DynamicObject(eo).Get<String>("State");
 			var saga = sagaFactory.CreateSaga();
-			saga.Restore(DynamicObjectConverters.FromJson(statejson));
+			var statejson = new DynamicObject(eo).Get<String>("State");
+			if (!String.IsNullOrEmpty(statejson))
+				saga.Restore(DynamicObjectConverters.FromJson(statejson));
 
 			return (saga, key);
 		}
-
-
-
-			/*
-			var state = sagas.GetOrAdd(key, k =>
-			{
-				var saga = sagaFactory.CreateSaga();
-				return new SagaState(saga);
-			});
-			if (Interlocked.CompareExchange(ref state.HoldLevel, 1, 0) == 0)
-				return state.Saga;
-			*/
 
 		public Task ReleaseSaga(PickedSaga picked)
 		{
@@ -82,14 +72,20 @@ namespace A2v10.ProcS.SqlServer
 			var json = DynamicObjectConverters.ToJson(msg);
 			var prm = new DynamicObject();
 			prm.Set("Message", json);
+			prm.Set("Id", (Int64)0);
 			await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", prm);
+			Int64 msgId = prm.Get<Int64>("Id");
 			if (item.After != null)
+			{
 				foreach (var a in item.After)
 				{
-					json = DynamicObjectConverters.ToJson(_resourceWrapper.Wrap(a).Store());
-					prm.Set("Message", json);
+					var aftermsg = _resourceWrapper.Wrap(a.Message).Store();
+					var afterjson = DynamicObjectConverters.ToJson(aftermsg);
+					prm.Set("Message", afterjson);
+					prm.Set("Parent", msgId);
 					await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", prm);
 				}
+			}
 		}
 
 		async Task SagaUpdate(ISaga saga, ISagaKeeperKey key)

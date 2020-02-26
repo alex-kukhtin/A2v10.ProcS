@@ -50,11 +50,14 @@ namespace A2v10.ProcS
 			foreach (var p in ct.prms)
 			{
 				if (!data.ContainsKey(p.Name))
-					throw new Exception($"There is no value for constructor parameter {p.Name}");
+					throw new Exception($"There is no value for constructor parameter '{p.Name}'");
 				var dt = data[p.Name];
-				if (!p.ParameterType.IsAssignableFrom(dt.GetType()))
-					dt = DynamicObject.ConvertTo(dt, p.ParameterType);
-				prms[i] = dt;
+				if (dt != null)
+				{
+					if (!p.ParameterType.IsAssignableFrom(dt.GetType()))
+						dt = DynamicObject.ConvertTo(dt, p.ParameterType);
+					prms[i] = dt;
+				}
 				i++;
 			}
 			return Activator.CreateInstance(type, prms);
@@ -168,10 +171,13 @@ namespace A2v10.ProcS
 		{
 			var type = obj.GetType();
 			var att = type.GetCustomAttribute<ResourceKeyAttribute>();
-			if (att == null) throw new Exception("Resource must have ResourceKeyAttribute");
+			if (att == null) 
+				throw new InvalidProgramException("Resource must have ResourceKeyAttribute");
 			IDynamicObject data;
-			if (obj is IStorable sto) data = sto.Store();
-			else data = new DynamicObject();
+			if (obj is IStorable sto) 
+				data = sto.Store();
+			else 
+				data = new DynamicObject();
 			return new Resource(att.Key, data);
 		}
 

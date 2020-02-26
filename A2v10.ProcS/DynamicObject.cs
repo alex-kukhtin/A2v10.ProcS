@@ -92,5 +92,10 @@ namespace A2v10.ProcS
 				return null;
 			return JsonConvert.DeserializeObject<T>(obj.ToJson());
 		}
+
+		public static String Serialize(Object obj)
+		{
+			return JsonConvert.SerializeObject(obj);
+		}
 	}
 }
