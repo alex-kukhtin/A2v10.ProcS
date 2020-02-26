@@ -10,6 +10,7 @@ using A2v10.Data;
 using A2v10.Data.Interfaces;
 using A2v10.ProcS.Infrastructure;
 using A2v10.ProcS.SqlServer;
+using Microsoft.Extensions.Configuration.UserSecrets;
 
 namespace A2v10.ProcS.Tests.SqlStorage
 {
@@ -21,6 +22,7 @@ namespace A2v10.ProcS.Tests.SqlStorage
 
 			var configuration = new ConfigurationBuilder()
 				.AddJsonFile(fullPath)
+				.AddUserSecrets<DatabaseConfig>()
 				.Build();
 
 			var profiler = new NullDataProfiler();
