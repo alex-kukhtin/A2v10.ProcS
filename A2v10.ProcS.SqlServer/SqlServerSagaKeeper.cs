@@ -35,12 +35,12 @@ namespace A2v10.ProcS.SqlServer
 			var message = _resourceWrapper.Unwrap<IMessage>(msgdo);
 			Int64 msgid = dobj.Get<Int64>("Id");
 
-			(ISaga saga, ISagaKeeperKey key) = await GetSagaForMessage(message);
+			(Guid id, ISaga saga) = await GetSagaForMessage(message);
 
-			return new PickedSaga(key, saga, new ServiceBusItem(message));
+			return new PickedSaga(id, saga, new ServiceBusItem(message));
 		}
 
-		private async Task<(ISaga saga, ISagaKeeperKey key)> GetSagaForMessage(IMessage message)
+		private async Task<(Guid id, ISaga saga)> GetSagaForMessage(IMessage message)
 		{
 			var sagaFactory = _sagaResolver.GetSagaFactory(message.GetType());
 			var key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
@@ -50,20 +50,21 @@ namespace A2v10.ProcS.SqlServer
 			};
 
 			var eo = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Saga.GetOrAdd]", prms);
+			var edo = new DynamicObject(eo);
 
 			var saga = sagaFactory.CreateSaga();
-			var statejson = new DynamicObject(eo).Get<String>("State");
+			var statejson = edo.Get<String>("State");
 			if (!String.IsNullOrEmpty(statejson))
 				saga.Restore(DynamicObjectConverters.FromJson(statejson), _resourceWrapper);
 
-			return (saga, key);
+			return (edo.Get<Guid>("Id"), saga);
 		}
 
 		public Task ReleaseSaga(PickedSaga picked)
 		{
 			if (!picked.Available) 
 				throw new InvalidOperationException("Saga is not picked");
-			return SagaUpdate(picked.Saga, picked.Key);
+			return SagaUpdate(picked.Saga, picked.Id);
 		}
 
 		public async Task SendMessage(IServiceBusItem item)
@@ -88,17 +89,9 @@ namespace A2v10.ProcS.SqlServer
 			}
 		}
 
-		async Task SagaUpdate(ISaga saga, ISagaKeeperKey key)
+		Task SagaUpdate(ISaga saga, Guid id)
 		{
-			if (saga.IsComplete || saga.CorrelationId == null || !saga.CorrelationId.Equals(key.CorrelationId))
-			{
-				await RemoveSaga(key);
-			}
-			if (!saga.IsComplete)
-			{
-				var ns = new SagaState(saga);
-				await AddOrUpdate(key, ns);
-			}
+			return Task.CompletedTask;
 		}
 
 		Task RemoveSaga(ISagaKeeperKey key)

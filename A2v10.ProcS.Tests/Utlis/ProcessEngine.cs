@@ -14,14 +14,14 @@ namespace A2v10.ProcS.Tests
 	{
 		public static (WorkflowEngine engine, IRepository repository, ServiceBus bus) CreateEngine()
 		{
-			var storage = new FakeStorage();
+			var rm = new ResourceManager(null);
+
+			var storage = new FakeStorage(rm);
 			var pmr = new PluginManager(null);
 
 			String pluginPath = GetPluginPath();
 			var configuration = new ConfigurationBuilder().Build();
 			pmr.LoadPlugins(pluginPath, configuration);
-
-			var rm = new ResourceManager(null);
 			
 			var mgr = new SagaManager(null);
 			ProcS.RegisterSagas(rm, mgr);

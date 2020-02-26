@@ -25,13 +25,14 @@ namespace A2v10.ProcS.Tests
 		private readonly String path;
 		private readonly IResourceWrapper _wrapper;
 
-		public FakeStorage() : this("../../../../Workflows/")
+		public FakeStorage(IResourceWrapper wrapper) : this(wrapper, "../../../../Workflows/")
 		{
 			
 		}
 
-		public FakeStorage(String path)
+		public FakeStorage(IResourceWrapper wrapper, String path)
 		{
+			_wrapper = wrapper;
 			this.path = path;
 		}
 

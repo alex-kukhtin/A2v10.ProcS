@@ -39,5 +39,6 @@ namespace A2v10.ProcS.Infrastructure
 		ISagaFactory GetSagaFactory(IMessage message);
 		ISagaFactory GetSagaFactory(Type messageType);
 		ISagaFactory GetSagaFactory<TMessage>() where TMessage : IMessage;
+		IEnumerable<KeyValuePair<String, ISagaFactory>> GetMap();
 	}
 }
