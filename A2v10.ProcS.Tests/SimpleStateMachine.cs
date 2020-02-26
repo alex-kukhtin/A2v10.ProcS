@@ -17,7 +17,7 @@ namespace A2v10.ProcS.Tests
 		public async Task LoadDefinition()
 		{
 
-			var storage = new FakeStorage();
+			var storage = new FakeStorage(null);
 			var stm = await storage.WorkflowFromStorage(new Identity("simple.json")) as StateMachine;
 
 			Assert.AreEqual("S1", stm.InitialState);

@@ -17,21 +17,21 @@ namespace A2v10.ProcS.Infrastructure
 		public PickedSaga(Boolean avail)
 		{
 			Available = avail;
-			Key = null;
+			Id = Guid.Empty;
 			Saga = null;
 			ServiceBusItem = null;
 		}
 
-		public PickedSaga(ISagaKeeperKey key, ISaga saga, IServiceBusItem item)
+		public PickedSaga(Guid id, ISaga saga, IServiceBusItem item)
 		{
 			Available = true;
-			Key = key;
+			Id = id;
 			Saga = saga;
 			ServiceBusItem = item;
 		}
 
 		public Boolean Available;
-		public ISagaKeeperKey Key;
+		public Guid Id;
 		public ISaga Saga;
 		public IServiceBusItem ServiceBusItem;
 	}

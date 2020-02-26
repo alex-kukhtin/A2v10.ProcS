@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
@@ -65,19 +66,18 @@ namespace A2v10.ProcS
 			this.sagaResolver = sagaResolver;
 		}
 
-		private ISaga GetSagaForMessage(IMessage message, out ISagaKeeperKey key, out Boolean isNew)
+		private (ISagaKeeperKey key, ISaga saga) GetSagaForMessage(IMessage message)
 		{
 			var sagaFactory = sagaResolver.GetSagaFactory(message.GetType());
-			key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
-			isNew = false;
+			var key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
 			var state = sagas.GetOrAdd(key, k =>
 			{
 				var saga = sagaFactory.CreateSaga();
 				return new SagaState(saga);
 			});
 			if (Interlocked.CompareExchange(ref state.HoldLevel, 1, 0) == 0)
-				return state.Saga;
-			return null;
+				return (key, state.Saga);
+			return default;
 		}
 
 		private void SagaUpdate(ISaga saga, ISagaKeeperKey key)
@@ -101,25 +101,29 @@ namespace A2v10.ProcS
 			return Task.CompletedTask;
 		}
 
+		private readonly Dictionary<Guid, ISagaKeeperKey> picked = new Dictionary<Guid, ISagaKeeperKey>();
+
 		public Task<PickedSaga> PickSaga()
 		{
 			while (_messages.TryDequeue(out var message))
 			{
-				var saga = GetSagaForMessage(message.Message, out ISagaKeeperKey key, out _);
-				if (saga == null)
+				var saga = GetSagaForMessage(message.Message);
+				if (saga == default)
 				{
 					_messages.Enqueue(message);
 					continue;
 				}
-				return Task.FromResult(new PickedSaga(key, saga, message));
+				var id = Guid.NewGuid();
+				picked.Add(id, saga.key);
+				return Task.FromResult(new PickedSaga(id, saga.saga, message));
 			}
 			return Task.FromResult(new PickedSaga(false));
 		}
 
 		public Task ReleaseSaga(PickedSaga picked)
 		{
-			if (!picked.Available) throw new Exception("Saga is not picked");
-			SagaUpdate(picked.Saga, picked.Key);
+			if (!picked.Available || !this.picked.ContainsKey(picked.Id)) throw new Exception("Saga is not picked");
+			SagaUpdate(picked.Saga, this.picked[picked.Id]);
 			return Task.CompletedTask;
 		}
 	}

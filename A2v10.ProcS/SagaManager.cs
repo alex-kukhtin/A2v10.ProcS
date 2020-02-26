@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace A2v10.ProcS
 	
 	public class SagaManager : ISagaManager
 	{
-		protected readonly Dictionary<Type, ISagaFactory> _messagesMap = new Dictionary<Type, ISagaFactory>();
+		protected readonly Dictionary<String, ISagaFactory> _messagesMap = new Dictionary<String, ISagaFactory>();
 		protected readonly IServiceProvider serviceProvider;
 
 		public SagaManager(IServiceProvider serviceProvider)
@@ -62,24 +63,26 @@ namespace A2v10.ProcS
 		{
 			foreach (var t in types)
 			{
-				_messagesMap.Add(t, factory);
+				var att = t.GetCustomAttribute<ResourceKeyAttribute>();
+				if (att == null) throw new Exception("Registred message type must have ResourceKeyAttribute");
+				_messagesMap.Add(att.Key, factory);
 			}
 		}
 
-		protected ISagaFactory GetFactory(Type type)
-		{
-			return _messagesMap[type];
-		}
-
-		public ISagaResolver Resolver => new InternalResolver(GetFactory);
+		public ISagaResolver Resolver => new InternalResolver(_messagesMap);
 
 		protected class InternalResolver : ISagaResolver
 		{
-			private readonly Func<Type, ISagaFactory> map;
+			private readonly IDictionary<String, ISagaFactory> map;
 
-			public InternalResolver(Func<Type, ISagaFactory> map)
+			public InternalResolver(IDictionary<String, ISagaFactory> map)
 			{
 				this.map = map;
+			}
+
+			public IEnumerable<KeyValuePair<String, ISagaFactory>> GetMap()
+			{
+				return map;
 			}
 
 			public ISagaFactory GetSagaFactory(IMessage message)
@@ -89,7 +92,8 @@ namespace A2v10.ProcS
 
 			public ISagaFactory GetSagaFactory(Type messageType)
 			{
-				return map(messageType);
+				var att = messageType.GetCustomAttribute<ResourceKeyAttribute>();
+				return map[att.Key];
 			}
 
 			public ISagaFactory GetSagaFactory<TMessage>() where TMessage : IMessage
