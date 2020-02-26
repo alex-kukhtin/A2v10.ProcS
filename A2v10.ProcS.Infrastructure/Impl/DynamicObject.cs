@@ -89,10 +89,14 @@ namespace A2v10.ProcS.Infrastructure
 		{
 			if (this.TryGetValue(name, out Object val))
 			{
+				if (val == null)
+					return null;
 				if (val is ExpandoObject eo)
 					return new DynamicObject(eo);
 				else if (val is DynamicObject dobj)
+				{
 					return dobj;
+				}
 				else
 					throw new Exception($"The field \"{name}\" is not a DynamicObject");
 			}

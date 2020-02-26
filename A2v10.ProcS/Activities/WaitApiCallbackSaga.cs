@@ -20,13 +20,13 @@ namespace A2v10.ProcS
 		public String Tag { get; set; }
 		public String CorrelationExpression { get; set; }
 
-		public override void Store(IDynamicObject store)
+		public override void Store(IDynamicObject store, IResourceWrapper _)
 		{
 			store.Set("tag", Tag); // !!! as constructor parameter name !!!
 			store.Set(nameof(CorrelationExpression), CorrelationExpression);
 		}
 
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			Tag = store.Get<String>("tag");
 			CorrelationExpression = store.Get<String>(nameof(CorrelationExpression));
@@ -47,13 +47,13 @@ namespace A2v10.ProcS
 		public String Tag { get; set; }
 		public IDynamicObject Result { get; set; }
 
-		public override void Store(IDynamicObject store)
+		public override void Store(IDynamicObject store, IResourceWrapper _)
 		{
 			store.Set("tag", Tag); // !!! as constructor parameter name !!!
 			store.Set(nameof(Result), Result);
 		}
 
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			Tag = store.Get<String>("tag");
 			Result = store.GetDynamicObject(nameof(Result));
@@ -79,14 +79,14 @@ namespace A2v10.ProcS
 		public String Tag { get; set; }
 		public String CorrelationValue { get; set; }
 
-		public override void Store(IDynamicObject store)
+		public override void Store(IDynamicObject store, IResourceWrapper _)
 		{
 			store.Set("bookmark", BookmarkId); // as ctor parameter name
 			store.Set("tag", Tag);
 			store.Set("corrVal", CorrelationValue);
 		}
 
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			BookmarkId = store.Get<Guid>("bookmark");
 			Tag = store.Get<String>("tag");
@@ -100,31 +100,28 @@ namespace A2v10.ProcS
 		public const String ukey = ProcS.ResName + ":" + nameof(CorrelatedCallbackMessage);
 
 		[RestoreWith]
-		public CorrelatedCallbackMessage(String tag, String correlationId) 
-			: base(CorrelatedCallbackMessage.getBaseCorrelationId(tag, correlationId))
+		public CorrelatedCallbackMessage(String tag, String corrId)
+			: base($"{tag}:{corrId}")
 		{
 			Tag = tag;
-		}
-
-		static String getBaseCorrelationId(String tag, String correlationId)
-		{
-			if (correlationId.StartsWith(tag))
-				return correlationId;
-			return $"{tag}:{correlationId}";
+			CorrId = corrId;
 		}
 
 		public String Tag;
+		public String CorrId;
 		public IDynamicObject Result { get; set; }
 
-		public override void Store(IDynamicObject store)
+		public override void Store(IDynamicObject store, IResourceWrapper _)
 		{
 			store.Set("tag", Tag); // !!! as constructor parameter name !!!
+			store.Set("corrId", CorrId); // !!! as constructor parameter name !!!
 			store.Set(nameof(Result), Result);
 		}
 
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
-			Tag = store.Get<String>("tag");
+			//Tag = store.Get<String>("tag");
+			//CorrId = store.Get<String>("corrId");
 			Result = store.GetDynamicObject(nameof(Result));
 		}
 	}
@@ -161,7 +158,7 @@ namespace A2v10.ProcS
 			return Task.CompletedTask;
 		}
 
-		public override IDynamicObject Store()
+		public override IDynamicObject Store(IResourceWrapper _)
 		{
 			var d = new DynamicObject();
 			d.Set(nameof(tag), tag);
@@ -169,7 +166,7 @@ namespace A2v10.ProcS
 			return d;
 		}
 
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			tag = store.Get<String>(nameof(tag));
 			correlationExpression = store.Get<String>(nameof(correlationExpression));
@@ -187,14 +184,14 @@ namespace A2v10.ProcS
 		// serializable
 		private Guid bookmark;
 
-		public override IDynamicObject Store()
+		public override IDynamicObject Store(IResourceWrapper _)
 		{
 			var d = new DynamicObject();
 			d.Set(nameof(bookmark), bookmark);
 			return d;
 		}
 
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			bookmark = store.Get<Guid>(nameof(bookmark));
 		}

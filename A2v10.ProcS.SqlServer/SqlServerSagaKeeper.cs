@@ -54,7 +54,7 @@ namespace A2v10.ProcS.SqlServer
 			var saga = sagaFactory.CreateSaga();
 			var statejson = new DynamicObject(eo).Get<String>("State");
 			if (!String.IsNullOrEmpty(statejson))
-				saga.Restore(DynamicObjectConverters.FromJson(statejson));
+				saga.Restore(DynamicObjectConverters.FromJson(statejson), _resourceWrapper);
 
 			return (saga, key);
 		}
@@ -68,7 +68,7 @@ namespace A2v10.ProcS.SqlServer
 
 		public async Task SendMessage(IServiceBusItem item)
 		{
-			var msg = _resourceWrapper.Wrap(item.Message).Store();
+			var msg = _resourceWrapper.Wrap(item.Message).Store(_resourceWrapper);
 			var json = DynamicObjectConverters.ToJson(msg);
 			var prm = new DynamicObject();
 			prm.Set("Message", json);
@@ -79,7 +79,7 @@ namespace A2v10.ProcS.SqlServer
 			{
 				foreach (var a in item.After)
 				{
-					var aftermsg = _resourceWrapper.Wrap(a.Message).Store();
+					var aftermsg = _resourceWrapper.Wrap(a.Message).Store(_resourceWrapper);
 					var afterjson = DynamicObjectConverters.ToJson(aftermsg);
 					prm.Set("Message", afterjson);
 					prm.Set("Parent", msgId);
@@ -115,7 +115,7 @@ namespace A2v10.ProcS.SqlServer
 			var prms = new DynamicObject
 			{
 				{ "Key", key.ToString() },
-				{ "State", DynamicObjectConverters.ToJson(state.Saga.Store()) },
+				{ "State", DynamicObjectConverters.ToJson(state.Saga.Store(_resourceWrapper)) },
 				{ "Hold", state.HoldLevel }
 			};
 			return _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Saga.Update]", prms);

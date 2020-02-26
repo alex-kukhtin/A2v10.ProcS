@@ -23,10 +23,11 @@ namespace A2v10.ProcS.Tests
 		private readonly Dictionary<Guid, InstanceItem> _instances = new Dictionary<Guid, InstanceItem>();
 
 		private readonly String path;
+		private readonly IResourceWrapper _wrapper;
 
 		public FakeStorage() : this("../../../../Workflows/")
 		{
-
+			
 		}
 
 		public FakeStorage(String path)
@@ -54,10 +55,10 @@ namespace A2v10.ProcS.Tests
 				if (item.WorkflowState != null)
 				{
 					var workflowState = DynamicObjectConverters.FromJson(item.WorkflowState);
-					instance.Workflow.Restore(workflowState);
+					instance.Workflow.Restore(workflowState, _wrapper);
 				}
 
-				instance.Restore(DynamicObjectConverters.FromJson(item.InstanceData));
+				instance.Restore(DynamicObjectConverters.FromJson(item.InstanceData), _wrapper);
 
 				return instance;
 			}
@@ -66,7 +67,7 @@ namespace A2v10.ProcS.Tests
 
 		public Task Save(IInstance instance)
 		{
-			IDynamicObject state = instance.Workflow.Store();
+			IDynamicObject state = instance.Workflow.Store(_wrapper);
 			String stateJson = null;
 
 			if (state != null)
@@ -83,7 +84,7 @@ namespace A2v10.ProcS.Tests
 				_instances.Add(instance.Id, item);
 			}
 			item.WorkflowState = stateJson;
-			item.InstanceData =  instance.Store().ToJson();
+			item.InstanceData =  instance.Store(_wrapper).ToJson();
 			return Task.FromResult(0);
 		}
 

@@ -13,15 +13,17 @@ namespace A2v10.ProcS.SqlServer
 		private readonly IDbContext _dbContext;
 		private readonly IWorkflowStorage _workflowStorage;
 		private readonly ISagaResolver _sagaResolver;
+		private readonly IResourceWrapper _resourceWrapper;
 
 
 		private const String Schema = "[A2v10.ProcS]";
 
-		public SqlServerInstanceStorage(ISagaResolver sagaResolver, IWorkflowStorage workflowStorage, IDbContext dbContext)
+		public SqlServerInstanceStorage(ISagaResolver sagaResolver, IWorkflowStorage workflowStorage, IDbContext dbContext, IResourceWrapper resourceWrapper)
 		{
 			_workflowStorage = workflowStorage ?? throw new ArgumentNullException(nameof(workflowStorage));
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 			_sagaResolver = sagaResolver ?? throw new ArgumentNullException(nameof(sagaResolver));
+			_resourceWrapper = resourceWrapper ?? throw new ArgumentNullException(nameof(resourceWrapper));
 		}
 
 		public async Task<IInstance> Load(Guid instanceId)
@@ -40,16 +42,16 @@ namespace A2v10.ProcS.SqlServer
 			};
 			var instanceState = DynamicObjectConverters.FromJson(di.Get<String>("InstanceState"));
 			var workflowState = DynamicObjectConverters.FromJson(di.Get<String>("WorkflowState"));
-			inst.Restore(instanceState);
-			inst.Workflow.Restore(workflowState);
+			inst.Restore(instanceState, _resourceWrapper);
+			inst.Workflow.Restore(workflowState, _resourceWrapper);
 			return inst;
 		}
 
 		public async Task Save(IInstance instance)
 		{
 			var identity = instance.Workflow.GetIdentity();
-			var instanceState = instance.Store();
-			var wfState = instance.Workflow.Store();
+			var instanceState = instance.Store(_resourceWrapper);
+			var wfState = instance.Workflow.Store(_resourceWrapper);
 
 			DynamicObject di = new DynamicObject();
 

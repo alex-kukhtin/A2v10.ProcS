@@ -61,14 +61,14 @@ namespace A2v10.ProcS
 
 		const String waitingName = "Waiting";
 
-		public IDynamicObject Store()
+		public IDynamicObject Store(IResourceWrapper _)
 		{
 			var d = new DynamicObject();
 			d.Set(waitingName, _waiting);
 			return d;
 		}
 
-		public void Restore(IDynamicObject store)
+		public void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			var elems = store.GetEnumerableOrNull<Boolean>(waitingName);
 			if (elems != null)

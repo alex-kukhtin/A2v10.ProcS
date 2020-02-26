@@ -20,13 +20,13 @@ namespace A2v10.ProcS
 		public String Method { get; set; }
 		public String Url { get; set; }
 
-		public override void Store(IDynamicObject storage)
+		public override void Store(IDynamicObject storage, IResourceWrapper _)
 		{
 			storage.Set(nameof(Method), Method);
 			storage.Set(nameof(Url), Url);
 		}
 
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			Method = store.Get<String>(nameof(Method));
 			Url = store.Get<String>(nameof(Url));
@@ -47,12 +47,12 @@ namespace A2v10.ProcS
 
 		public IDynamicObject Result { get; set; }
 
-		public override void Store(IDynamicObject storage)
+		public override void Store(IDynamicObject storage, IResourceWrapper _)
 		{
 			storage.Set("Result", Result);
 		}
 
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			Result = store.GetDynamicObject("Result");
 		}

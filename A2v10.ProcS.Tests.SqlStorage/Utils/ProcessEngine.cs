@@ -33,7 +33,7 @@ namespace A2v10.ProcS.Tests.SqlStorage
 			var rm = new ResourceManager(null);
 			var mgr = new SagaManager(null);
 
-			var instanceStorage = new SqlServerInstanceStorage(mgr.Resolver, workflowStorage, dbContext);
+			var instanceStorage = new SqlServerInstanceStorage(mgr.Resolver, workflowStorage, dbContext, rm);
 			var repository = new Repository(workflowStorage, instanceStorage);
 
 			ProcS.RegisterSagas(rm, mgr);

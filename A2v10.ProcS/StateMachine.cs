@@ -73,25 +73,25 @@ namespace A2v10.ProcS
 
 		#region IStorable
 		
-		public IDynamicObject Store()
+		public IDynamicObject Store(IResourceWrapper wrapper)
 		{
 			var stmStore = new DynamicObject();
 			foreach (var stx in States)
 			{
-				var stateStore = stx.Value.Store();
+				var stateStore = stx.Value.Store(wrapper);
 				if (!stateStore.IsEmpty)
 					stmStore.Set(stx.Key, stateStore);
 			}
 			return stmStore;
 		}
 
-		public void Restore(IDynamicObject store)
+		public void Restore(IDynamicObject store, IResourceWrapper wrapper)
 		{
 			foreach (var stx in States)
 			{
 				var obj = store.GetDynamicObject(stx.Key);
 				if (obj != null)
-					stx.Value.Restore(obj);
+					stx.Value.Restore(obj, wrapper);
 			}
 		}
 		#endregion

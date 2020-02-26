@@ -31,12 +31,12 @@ namespace A2v10.ProcS.Infrastructure
 		public Boolean IsComplete { get; set; }
 		public abstract Task Handle(IHandleContext context, IMessage message);
 
-		public virtual void Restore(IDynamicObject store)
+		public virtual void Restore(IDynamicObject store, IResourceWrapper wrapper)
 		{
 
 		}
 
-		public virtual IDynamicObject Store()
+		public virtual IDynamicObject Store(IResourceWrapper wrapper)
 		{
 			return null;
 		}

@@ -6,7 +6,7 @@ namespace A2v10.ProcS.Infrastructure
 {
 	public interface IStorable
 	{
-		IDynamicObject Store();
-		void Restore(IDynamicObject store);
+		IDynamicObject Store(IResourceWrapper wrapper);
+		void Restore(IDynamicObject store, IResourceWrapper wrapper);
 	}
 }

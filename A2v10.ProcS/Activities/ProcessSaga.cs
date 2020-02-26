@@ -22,14 +22,16 @@ namespace A2v10.ProcS
 
 		public IResultMessage ResultMessage { get; private set; }
 
-		public override void Store(IDynamicObject store)
+		public override void Store(IDynamicObject store, IResourceWrapper wrapper)
 		{
-			store.Set(nameof(ResultMessage), DynamicObjectConverters.From(ResultMessage));
+			var dres = wrapper.Wrap(ResultMessage).Store(wrapper);
+			store.Set(nameof(ResultMessage), dres);
 		}
 
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper wrapper)
 		{
-			ResultMessage = store.GetDynamicObject(nameof(ResultMessage)).To<IResultMessage>();
+			var dynres = store.GetDynamicObject(nameof(ResultMessage));
+			ResultMessage = wrapper.Unwrap<IResultMessage>(dynres);
 		}
 	}
 
@@ -53,13 +55,13 @@ namespace A2v10.ProcS
 		public Guid Id { get; private set; }
 		public IDynamicObject Result { get; private set; }
 
-		public override void Store(IDynamicObject store)
+		public override void Store(IDynamicObject store, IResourceWrapper _)
 		{
 			store.Set(nameof(Id), Id);
 			store.Set(nameof(Result), Result);
 		}
 
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			Id = store.Get<Guid>(nameof(Id));
 			Result = store.GetDynamicObject(nameof(Result));
@@ -90,15 +92,17 @@ namespace A2v10.ProcS
 			return Task.CompletedTask;
 		}
 
-		public override IDynamicObject Store()
+		public override IDynamicObject Store(IResourceWrapper wrapper)
 		{
 			var d = new DynamicObject();
-			d.Set(nameof(resultMessage), DynamicObjectConverters.From(resultMessage));
+			var dres = wrapper.Wrap(resultMessage).Store(wrapper);
+			d.Set(nameof(resultMessage), dres);
 			return d;
 		}
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper wrapper)
 		{
-			resultMessage = store.GetDynamicObject(nameof(resultMessage)).To<IResultMessage>();
+			var dynmsg = store.GetDynamicObject(nameof(resultMessage));
+			resultMessage=  wrapper.Unwrap<IResultMessage>(dynmsg);
 		}
 	}
 
@@ -129,14 +133,14 @@ namespace A2v10.ProcS
 			Bookmark = bookmark;
 		}
 
-		public override void Store(IDynamicObject store)
+		public override void Store(IDynamicObject store, IResourceWrapper _)
 		{
 			store.Set(nameof(InstanceId), InstanceId);
 			store.Set(nameof(Result), Result);
 			store.Set(nameof(Bookmark), Bookmark);
 		}
 
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			InstanceId = store.Get<Guid>(nameof(InstanceId));
 			Result = store.GetDynamicObject(nameof(Result));
@@ -160,14 +164,14 @@ namespace A2v10.ProcS
 			ParentId = correlationId;
 		}
 
-		public override void Store(IDynamicObject store)
+		public override void Store(IDynamicObject store, IResourceWrapper _)
 		{
 			store.Set(nameof(ParentId), ParentId);
 			store.Set(nameof(ProcessId), ProcessId);
 			store.Set(nameof(Parameters), Parameters);
 		}
 
-		public override void Restore(IDynamicObject store)
+		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			ParentId = store.Get<Guid>(nameof(ParentId));
 			ProcessId = store.Get<String>(nameof(ProcessId));

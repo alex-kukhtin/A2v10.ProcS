@@ -70,33 +70,33 @@ namespace A2v10.ProcS
 
 
 		#region IStorable
-		public IDynamicObject Store()
+		public IDynamicObject Store(IResourceWrapper wrapper)
 		{
 			var ret = new DynamicObject();
 			if (OnEntry is IStorable storable)
 			{
-				var data = storable.Store();
+				var data = storable.Store(wrapper);
 				if (!data.IsEmpty)
 					ret.Set(nameof(OnEntry), data);
 			}
 			if (OnExit is IStorable storable1)
 			{
-				var data = storable1.Store();
+				var data = storable1.Store(wrapper);
 				if (!data.IsEmpty)
 					ret.Set(nameof(OnExit), data);
 			}
 			return ret;
 		}
 
-		public void Restore(IDynamicObject store)
+		public void Restore(IDynamicObject store, IResourceWrapper wrapper)
 		{
 			var entry = store.GetDynamicObject(nameof(OnEntry));
 			if (entry != null && OnEntry is IStorable storable)
-				storable.Restore(entry);
+				storable.Restore(entry, wrapper);
 
 			var exit = store.GetDynamicObject(nameof(OnExit));
 			if (exit != null && OnExit is IStorable storable1)
-				storable1.Restore(exit);
+				storable1.Restore(exit, wrapper);
 		}
 		#endregion
 	}

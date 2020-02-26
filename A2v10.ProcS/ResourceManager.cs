@@ -175,7 +175,7 @@ namespace A2v10.ProcS
 				throw new InvalidProgramException("Resource must have ResourceKeyAttribute");
 			IDynamicObject data;
 			if (obj is IStorable sto) 
-				data = sto.Store();
+				data = sto.Store(this);
 			else 
 				data = new DynamicObject();
 			return new Resource(att.Key, data);
@@ -198,13 +198,13 @@ namespace A2v10.ProcS
 		private Resource RestoreResource(IDynamicObject obj)
 		{
 			var res = new Resource();
-			res.Restore(obj);
+			res.Restore(obj, this);
 			return res;
 		}
 
 		private Resource RestoreResource(IStorable src)
 		{
-			var d = src.Store();
+			var d = src.Store(this);
 			return RestoreResource(d);
 		}
 
@@ -216,7 +216,7 @@ namespace A2v10.ProcS
 			var fact = resources[key];
 			var obj = fact.Create(res.Object);
 			if (obj is IStorable sto)
-				sto.Restore(res.Object);
+				sto.Restore(res.Object, this);
 			return obj;
 		}
 
@@ -265,14 +265,14 @@ namespace A2v10.ProcS
 
 		private const String key = "$res";
 
-		public IDynamicObject Store()
+		public IDynamicObject Store(IResourceWrapper _)
 		{
 			var d = DynamicObjectConverters.From(Object);
 			d.Set(key, Key);
 			return d;
 		}
 
-		public void Restore(IDynamicObject store)
+		public void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			var data = DynamicObjectConverters.From(store);
 			Key = data.Get<String>(key);

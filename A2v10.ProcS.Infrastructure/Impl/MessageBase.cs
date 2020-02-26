@@ -15,21 +15,21 @@ namespace A2v10.ProcS.Infrastructure
 
 		ICorrelationId IMessage.CorrelationId => CorrelationId;
 
-		public virtual void Restore(IDynamicObject store)
+		public virtual void Restore(IDynamicObject store, IResourceWrapper wrapper)
 		{
 
 		}
 
-		public virtual void Store(IDynamicObject storage)
+		public virtual void Store(IDynamicObject storage, IResourceWrapper wrapper)
 		{
 
 		}
 
-		public IDynamicObject Store()
+		public IDynamicObject Store(IResourceWrapper wrapper)
 		{
 			var obj = new DynamicObject();
 			obj.Set("correlationId", CorrelationId.Value);
-			Store(obj);
+			Store(obj, wrapper);
 			return obj;
 		}
 	}

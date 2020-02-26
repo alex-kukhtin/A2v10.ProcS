@@ -31,13 +31,13 @@ namespace A2v10.ProcS
 		const String currentActionName = "Current";
 
 		#region IStorable
-		public IDynamicObject Store()
+		public IDynamicObject Store(IResourceWrapper wrapper)
 		{
 			var list = new List<Object>();
 			foreach (var activity in Activities)
 			{
 				if (activity is IStorable storable)
-					list.Add(storable.Store().Root);
+					list.Add(storable.Store(wrapper).Root);
 				else
 					list.Add(null);
 			}
@@ -47,7 +47,7 @@ namespace A2v10.ProcS
 			return ret;
 		}
 
-		public void Restore(IDynamicObject store)
+		public void Restore(IDynamicObject store, IResourceWrapper wrapper)
 		{
 			_currentAction = store.Get<Int32>(currentActionName);
 			var activities = store.Get<List<Object>>(nameof(Activities));
@@ -56,7 +56,7 @@ namespace A2v10.ProcS
 				var elem = DynamicObjectConverters.From(activities[i]);
 				if (elem != null && Activities[i] is IStorable storable)
 				{
-					storable.Restore(elem);
+					storable.Restore(elem, wrapper);
 				}
 			}
 		}

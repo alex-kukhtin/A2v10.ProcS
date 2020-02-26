@@ -51,7 +51,7 @@ namespace A2v10.ProcS
 		#endregion
 
 		#region IStorable
-		public IDynamicObject Store()
+		public IDynamicObject Store(IResourceWrapper wrapper)
 		{
 			var d = new DynamicObject();
 			d.Set(nameof(Data), Data);
@@ -62,7 +62,7 @@ namespace A2v10.ProcS
 			return d;
 		}
 
-		public void Restore(IDynamicObject store)
+		public void Restore(IDynamicObject store, IResourceWrapper wrapper)
 		{
 			IsComplete = store.GetOrDefault<Boolean>(nameof(IsComplete));
 			CurrentState = store.GetOrDefault<String>(nameof(CurrentState));
