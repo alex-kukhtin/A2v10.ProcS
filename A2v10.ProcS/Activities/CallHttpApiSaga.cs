@@ -31,7 +31,6 @@ namespace A2v10.ProcS
 			Method = store.Get<String>(nameof(Method));
 			Url = store.Get<String>(nameof(Url));
 		}
-
 	}
 
 	[ResourceKey(ukey)]

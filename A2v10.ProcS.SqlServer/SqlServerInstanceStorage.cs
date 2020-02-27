@@ -16,7 +16,7 @@ namespace A2v10.ProcS.SqlServer
 		private readonly IResourceWrapper _resourceWrapper;
 
 
-		private const String Schema = "[A2v10.ProcS]";
+		private const String Schema = "[A2v10_ProcS]";
 
 		public SqlServerInstanceStorage(ISagaResolver sagaResolver, IWorkflowStorage workflowStorage, IDbContext dbContext, IResourceWrapper resourceWrapper)
 		{

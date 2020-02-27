@@ -122,8 +122,11 @@ namespace A2v10.ProcS
 
 		public Task ReleaseSaga(PickedSaga picked)
 		{
-			if (!picked.Available || !this.picked.ContainsKey(picked.Id)) throw new Exception("Saga is not picked");
-			SagaUpdate(picked.Saga, this.picked[picked.Id]);
+			if (picked.Id == null)
+				return Task.CompletedTask;
+			if (!picked.Available || !this.picked.ContainsKey(picked.Id.Value)) 
+				throw new Exception("Saga is not picked");
+			SagaUpdate(picked.Saga, this.picked[picked.Id.Value]);
 			return Task.CompletedTask;
 		}
 	}

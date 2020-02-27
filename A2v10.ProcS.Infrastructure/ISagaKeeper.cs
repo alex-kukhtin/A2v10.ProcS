@@ -17,12 +17,12 @@ namespace A2v10.ProcS.Infrastructure
 		public PickedSaga(Boolean avail)
 		{
 			Available = avail;
-			Id = Guid.Empty;
+			Id = null;
 			Saga = null;
 			ServiceBusItem = null;
 		}
 
-		public PickedSaga(Guid id, ISaga saga, IServiceBusItem item)
+		public PickedSaga(Guid? id, ISaga saga, IServiceBusItem item)
 		{
 			Available = true;
 			Id = id;
@@ -31,7 +31,7 @@ namespace A2v10.ProcS.Infrastructure
 		}
 
 		public Boolean Available;
-		public Guid Id;
+		public Guid? Id;
 		public ISaga Saga;
 		public IServiceBusItem ServiceBusItem;
 	}

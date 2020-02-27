@@ -53,7 +53,14 @@ namespace A2v10.ProcS
 		{
 			async Task task()
 			{
-				await _sagaKeeper.SendMessage(item);
+				try
+				{
+					await _sagaKeeper.SendMessage(item);
+				} 
+				catch (Exception ex)
+				{
+					int z = 55;
+				}
 			}
 			return _taskManager.AddTask(task);
 		}

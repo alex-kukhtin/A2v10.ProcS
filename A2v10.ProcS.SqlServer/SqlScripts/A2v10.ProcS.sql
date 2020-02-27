@@ -1,25 +1,39 @@
 ﻿/* Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved. */
 
+-- TODO drop create or alter
+
 ------------------------------------------------
-if not exists(select * from INFORMATION_SCHEMA.SCHEMATA where SCHEMA_NAME=N'A2v10.ProcS')
+if not exists(select * from INFORMATION_SCHEMA.SCHEMATA where SCHEMA_NAME=N'A2v10_ProcS')
 begin
-	exec sp_executesql N'create schema [A2v10.ProcS]';
+	exec sp_executesql N'create schema A2v10_ProcS';
 end
 go
 ------------------------------------------------
 begin
 	set nocount on;
-	grant execute on schema ::[A2v10.ProcS] to public;
+	grant execute on schema ::A2v10_ProcS to public;
 end
 go
 ------------------------------------------------
-if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.ProcS' and TABLE_NAME=N'Instances')
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'SagaMap')
 begin
-	create table [A2v10.ProcS].Instances
+	create table A2v10_ProcS.SagaMap
+	(
+		Host uniqueidentifier not null,
+		[MessageKind] nvarchar(255) not null,
+		[SagaKind] nvarchar(255) not null,
+		constraint PK_SagaMap primary key(Host, [MessageKind], [SagaKind])
+	);
+end
+go
+------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'Instances')
+begin
+	create table A2v10_ProcS.Instances
 	(
 		Id	uniqueidentifier not null constraint PK_Instances primary key,
 		Parent uniqueidentifier null
-			constraint FK_Instances_Parent_Instances references [A2v10.ProcS].Instances(Id),
+			constraint FK_Instances_Parent_Instances references A2v10_ProcS.Instances(Id),
 		Workflow nvarchar(255) not null,
 		[Version] int not null,
 		IsComplete bit not null constraint DF_Instances_IsCompelte default(0),
@@ -30,19 +44,21 @@ begin
 end
 go
 ------------------------------------------------
-if not exists(select * from INFORMATION_SCHEMA.SEQUENCES where SEQUENCE_SCHEMA=N'A2v10.ProcS' and SEQUENCE_NAME=N'SQ_MessageQueue')
-	create sequence [A2v10.ProcS].SQ_MessageQueue as bigint start with 1000 increment by 1;
+if not exists(select * from INFORMATION_SCHEMA.SEQUENCES where SEQUENCE_SCHEMA=N'A2v10_ProcS' and SEQUENCE_NAME=N'SQ_MessageQueue')
+	create sequence A2v10_ProcS.SQ_MessageQueue as bigint start with 1000 increment by 1;
 go
 ------------------------------------------------
-if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.ProcS' and TABLE_NAME=N'MessageQueue')
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'MessageQueue')
 begin
-	create table [A2v10.ProcS].MessageQueue
+	create table A2v10_ProcS.MessageQueue
 	(
 		Id	bigint	not null constraint PK_MessageQueue primary key
-			constraint DF_MessageQueue_PK default(next value for [A2v10.ProcS].SQ_MessageQueue),
+			constraint DF_MessageQueue_PK default(next value for A2v10_ProcS.SQ_MessageQueue),
+		CorrelationId nvarchar(255) null,
 		Parent bigint null
-			constraint FK_MessageQueue_Parent_MessageQueue references [A2v10.ProcS].MessageQueue(Id),
-		[Message] nvarchar(max),
+			constraint FK_MessageQueue_Parent_MessageQueue references A2v10_ProcS.MessageQueue(Id),
+		[Kind] nvarchar(255),
+		[Body] nvarchar(max),
 		[State] nvarchar(32) not null
 			constraint DF_MessageQueue_State default(N'Init'),
 		DateCreated datetime2 not null constraint DF_MessageQueue_DateCreated default(getutcdate())
@@ -50,18 +66,26 @@ begin
 end
 go
 ------------------------------------------------
-if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.ProcS' and TABLE_NAME=N'Sagas')
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'Sagas')
 begin
-	create table [A2v10.ProcS].Sagas
+	create table A2v10_ProcS.Sagas
 	(
-		[Key] nvarchar(255) not null constraint PK_Sagas primary key,
-		[State] nvarchar(max) null,
+		[Id] uniqueidentifier not null constraint PK_Sagas primary key,
+		CorrelationId nvarchar(255) null,
+		[Kind] nvarchar(255) null,
+		[Body] nvarchar(max) null,
+		[Hold] bit not null constraint DF_Sagas_Hold default(0),
+		MessageId bigint null,
 		DateCreated datetime2 not null constraint DF_Sagas_DateCreated default(getutcdate())
 	);
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.ProcS].[Instance.Save]
+if exists (select * from INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA=N'A2v10_ProcS' and ROUTINE_NAME=N'Instance.Save')
+	drop procedure A2v10_ProcS.[Instance.Save]
+go
+------------------------------------------------
+create procedure A2v10_ProcS.[Instance.Save]
 @Id uniqueidentifier,
 @Parent uniqueidentifier = null,
 @Workflow nvarchar(255),
@@ -75,7 +99,7 @@ begin
 	set transaction isolation level serializable;
 	set xact_abort on;
 
-	merge [A2v10.ProcS].Instances as target
+	merge A2v10_ProcS.Instances as target
 	using (select Id=@Id) as source
 	on target.Id = source.Id
 	when matched then update set
@@ -88,7 +112,11 @@ begin
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.ProcS].[Instance.Load]
+if exists (select * from INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA=N'A2v10_ProcS' and ROUTINE_NAME=N'Instance.Load')
+	drop procedure A2v10_ProcS.[Instance.Load]
+go
+------------------------------------------------
+create procedure A2v10_ProcS.[Instance.Load]
 @Id uniqueidentifier
 as
 begin
@@ -96,12 +124,18 @@ begin
 	set transaction isolation level read committed;
 
 	select Id, Parent, Workflow, [Version], IsComplete, WorkflowState, InstanceState
-	from [A2v10.ProcS].Instances where Id=@Id;
+	from A2v10_ProcS.Instances where Id=@Id;
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.ProcS].[Message.Send]
-@Message nvarchar(max),
+if exists (select * from INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA=N'A2v10_ProcS' and ROUTINE_NAME=N'Message.Send')
+	drop procedure A2v10_ProcS.[Message.Send]
+go
+------------------------------------------------
+create procedure A2v10_ProcS.[Message.Send]
+@Kind nvarchar(255) = null,
+@CorrelationId nvarchar(255) = null,
+@Body nvarchar(max),
 @Parent bigint = null,
 @RetId bigint output
 as
@@ -111,91 +145,161 @@ begin
 	set xact_abort on;
 	declare @rtable table(Id bigint);
 
-	insert into [A2v10.ProcS].MessageQueue ([Message], Parent, [State]) 
+	insert into A2v10_ProcS.MessageQueue ([Kind], CorrelationId, [Body], Parent, [State]) 
 	output inserted.Id into @rtable(id)
-	values (@Message, @Parent, case when @Parent is not null then N'Wait' else N'Init' end);
+	values (@Kind, @CorrelationId, @Body, @Parent, case when @Parent is not null then N'Wait' else N'Init' end);
 
 	select top(1) @RetId = Id from @rtable;
 end
 go
+
 ------------------------------------------------
-create or alter procedure [A2v10.ProcS].[Message.Peek]
+if exists (select * from INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA=N'A2v10_ProcS' and ROUTINE_NAME=N'SagaMap.Save')
+	drop procedure A2v10_ProcS.[SagaMap.Save]
+go
+------------------------------------------------
+if exists (select * from INFORMATION_SCHEMA.DOMAINS where DATA_TYPE = N'table type'and DOMAIN_SCHEMA=N'A2v10_ProcS' and DOMAIN_NAME=N'SagaMap.TableType')
+	drop type A2v10_ProcS.[SagaMap.TableType];
+go
+------------------------------------------------
+create type A2v10_ProcS.[SagaMap.TableType]
+as table(
+	[MessageKind] nvarchar(255),
+	SagaKind nvarchar(255)
+)
+go
+------------------------------------------------
+create procedure A2v10_ProcS.[SagaMap.Save]
+@Host uniqueidentifier,
+@Sagas A2v10_ProcS.[SagaMap.TableType] readonly
 as
 begin
 	set nocount on;
 	set transaction isolation level serializable;
 	set xact_abort on;
 
-	declare @tmp table([Message] nvarchar(max), [After] nvarchar(max), Id bigint);
+	merge A2v10_ProcS.[SagaMap] as target
+	using 
+		(select Host = @Host, MessageKind, SagaKind from @Sagas) as source
+	on target.Host = source.Host and target.MessageKind = source.MessageKind and target.SagaKind=source.SagaKind
+	when not matched by target then 
+		insert (Host, MessageKind, SagaKind)
+		values (source.Host, source.MessageKind, source.SagaKind)
+	when not matched by source then 
+		delete;
+end
+go
+------------------------------------------------
+if exists (select * from INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA=N'A2v10_ProcS' and ROUTINE_NAME=N'Message.Peek')
+	drop procedure A2v10_ProcS.[Message.Peek]
+go
+------------------------------------------------
+create procedure A2v10_ProcS.[Message.Peek]
+@Host uniqueidentifier
+as
+begin
+	set nocount on;
+	set transaction isolation level serializable;
+	set xact_abort on;
 
+	declare @queueTable table(QueueId bigint, MessageKind nvarchar(255), MessageBody nvarchar(max), 
+		MessageCorrelationId nvarchar(255),
+		SagaId uniqueidentifier, SagaKind nvarchar(255), SagaBody nvarchar(max), SagaHold bit);
+
+	declare @sagaTable table(Id uniqueidentifier);
+	declare @sagaId uniqueidentifier;
+	declare @queueId bigint;
+
+	begin tran;
 	with T
-	as (
-		select top 1 Id, [Message] from [A2v10.ProcS].MessageQueue where [State] = N'Init' order by Id
+	as(
+		select top(1) QueueId = q.Id, MessageKind = q.Kind, MessageBody = q.Body, MessageCorrelationId = q.CorrelationId,
+			SagaId = s.Id,  SagaKind = m.SagaKind, SagaBody = s.Body, SagaHold = s.Hold
+		from A2v10_ProcS.MessageQueue q
+			inner join A2v10_ProcS.SagaMap m on q.Kind = m.MessageKind
+			left join A2v10_ProcS.Sagas s on s.[Kind] = m.SagaKind and q.CorrelationId = s.CorrelationId
+		where m.Host = @Host and q.[State] = N'Init' and isnull(s.Hold, 0) = 0
+		order by QueueId
 	)
-	update [A2v10.ProcS].MessageQueue set [State] = N'Hold'
-	output inserted.[Message], inserted.Id into @tmp([Message], Id)
-	from T inner join [A2v10.ProcS].MessageQueue q on T.Id = q.Id 
+	update A2v10_ProcS.MessageQueue set [State] = N'Hold'
+	output inserted.Id, inserted.Kind, inserted.Body, T.SagaId, T.SagaKind, T.SagaBody, T.MessageCorrelationId
+	into @queueTable(QueueId, MessageKind, MessageBody, SagaId, SagaKind, SagaBody, MessageCorrelationId)
+	from T inner join A2v10_ProcS.MessageQueue q on T.QueueId = q.Id;
 
-	declare @Id bigint;
-	select @Id = Id from @tmp;
+	select top(1) @queueId = QueueId, @sagaId = SagaId from @queueTable;
+
+	if exists(select * from @queueTable where SagaId is null and MessageCorrelationId <> N'null')
+	begin
+		-- create new saga
+		insert into A2v10_ProcS.Sagas (Id, Kind, Hold, CorrelationId)
+		output inserted.Id into @sagaTable(Id)
+		select newid(), SagaKind, 1, MessageCorrelationId
+			from @queueTable;
+		select @sagaId = Id from @sagaTable;
+		update @queueTable set SagaId = @sagaId, SagaHold = 1 where QueueId = @queueId;
+	end
+	else
+	begin
+		-- hold exisiting saga
+		update A2v10_ProcS.Sagas set Hold = 1, MessageId = @queueId where Id = @sagaId;
+	end
+	commit tran;
 
 	-- queue dependent messages
-	update [A2v10.ProcS].MessageQueue set [State] = N'Init' where Parent = @Id and [State] = N'Wait';
+	update A2v10_ProcS.MessageQueue set [State] = N'Init' where Parent = @queueId and [State] = N'Wait';
 
-	select [Id], [Message] from @tmp;
+	select QueueId, MessageKind, MessageBody, SagaId, SagaKind, SagaBody from @queueTable;
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.ProcS].[Saga.GetOrAdd]
-@Key nvarchar(255),
-@State nvarchar(max) = null
+if exists (select * from INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA=N'A2v10_ProcS' and ROUTINE_NAME=N'Saga.Update')
+	drop procedure A2v10_ProcS.[Saga.Update]
+go
+------------------------------------------------
+create procedure A2v10_ProcS.[Saga.Update]
+@Id uniqueidentifier,
+@CorrelationId nvarchar(255),
+@Body nvarchar(max) = null,
+@IsComplete bit
 as
 begin
 	set nocount on;
 	set transaction isolation level serializable;
 	set xact_abort on;
-
-	begin tran
-	if not exists(select * from [A2v10.ProcS].Sagas where [Key] = @Key)
-		insert into [A2v10.ProcS].Sagas ([Key], [State]) values (@Key, @State)
-	select [Key], [State] from [A2v10.ProcS].Sagas where [Key] = @Key;
-	commit tran;
+	if not exists (select * from A2v10_ProcS.Sagas where Id = @Id)
+	begin
+		declare @msg nvarchar(255);
+		set @msg = N'Saga with id {' + cast(@Id as nvarchar(255)) + N'} not found';
+		throw 60000, @msg, 0
 	end
-go
-------------------------------------------------
-create or alter procedure [A2v10.ProcS].[Saga.Update]
-@Key nvarchar(255),
-@State nvarchar(max) = null,
-@Hold int = 0
-as
-begin
-	set nocount on;
-	set transaction isolation level serializable;
-	set xact_abort on;
-	update [A2v10.ProcS].Sagas set [State] = @State where [Key]=@Key;
+
+	if @IsComplete = 1 or @CorrelationId is null
+	begin
+		delete from A2v10_ProcS.Sagas where Id=@Id;
+	end
+	else
+	begin
+		update A2v10_ProcS.Sagas set Hold = 0, CorrelationId = @CorrelationId, [Body] = @Body where [Id] = @Id;
+	end
 end
 go
 
-------------------------------------------------
-create or alter procedure [A2v10.ProcS].[Saga.Remove]
-@Key nvarchar(255)
-as
-begin
-	set nocount on;
-	set transaction isolation level serializable;
-	set xact_abort on;
-	delete from [A2v10.ProcS].Sagas where [Key]=@Key;
-end
-go
+select * from A2v10_ProcS.[MessageQueue] order by Id desc;
+select * from A2v10_ProcS.Instances order by DateCreated desc
+select * from A2v10_ProcS.[Sagas] order by DateCreated desc;
+--select * from A2v10_ProcS.[SagaMap]
 
 
-select * from [A2v10.ProcS].[MessageQueue] order by Id desc;
-select * from [A2v10.ProcS].Instances order by DateCreated desc
-select * from [A2v10.ProcS].[Sagas] order by DateCreated desc;
 
 /* 
-delete from [A2v10.ProcS].[MessageQueue];
-delete from [A2v10.ProcS].Instances;
-delete from [A2v10.ProcS].[Sagas];
+	delete from A2v10_ProcS.[MessageQueue];
+	delete from A2v10_ProcS.Instances;
+	delete from A2v10_ProcS.[Sagas];
 */
 
+/*
+drop table A2v10_ProcS.[MessageQueue];
+drop table A2v10_ProcS.Instances;
+drop table A2v10_ProcS.[Sagas];
+--drop table A2v10_ProcS.[SagaMap];
+*/

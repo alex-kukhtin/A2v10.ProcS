@@ -102,12 +102,12 @@ namespace A2v10.ProcS
 		public override void Restore(IDynamicObject store, IResourceWrapper wrapper)
 		{
 			var dynmsg = store.GetDynamicObject(nameof(resultMessage));
-			resultMessage=  wrapper.Unwrap<IResultMessage>(dynmsg);
+			resultMessage =  wrapper.Unwrap<IResultMessage>(dynmsg);
 		}
 	}
 
 	[ResourceKey(ukey)]
-	public class ContinueActivityMessage : MessageBase<Guid>, IResultMessage
+	public class ContinueActivityMessage : MessageBase<String>, IResultMessage
 	{
 		public const String ukey = ProcS.ResName + ":" + nameof(ContinueActivityMessage);
 
@@ -116,18 +116,18 @@ namespace A2v10.ProcS
 		public String Bookmark { get; private set; }
 
 		[RestoreWith]
-		public ContinueActivityMessage(Guid correlationId) : base(correlationId)
+		public ContinueActivityMessage() : base(null)
 		{
 		}
 
-		public ContinueActivityMessage(Guid instanceId, String bookmark, IDynamicObject result): base(instanceId)
+		public ContinueActivityMessage(Guid instanceId, String bookmark, IDynamicObject result): base(null)
 		{
 			InstanceId = instanceId;
 			Bookmark = bookmark;
 			Result = result;
 		}
 
-		public ContinueActivityMessage(Guid instanceId, String bookmark) : base(instanceId)
+		public ContinueActivityMessage(Guid instanceId, String bookmark) : base(null)
 		{
 			InstanceId = instanceId;
 			Bookmark = bookmark;
@@ -149,19 +149,18 @@ namespace A2v10.ProcS
 	}
 
 	[ResourceKey(ukey)]
-	public class StartProcessMessage : MessageBase<Guid>
+	public class StartProcessMessage : MessageBase<String>
 	{
 		public const String ukey = ProcS.ResName + ":" + nameof(StartProcessMessage);
 
-		public Guid ParentId { get; private set; }
+		public Guid ParentId { get; set; }
 		public String ProcessId { get; set; }
 		public IDynamicObject Parameters { get; set; }
 
 
 		[RestoreWith]
-		public StartProcessMessage(Guid correlationId) : base(correlationId)
+		public StartProcessMessage() : base(null)
 		{
-			ParentId = correlationId;
 		}
 
 		public override void Store(IDynamicObject store, IResourceWrapper _)
@@ -187,10 +186,9 @@ namespace A2v10.ProcS
 		{
 		}
 
-		protected override async Task Handle(IHandleContext context, StartProcessMessage message)
+		protected override Task Handle(IHandleContext context, StartProcessMessage message)
 		{
-			IInstance instance = await context.StartProcess(message.ProcessId, message.ParentId, message.Parameters);
-			message.CorrelationId.Value = instance.Id;
+			return context.StartProcess(message.ProcessId, message.ParentId, message.Parameters);
 		}
 
 		protected async override Task Handle(IHandleContext context, ContinueActivityMessage message)

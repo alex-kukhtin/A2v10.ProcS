@@ -208,6 +208,20 @@ namespace A2v10.ProcS
 			return RestoreResource(d);
 		}
 
+		public Object Create(String key)
+		{
+			if (!resources.ContainsKey(key))
+				throw new Exception($"Resource {key} is not registred");
+			var fact = resources[key];
+			return fact.Create(new DynamicObject());
+		}
+
+		public T Create<T>(String key) where T : class
+		{
+			var obj = Create(key);
+			return Generalyze<T>(obj, key);
+		}
+
 		public Object Unwrap(Resource res)
 		{
 			var key = res.Key;

@@ -7,6 +7,13 @@ using System.Linq.Expressions;
 
 namespace A2v10.ProcS.Infrastructure
 {
+
+	public static class ValueTypeHelper
+	{
+		public static Boolean IsNullable<T>(T t) { return false; }
+		public static Boolean IsNullable<T>(T? t) where T : struct { return true; }
+	}
+
 	public class DynamicObject : IDynamicObject
 	{
 		private ExpandoObject _object;
@@ -66,7 +73,9 @@ namespace A2v10.ProcS.Infrastructure
 
 		public static T ConvertTo<T>(Object val)
 		{
-			return (T)ConvertTo(val, typeof(T));
+			if (val == null)
+				return default(T);
+			return (T) ConvertTo(val, typeof(T));
 		}
 
 		public static Object ConvertTo(Object val, Type type)
