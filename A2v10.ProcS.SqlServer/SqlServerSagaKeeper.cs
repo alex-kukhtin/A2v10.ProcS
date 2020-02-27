@@ -14,8 +14,8 @@ namespace A2v10.ProcS.SqlServer
 	{
 		public void Track(String text)
 		{
-			using var tw = new StreamWriter("d:\\temp\\log.txt", true);
-			tw.WriteLine(text);
+			//using var tw = new StreamWriter("d:\\temp\\log.txt", true);
+			//tw.WriteLine(text);
 		}
 	}
 
@@ -97,7 +97,7 @@ namespace A2v10.ProcS.SqlServer
 			else
 			{
 				_tracker.Track($"Create saga. id:{sagaId}, kind:{sagakind}, correlationId: {sagaCorrelationId}");
-				saga = _resourceWrapper.Create<ISaga>(sagakind);
+				saga = _resourceWrapper.Create<ISaga>(sagakind, new DynamicObject());
 			}
 			return new PickedSaga(sagaId, saga, new ServiceBusItem(message));
 		}

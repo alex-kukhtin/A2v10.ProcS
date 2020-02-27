@@ -169,6 +169,7 @@ namespace A2v10.ProcS
 
 		public IStorable Wrap(Object obj)
 		{
+			if (obj == null) return new Empty();
 			var type = obj.GetType();
 			var att = type.GetCustomAttribute<ResourceKeyAttribute>();
 			if (att == null) 
@@ -197,6 +198,7 @@ namespace A2v10.ProcS
 
 		private Resource RestoreResource(IDynamicObject obj)
 		{
+			if (obj == null || obj.IsEmpty) return null;
 			var res = new Resource();
 			res.Restore(obj, this);
 			return res;
@@ -204,26 +206,27 @@ namespace A2v10.ProcS
 
 		private Resource RestoreResource(IStorable src)
 		{
-			var d = src.Store(this);
+			var d = src?.Store(this);
 			return RestoreResource(d);
 		}
 
-		public Object Create(String key)
+		public Object Create(String key, IDynamicObject data)
 		{
 			if (!resources.ContainsKey(key))
 				throw new Exception($"Resource {key} is not registred");
 			var fact = resources[key];
-			return fact.Create(new DynamicObject());
+			return fact.Create(data);
 		}
 
-		public T Create<T>(String key) where T : class
+		public T Create<T>(String key, IDynamicObject data) where T : class
 		{
-			var obj = Create(key);
+			var obj = Create(key, data);
 			return Generalyze<T>(obj, key);
 		}
 
 		public Object Unwrap(Resource res)
 		{
+			if (res == null) return null;
 			var key = res.Key;
 			if (!resources.ContainsKey(key))
 				throw new Exception($"Resource {key} is not registred");
@@ -236,6 +239,7 @@ namespace A2v10.ProcS
 
 		private T Generalyze<T>(Object obj, String key) where T : class
 		{
+			if (obj == null) return null;
 			if (obj is T t) return t;
 			throw new Exception($"Resource {key} is not {typeof(T)}");
 		}
@@ -244,20 +248,20 @@ namespace A2v10.ProcS
 		{
 			var res = RestoreResource(src);
 			var obj = Unwrap(res);
-			return Generalyze<T>(obj, res.Key);
+			return Generalyze<T>(obj, res?.Key);
 		}
 
 		public T Unwrap<T>(Resource res) where T : class
 		{
 			var obj = Unwrap(res);
-			return Generalyze<T>(obj, res.Key);
+			return Generalyze<T>(obj, res?.Key);
 		}
 
 		public T Unwrap<T>(IDynamicObject obj) where T : class
 		{
 			var res = RestoreResource(obj);
 			var robj = Unwrap(res);
-			return Generalyze<T>(robj, res.Key);
+			return Generalyze<T>(robj, res?.Key);
 		}
 	}
 
@@ -292,6 +296,24 @@ namespace A2v10.ProcS
 			Key = data.Get<String>(key);
 			data.Remove(key);
 			Object = data;
+		}
+	}
+
+	public class Empty : IStorable
+	{
+		public Empty()
+		{
+
+		}
+
+		public IDynamicObject Store(IResourceWrapper _)
+		{
+			return new DynamicObject();
+		}
+
+		public void Restore(IDynamicObject store, IResourceWrapper _)
+		{
+			throw new InvalidOperationException("Can't restore emptiness...");
 		}
 	}
 }
