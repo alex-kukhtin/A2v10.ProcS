@@ -11,6 +11,7 @@ using A2v10.ProcS.Infrastructure;
 using System.Linq;
 
 using DynamicObject = A2v10.ProcS.Infrastructure.DynamicObject;
+using Newtonsoft.Json.Linq;
 
 namespace A2v10.ProcS.Tests
 {
@@ -85,7 +86,7 @@ namespace A2v10.ProcS.Tests
 			RegisterResource<T4>();
 		}
 
-		private KeyValuePair<String, Type>[] GetParams(TypeResourceFactory factory)
+		public static KeyValuePair<String, Type>[] GetParams(TypeResourceFactory factory)
 		{
 			var fld = factory.GetType().GetField("ct", BindingFlags.NonPublic | BindingFlags.Instance);
 			var ddd = ((ConstructorInfo c, ParameterInfo[] prms))fld.GetValue(factory);
@@ -125,6 +126,8 @@ namespace A2v10.ProcS.Tests
 			var ppts = tt.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 			foreach (var ppt in ppts)
 			{
+				var sm = ppt.GetSetMethod(true);
+				if (sm == null) continue;
 				Object val = BullshitGenerator(ppt.PropertyType);
 				if (val == null)
 				{
@@ -135,9 +138,21 @@ namespace A2v10.ProcS.Tests
 						{
 							val = rw.Create(rk.Key, new DynamicObject());
 						}
+						else if (ppt.PropertyType.IsGenericType && ppt.PropertyType.GetGenericTypeDefinition() == typeof(CorrelationId<>))
+						{
+							var crdt = ppt.PropertyType.GetGenericArguments()[0];
+							val = Activator.CreateInstance(ppt.PropertyType, BullshitGenerator(crdt));
+						}
 						else
 						{
-							val = Activator.CreateInstance(ppt.PropertyType);
+							var fct = new TypeResourceFactory(ppt.PropertyType);
+							var prms = FakeResourceManager.GetParams(fct);
+							var data = new DynamicObject();
+							foreach (var itm in prms)
+							{
+								data[itm.Key] = BullshitGenerator(itm.Value);
+							}
+							val = fct.Create(data);
 						}
 						FillPropertiesBullshit(val, rw);
 					}
@@ -146,14 +161,21 @@ namespace A2v10.ProcS.Tests
 						continue;
 					}
 				}
-				ppt.SetValue(item, val);
+				sm.Invoke(item, new Object[] { val });
 			}
 		}
+
+		public static bool Check(object item)
+		{
+			Assert.IsTrue(item is IStorable);
+			return true;
+		}
+
 
 		public static void StoreRestoreBullshit(IResourceWrapper rw, String key, IDynamicObject data)
 		{
 			var item = rw.Create(key, data);
-			Assert.IsTrue(item is IStorable);
+			if (!Check(item)) return;
 			var storable = item as IStorable;
 
 			FillPropertiesBullshit(item, rw);
@@ -168,10 +190,42 @@ namespace A2v10.ProcS.Tests
 
 			var restored = restorable.Store(rw);
 
+			Compare(key, stored, restored);
+		}
+
+		public static void StoreRestoreEmpty(IResourceWrapper rw, String key, IDynamicObject data)
+		{
+			var item = rw.Create(key, data);
+			if (!Check(item)) return;
+			var storable = item as IStorable;
+
+			var stored = storable.Store(rw);
+
+			var rest = rw.Create(key, data);
+			Assert.IsTrue(rest is IStorable);
+			var restorable = rest as IStorable;
+
+			restorable.Restore(stored, rw);
+
+			var restored = restorable.Store(rw);
+
+			Compare(key, stored, restored);
+		}
+
+		public static void Compare(String key, IDynamicObject stored, IDynamicObject restored)
+		{
+			Assert.AreEqual(stored == null, restored == null);
+			if (stored == null && restored == null) return;
+
+			Assert.AreEqual(stored.IsEmpty, restored.IsEmpty);
+			if (stored.IsEmpty && restored.IsEmpty) return;
+
 			var storedJson = DynamicObjectConverters.ToJson(stored);
 			var restoredJson = DynamicObjectConverters.ToJson(restored);
 
-			Assert.AreEqual(storedJson, restoredJson);
+			Assert.IsTrue(JToken.DeepEquals(JToken.Parse(storedJson), JToken.Parse(restoredJson)));
+
+			
 		}
 
 		[TestMethod]
@@ -189,21 +243,26 @@ namespace A2v10.ProcS.Tests
 			//var configuration = new ConfigurationBuilder().Build();
 
 			ProcS.RegisterSagas(rm, mgr);
-			ProcS.RegisterActivities(rm);
+			//ProcS.RegisterActivities(rm);
 
 			ProcS.RegisterSagas(frm, mgr2);
-			ProcS.RegisterActivities(frm);
+			//ProcS.RegisterActivities(frm);
 
 			//pmr.LoadPlugins(pluginPath, configuration);
 			//pmr.RegisterResources(rm, mgr);
 
-			var data = new DynamicObject();
-			var lst = frm.TheList[RegisterCallbackMessage.ukey];
-			foreach (var itm in lst){
-				data[itm.Key] = BullshitGenerator(itm.Value);
+			foreach (var obj in frm.TheList)
+			{
+				var data0 = new DynamicObject();
+				var data = new DynamicObject();
+				foreach (var fld in obj.Value)
+				{
+					data0[fld.Key] = fld.Value.IsValueType ? Activator.CreateInstance(fld.Value) : null;
+					data[fld.Key] = BullshitGenerator(fld.Value);
+				}
+				StoreRestoreEmpty(rm, obj.Key, data0);
+				StoreRestoreBullshit(rm, obj.Key, data);
 			}
-
-			StoreRestoreBullshit(rm, RegisterCallbackMessage.ukey, data);
 		}
 	}
 }
