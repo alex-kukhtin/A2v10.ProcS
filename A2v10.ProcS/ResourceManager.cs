@@ -208,17 +208,17 @@ namespace A2v10.ProcS
 			return RestoreResource(d);
 		}
 
-		public Object Create(String key)
+		public Object Create(String key, IDynamicObject data)
 		{
 			if (!resources.ContainsKey(key))
 				throw new Exception($"Resource {key} is not registred");
 			var fact = resources[key];
-			return fact.Create(new DynamicObject());
+			return fact.Create(data);
 		}
 
-		public T Create<T>(String key) where T : class
+		public T Create<T>(String key, IDynamicObject data) where T : class
 		{
-			var obj = Create(key);
+			var obj = Create(key, data);
 			return Generalyze<T>(obj, key);
 		}
 
