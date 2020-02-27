@@ -32,14 +32,21 @@ namespace A2v10.ProcS.Infrastructure
 
 		public Boolean Equals(CorrelationId<T> other)
 		{
-			if (Value == null) return other.Value == null;
+			if (Value == null) 
+				return other.Value == null;
 			return Value.Equals(other.Value);
 		}
 
-		public override string ToString()
+		public override String ToString()
 		{
-			if (Value == null) return "null";
+			if (Value == null) 
+				return "null";
 			return Value.ToString();
+		}
+
+		public void FromString(String str)
+		{
+			Value = DynamicObject.ConvertTo<T>(str);
 		}
 	}
 

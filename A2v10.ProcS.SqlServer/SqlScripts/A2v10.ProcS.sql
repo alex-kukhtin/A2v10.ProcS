@@ -204,7 +204,7 @@ begin
 
 	declare @queueTable table(QueueId bigint, MessageKind nvarchar(255), MessageBody nvarchar(max), 
 		MessageCorrelationId nvarchar(255),
-		SagaId uniqueidentifier, SagaKind nvarchar(255), SagaBody nvarchar(max), SagaHold bit);
+		SagaId uniqueidentifier, SagaKind nvarchar(255), SagaBody nvarchar(max), SagaHold bit, SagaCorrelationId nvarchar(255));
 
 	declare @sagaTable table(Id uniqueidentifier);
 	declare @sagaId uniqueidentifier;
@@ -214,7 +214,7 @@ begin
 	with T
 	as(
 		select top(1) QueueId = q.Id, MessageKind = q.Kind, MessageBody = q.Body, MessageCorrelationId = q.CorrelationId,
-			SagaId = s.Id,  SagaKind = m.SagaKind, SagaBody = s.Body, SagaHold = s.Hold
+			SagaId = s.Id,  SagaKind = m.SagaKind, SagaBody = s.Body, SagaHold = s.Hold, SagaCorrelationId = s.CorrelationId
 		from A2v10_ProcS.MessageQueue q
 			inner join A2v10_ProcS.SagaMap m on q.Kind = m.MessageKind
 			left join A2v10_ProcS.Sagas s on s.[Kind] = m.SagaKind and q.CorrelationId = s.CorrelationId
@@ -222,8 +222,8 @@ begin
 		order by QueueId
 	)
 	update A2v10_ProcS.MessageQueue set [State] = N'Hold'
-	output inserted.Id, inserted.Kind, inserted.Body, T.SagaId, T.SagaKind, T.SagaBody, T.MessageCorrelationId
-	into @queueTable(QueueId, MessageKind, MessageBody, SagaId, SagaKind, SagaBody, MessageCorrelationId)
+	output inserted.Id, inserted.Kind, inserted.Body, T.SagaId, T.SagaKind, T.SagaBody, T.MessageCorrelationId, T.SagaCorrelationId
+	into @queueTable(QueueId, MessageKind, MessageBody, SagaId, SagaKind, SagaBody, MessageCorrelationId, SagaCorrelationId)
 	from T inner join A2v10_ProcS.MessageQueue q on T.QueueId = q.Id;
 
 	select top(1) @queueId = QueueId, @sagaId = SagaId from @queueTable;
@@ -248,7 +248,7 @@ begin
 	-- queue dependent messages
 	update A2v10_ProcS.MessageQueue set [State] = N'Init' where Parent = @queueId and [State] = N'Wait';
 
-	select QueueId, MessageKind, MessageBody, SagaId, SagaKind, SagaBody from @queueTable;
+	select QueueId, MessageKind, MessageBody, SagaId, SagaKind, SagaBody, SagaCorrelationId from @queueTable;
 end
 go
 ------------------------------------------------

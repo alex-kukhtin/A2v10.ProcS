@@ -1,6 +1,7 @@
 ﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,6 +10,15 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS.SqlServer
 {
+	public class Tracker
+	{
+		public void Track(String text)
+		{
+			using var tw = new StreamWriter("d:\\temp\\log.txt", true);
+			tw.WriteLine(text);
+		}
+	}
+
 	public class SagaMapItem
 	{
 		public SagaMapItem(String messageKind, String sagaKind)
@@ -26,6 +36,7 @@ namespace A2v10.ProcS.SqlServer
 		private readonly ISagaResolver _sagaResolver;
 		private readonly IDbContext _dbContext;
 		private readonly IResourceWrapper _resourceWrapper;
+		private readonly Tracker _tracker = new Tracker();
 
 		// TODO: ??????????? Config????
 		private static readonly Guid _host = Guid.Parse("BBDFE351-D6A1-4F22-9341-6FBD6628424B");
@@ -63,8 +74,13 @@ namespace A2v10.ProcS.SqlServer
 			var msgjson = dobj.Get<String>("MessageBody");
 			var msgdo = DynamicObjectConverters.FromJson(msgjson);
 			var message = _resourceWrapper.Unwrap<IMessage>(msgdo);
+			String sagaCorrelationId = dobj.Get<String>("SagaCorrelationId");
+
+			_tracker.Track("---------------");
+			_tracker.Track($"Peek Message. type:{message.GetType()}, correlationId: {message.CorrelationId}");
 
 			Guid? sagaId = dobj.Get<Guid?>("SagaId");
+
 			
 			var sagakind = dobj.Get<String>("SagaKind");
 			var sagabodyjson = dobj.Get<String>("SagaBody");
@@ -75,32 +91,15 @@ namespace A2v10.ProcS.SqlServer
 				var sagbodydo = DynamicObjectConverters.FromJson(sagabodyjson);
 				var sagaRes = new Resource(sagakind, sagbodydo);
 				saga = _resourceWrapper.Unwrap<ISaga>(sagaRes);
+				saga.CorrelationId.FromString(sagaCorrelationId);
+				_tracker.Track($"Restore saga. id:{sagaId}, kind:{sagakind}, correlationId: {sagaCorrelationId}");
 			}
 			else
 			{
+				_tracker.Track($"Create saga. id:{sagaId}, kind:{sagakind}, correlationId: {sagaCorrelationId}");
 				saga = _resourceWrapper.Create<ISaga>(sagakind);
 			}
 			return new PickedSaga(sagaId, saga, new ServiceBusItem(message));
-		}
-
-		private async Task<(Guid id, ISaga saga)> GetSagaForMessage(IMessage message)
-		{
-			var sagaFactory = _sagaResolver.GetSagaFactory(message.GetType());
-			var key = new SagaKeeperKey(sagaFactory.SagaKind, message.CorrelationId);
-			var prms = new DynamicObject()
-			{
-				{ "Key", key.ToString() }
-			};
-
-			var eo = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Saga.GetOrAdd]", prms);
-			var edo = new DynamicObject(eo);
-
-			var saga = sagaFactory.CreateSaga();
-			var statejson = edo.Get<String>("State");
-			if (!String.IsNullOrEmpty(statejson))
-				saga.Restore(DynamicObjectConverters.FromJson(statejson), _resourceWrapper);
-
-			return (edo.Get<Guid>("Id"), saga);
 		}
 
 		public async Task ReleaseSaga(PickedSaga picked)
@@ -124,6 +123,8 @@ namespace A2v10.ProcS.SqlServer
 				{ "CorrelationId", item.Message.CorrelationId.ToString() }
 			};
 
+			_tracker.Track($"SendMessage. kind:{prm.Get<String>("Kind")}, correlationId: {item.Message.CorrelationId.ToString()}");
+
 			await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", prm);
 			// TODO: msgId ????
 			Int64 msgId = prm.Get<Int64>("Id");
@@ -142,6 +143,7 @@ namespace A2v10.ProcS.SqlServer
 						{ "CorrelationId", a.Message.CorrelationId.ToString() }
 					};
 
+					_tracker.Track($"SendMessage. kind:{prmafter.Get<String>("Kind")}, correlationId: {a.Message.CorrelationId.ToString()}");
 					await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", prmafter);
 				}
 			}
@@ -157,6 +159,7 @@ namespace A2v10.ProcS.SqlServer
 				{ "Body", body },
 				{ "IsComplete", saga.IsComplete }
 			};
+			_tracker.Track($"Update saga. id: {id}, isComplete: {saga.IsComplete}, kind:{saga.Kind}, correlationId: {saga.CorrelationId.ToString()}");
 			return _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Saga.Update]", prms);
 		}
 

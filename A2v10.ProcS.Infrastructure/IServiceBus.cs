@@ -9,6 +9,7 @@ namespace A2v10.ProcS.Infrastructure
 {
 	public interface ICorrelationId : IEquatable<ICorrelationId>
 	{
+		void FromString(String str);
 	}
 
 	public interface IMessage : IStorable

@@ -89,6 +89,7 @@ namespace A2v10.ProcS
 		{
 			resultMessage.Result = message.Result;
 			context.SendMessage(resultMessage);
+			IsComplete = true;
 			return Task.CompletedTask;
 		}
 
