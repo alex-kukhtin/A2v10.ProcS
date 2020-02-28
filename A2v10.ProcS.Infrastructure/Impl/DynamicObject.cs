@@ -88,6 +88,10 @@ namespace A2v10.ProcS.Infrastructure
 						{
 							return Guid.Parse(strVal);
 						}
+						if (type.IsEnum)
+						{
+							return Enum.Parse(type, strVal);
+						}
 						break;
 					}
 			}
