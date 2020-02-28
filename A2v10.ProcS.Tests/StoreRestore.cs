@@ -111,20 +111,113 @@ namespace A2v10.ProcS.Tests.StoreRestore
 	public class StoreRestore
 	{
 
-		public static Object BullshitGenerator(Type type)
+		public static Object PlainBullshitGenerator(Type type)
 		{
 			if (type.IsAssignableFrom(typeof(String))) return "Bullshit String";
 			if (type.IsAssignableFrom(typeof(Int32))) return 777;
+			if (type.IsAssignableFrom(typeof(Int64))) return 999;
 			if (type.IsAssignableFrom(typeof(Single))) return (Single)333.33;
+			if (type.IsAssignableFrom(typeof(Double))) return (Double)55555.5555;
 			if (type.IsAssignableFrom(typeof(Guid))) return Guid.NewGuid();
 			if (type.IsAssignableFrom(typeof(Boolean))) return true;
+			if (type == typeof(Uri)) return new Uri("http://bullshit.io/");
+			if (type.IsAssignableFrom(typeof(DateTime))) return new DateTime(2020, 1, 1);
+			if (type.IsAssignableFrom(typeof(TimeSpan))) return new TimeSpan(0, 15, 0);
 			if (type.IsEnum)
 			{
-				var vals = type.GetEnumValues();
+				var vals = type.GetEnumNames();
 				var i = vals.Length == 1 ? 0 : vals.Length -1;
-				return vals.GetValue(i);
+				return Enum.Parse(type, vals[i]);
 			}
 			return null;
+		}
+
+		public static Object BullshitGenerator(Type type, IResourceWrapper rw, IDictionary<Type, Type> impl)
+		{
+			Object val = PlainBullshitGenerator(type);
+			if (val == null)
+			{
+				var optype = impl.ContainsKey(type) ? impl[type] : type;
+				if (optype != null)
+				{
+					if (!type.IsAssignableFrom(optype)) throw new Exception("Bad implementation");
+					bool fill;
+					var rk = optype.GetCustomAttribute<ResourceKeyAttribute>();
+					if (rk != null)
+					{
+						val = rw.Create(rk.Key, new DynamicObject());
+						fill = true;
+					}
+					else if (optype.IsGenericType && optype.GetGenericTypeDefinition() == typeof(CorrelationId<>))
+					{
+						var crdt = optype.GetGenericArguments()[0];
+						val = Activator.CreateInstance(optype, PlainBullshitGenerator(crdt));
+						fill = false;
+					}
+					else if (optype.IsArray)
+					{
+						var et = optype.GetElementType();
+						var arr = Array.CreateInstance(et, 3);
+						arr.SetValue(BullshitGenerator(et, rw, impl), 0);
+						arr.SetValue(BullshitGenerator(et, rw, impl), 1);
+						arr.SetValue(BullshitGenerator(et, rw, impl), 2);
+						val = arr;
+						fill = false;
+					}
+					else if (optype.IsGenericType && (optype.GetGenericTypeDefinition() == typeof(IEnumerable<>) || optype.GetInterface("IEnumerable`1") != null))
+					{
+						var gtd = optype.GetGenericTypeDefinition();
+						if (gtd == typeof(IEnumerable<>))
+						{
+							var et = optype.GetGenericArguments()[0];
+							var arr = Array.CreateInstance(et, 3);
+							arr.SetValue(BullshitGenerator(et, rw, impl), 0);
+							arr.SetValue(BullshitGenerator(et, rw, impl), 1);
+							arr.SetValue(BullshitGenerator(et, rw, impl), 2);
+							val = arr;
+							fill = false;
+						}
+						else if (gtd == typeof(List<>) || gtd == typeof(IList<>))
+						{
+							var lt = optype.GetGenericArguments()[0];
+							var t = typeof(List<>).MakeGenericType(lt);
+							var l = Activator.CreateInstance(t) as System.Collections.IList;
+							for (var i = 0; i < 3; i++)
+							{
+								l.Add(BullshitGenerator(lt, rw, impl));
+							}
+							val = l;
+							fill = false;
+						}
+						else if (gtd == typeof(Dictionary<,>) || gtd == typeof(IDictionary<,>))
+						{
+							throw new Exception("Can't handle Dictionaries");
+						}
+						else
+						{
+							throw new Exception("Can't handle this Enumerable");
+						}
+					}
+					else
+					{
+						var fct = new TypeResourceFactory(optype);
+						var prms = FakeResourceManager.GetParams(fct);
+						var data = new DynamicObject();
+						foreach (var itm in prms)
+						{
+							data[itm.Key] = PlainBullshitGenerator(itm.Value);
+						}
+						val = fct.Create(data);
+						fill = true;
+					}
+					if (fill) FillPropertiesBullshit(val, rw, impl);
+				}
+				else
+				{
+					//throw new Exception("Can't implement");
+				}
+			}
+			return val;
 		}
 
 		public static void FillPropertiesBullshit(Object item, IResourceWrapper rw, IDictionary<Type, Type> impl)
@@ -136,56 +229,24 @@ namespace A2v10.ProcS.Tests.StoreRestore
 				if (ppt.GetIndexParameters().Length > 0) continue;
 				var sm = ppt.GetSetMethod(true);
 				if (sm == null) continue;
-				Object val = BullshitGenerator(ppt.PropertyType);
-				if (val == null)
-				{
-					var optype = ppt.PropertyType.IsClass ? ppt.PropertyType : ((ppt.PropertyType.IsInterface && impl.ContainsKey(ppt.PropertyType)) ? impl[ppt.PropertyType] : null);
-					if (optype != null)
-					{
-						if (!ppt.PropertyType.IsAssignableFrom(optype)) throw new Exception("Bad implementation");
-						var rk = optype.GetCustomAttribute<ResourceKeyAttribute>();
-						if (rk != null)
-						{
-							val = rw.Create(rk.Key, new DynamicObject());
-						}
-						else if (optype.IsGenericType && optype.GetGenericTypeDefinition() == typeof(CorrelationId<>))
-						{
-							var crdt = optype.GetGenericArguments()[0];
-							val = Activator.CreateInstance(optype, BullshitGenerator(crdt));
-						}
-						else if (optype.IsArray)
-						{
-							throw new NotImplementedException("Can't deal with array");
-						}
-						else
-						{
-							var fct = new TypeResourceFactory(optype);
-							var prms = FakeResourceManager.GetParams(fct);
-							var data = new DynamicObject();
-							foreach (var itm in prms)
-							{
-								data[itm.Key] = BullshitGenerator(itm.Value);
-							}
-							val = fct.Create(data);
-						}
-						FillPropertiesBullshit(val, rw, impl);
-					}
-					else
-					{
-						throw new Exception("Can't implement");
-					}
-				}
+				var val = BullshitGenerator(ppt.PropertyType, rw, impl);
 				sm.Invoke(item, new Object[] { val });
+			}
+			var flds = tt.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+			foreach (var fld in flds)
+			{
+				if (fld.IsInitOnly) continue;
+				var val = BullshitGenerator(fld.FieldType, rw, impl);
+				fld.SetValue(item, val);
 			}
 		}
 
 		public static bool Check(object item)
 		{
-			/*if (item is IMessage)
+			if (item is IMessage)
 				Assert.IsTrue(item is IStorable);
 			if (item is ISaga)
-				Assert.IsTrue(item is IStorable);*/
-			Assert.IsTrue(item is IStorable);
+				Assert.IsTrue(item is IStorable);
 			return item is IStorable;
 		}
 
@@ -223,6 +284,11 @@ namespace A2v10.ProcS.Tests.StoreRestore
 			var storable = item as IStorable;
 
 			var stored = storable.Store(rw);
+
+			foreach (var d in data)
+			{
+				stored.Set(d.Key, d.Value);
+			}
 
 			var rest = rw.Create(key, data);
 			Assert.IsTrue(rest is IStorable);
@@ -294,6 +360,7 @@ namespace A2v10.ProcS.Tests.StoreRestore
 		{
 			var impl = new Dictionary<Type, Type>();
 			impl.Add(typeof(IDynamicObject), typeof(Dno));
+			impl.Add(typeof(IActivity), typeof(CodeActivity));
 			impl.Add(typeof(IMessage), typeof(CallbackMessage));
 			impl.Add(typeof(IResultMessage), typeof(ContinueActivityMessage));
 			
@@ -301,15 +368,13 @@ namespace A2v10.ProcS.Tests.StoreRestore
 
 			foreach (var obj in list)
 			{
-				var data0 = new DynamicObject();
-				var data = new DynamicObject();
+				var cdata = new DynamicObject();
 				foreach (var fld in obj.Value)
 				{
-					data0[fld.Key] = fld.Value.IsValueType ? Activator.CreateInstance(fld.Value) : null;
-					data[fld.Key] = BullshitGenerator(fld.Value);
+					cdata[fld.Key] = PlainBullshitGenerator(fld.Value);
 				}
-				StoreRestoreEmpty(rw, obj.Key, data0);
-				StoreRestoreBullshit(rw, obj.Key, data, impl);
+				StoreRestoreEmpty(rw, obj.Key, cdata);
+				StoreRestoreBullshit(rw, obj.Key, cdata, impl);
 			}
 		}
 
@@ -328,10 +393,10 @@ namespace A2v10.ProcS.Tests.StoreRestore
 			//var configuration = new ConfigurationBuilder().Build();
 
 			ProcS.RegisterSagas(rm, mgr);
-			ProcS.RegisterActivities(rm);
+			//ProcS.RegisterActivities(rm);
 
 			ProcS.RegisterSagas(frm, mgr2);
-			ProcS.RegisterActivities(frm);
+			//ProcS.RegisterActivities(frm);
 
 			//pmr.LoadPlugins(pluginPath, configuration);
 			//pmr.RegisterResources(rm, mgr);
