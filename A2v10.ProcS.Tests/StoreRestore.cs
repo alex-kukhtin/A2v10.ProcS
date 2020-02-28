@@ -13,7 +13,7 @@ using System.Linq;
 using DynamicObject = A2v10.ProcS.Infrastructure.DynamicObject;
 using Newtonsoft.Json.Linq;
 
-namespace A2v10.ProcS.Tests
+namespace A2v10.ProcS.Tests.StoreRestore
 {
 	public class FakeResourceManager : IResourceManager
 	{
@@ -115,37 +115,51 @@ namespace A2v10.ProcS.Tests
 		{
 			if (type.IsAssignableFrom(typeof(String))) return "Bullshit String";
 			if (type.IsAssignableFrom(typeof(Int32))) return 777;
+			if (type.IsAssignableFrom(typeof(Single))) return (Single)333.33;
 			if (type.IsAssignableFrom(typeof(Guid))) return Guid.NewGuid();
 			if (type.IsAssignableFrom(typeof(Boolean))) return true;
+			if (type.IsEnum)
+			{
+				var vals = type.GetEnumValues();
+				var i = vals.Length == 1 ? 0 : vals.Length -1;
+				return vals.GetValue(i);
+			}
 			return null;
 		}
 
-		public static void FillPropertiesBullshit(Object item, IResourceWrapper rw)
+		public static void FillPropertiesBullshit(Object item, IResourceWrapper rw, IDictionary<Type, Type> impl)
 		{
 			var tt = item.GetType();
 			var ppts = tt.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 			foreach (var ppt in ppts)
 			{
+				if (ppt.GetIndexParameters().Length > 0) continue;
 				var sm = ppt.GetSetMethod(true);
 				if (sm == null) continue;
 				Object val = BullshitGenerator(ppt.PropertyType);
 				if (val == null)
 				{
-					if (ppt.PropertyType.IsClass)
+					var optype = ppt.PropertyType.IsClass ? ppt.PropertyType : ((ppt.PropertyType.IsInterface && impl.ContainsKey(ppt.PropertyType)) ? impl[ppt.PropertyType] : null);
+					if (optype != null)
 					{
-						var rk = ppt.PropertyType.GetCustomAttribute<ResourceKeyAttribute>();
+						if (!ppt.PropertyType.IsAssignableFrom(optype)) throw new Exception("Bad implementation");
+						var rk = optype.GetCustomAttribute<ResourceKeyAttribute>();
 						if (rk != null)
 						{
 							val = rw.Create(rk.Key, new DynamicObject());
 						}
-						else if (ppt.PropertyType.IsGenericType && ppt.PropertyType.GetGenericTypeDefinition() == typeof(CorrelationId<>))
+						else if (optype.IsGenericType && optype.GetGenericTypeDefinition() == typeof(CorrelationId<>))
 						{
-							var crdt = ppt.PropertyType.GetGenericArguments()[0];
-							val = Activator.CreateInstance(ppt.PropertyType, BullshitGenerator(crdt));
+							var crdt = optype.GetGenericArguments()[0];
+							val = Activator.CreateInstance(optype, BullshitGenerator(crdt));
+						}
+						else if (optype.IsArray)
+						{
+							throw new NotImplementedException("Can't deal with array");
 						}
 						else
 						{
-							var fct = new TypeResourceFactory(ppt.PropertyType);
+							var fct = new TypeResourceFactory(optype);
 							var prms = FakeResourceManager.GetParams(fct);
 							var data = new DynamicObject();
 							foreach (var itm in prms)
@@ -154,11 +168,11 @@ namespace A2v10.ProcS.Tests
 							}
 							val = fct.Create(data);
 						}
-						FillPropertiesBullshit(val, rw);
+						FillPropertiesBullshit(val, rw, impl);
 					}
 					else
 					{
-						continue;
+						throw new Exception("Can't implement");
 					}
 				}
 				sm.Invoke(item, new Object[] { val });
@@ -167,20 +181,29 @@ namespace A2v10.ProcS.Tests
 
 		public static bool Check(object item)
 		{
+			/*if (item is IMessage)
+				Assert.IsTrue(item is IStorable);
+			if (item is ISaga)
+				Assert.IsTrue(item is IStorable);*/
 			Assert.IsTrue(item is IStorable);
-			return true;
+			return item is IStorable;
 		}
 
 
-		public static void StoreRestoreBullshit(IResourceWrapper rw, String key, IDynamicObject data)
+		public static void StoreRestoreBullshit(IResourceWrapper rw, String key, IDynamicObject data, IDictionary<Type, Type> impl)
 		{
 			var item = rw.Create(key, data);
 			if (!Check(item)) return;
 			var storable = item as IStorable;
 
-			FillPropertiesBullshit(item, rw);
+			FillPropertiesBullshit(item, rw, impl);
 
 			var stored = storable.Store(rw);
+
+			foreach (var d in data)
+			{
+				stored.Set(d.Key, d.Value);
+			}
 
 			var rest = rw.Create(key, data);
 			Assert.IsTrue(rest is IStorable);
@@ -225,7 +248,69 @@ namespace A2v10.ProcS.Tests
 
 			Assert.IsTrue(JToken.DeepEquals(JToken.Parse(storedJson), JToken.Parse(restoredJson)));
 
+
+		}
+
+		public class Dno : DynamicObject, IDynamicObject
+		{
+			public Guid DynamicGuid
+			{
+				get
+				{
+					return Get<Guid>("guid");
+				}
+				set
+				{
+					Set("guid", value);
+				}
+			}
+
+			public String DynamicString
+			{
+				get
+				{
+					return Get<String>("string");
+				}
+				set
+				{
+					Set("string", value);
+				}
+			}
+
+			public Int32 DynamicInt
+			{
+				get
+				{
+					return Get<Int32>("number");
+				}
+				set
+				{
+					Set("number", value);
+				}
+			}
+		}
+
+		public static void TestRegistred(IResourceWrapper rw, IEnumerable<KeyValuePair<String, KeyValuePair<String, Type>[]>> list, IEnumerable<KeyValuePair<Type, Type>> im = null)
+		{
+			var impl = new Dictionary<Type, Type>();
+			impl.Add(typeof(IDynamicObject), typeof(Dno));
+			impl.Add(typeof(IMessage), typeof(CallbackMessage));
+			impl.Add(typeof(IResultMessage), typeof(ContinueActivityMessage));
 			
+			if (im != null) foreach (var ii in im) impl.Add(ii.Key, ii.Value);
+
+			foreach (var obj in list)
+			{
+				var data0 = new DynamicObject();
+				var data = new DynamicObject();
+				foreach (var fld in obj.Value)
+				{
+					data0[fld.Key] = fld.Value.IsValueType ? Activator.CreateInstance(fld.Value) : null;
+					data[fld.Key] = BullshitGenerator(fld.Value);
+				}
+				StoreRestoreEmpty(rw, obj.Key, data0);
+				StoreRestoreBullshit(rw, obj.Key, data, impl);
+			}
 		}
 
 		[TestMethod]
@@ -243,26 +328,17 @@ namespace A2v10.ProcS.Tests
 			//var configuration = new ConfigurationBuilder().Build();
 
 			ProcS.RegisterSagas(rm, mgr);
-			//ProcS.RegisterActivities(rm);
+			ProcS.RegisterActivities(rm);
 
 			ProcS.RegisterSagas(frm, mgr2);
-			//ProcS.RegisterActivities(frm);
+			ProcS.RegisterActivities(frm);
 
 			//pmr.LoadPlugins(pluginPath, configuration);
 			//pmr.RegisterResources(rm, mgr);
 
-			foreach (var obj in frm.TheList)
-			{
-				var data0 = new DynamicObject();
-				var data = new DynamicObject();
-				foreach (var fld in obj.Value)
-				{
-					data0[fld.Key] = fld.Value.IsValueType ? Activator.CreateInstance(fld.Value) : null;
-					data[fld.Key] = BullshitGenerator(fld.Value);
-				}
-				StoreRestoreEmpty(rm, obj.Key, data0);
-				StoreRestoreBullshit(rm, obj.Key, data);
-			}
+			
+
+			TestRegistred(rm, frm.TheList);
 		}
 	}
 }
