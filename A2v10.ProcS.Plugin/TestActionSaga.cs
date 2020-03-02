@@ -28,10 +28,6 @@ namespace A2v10.ProcS.Plugin
 		{
 		}
 
-		public TestPluginActionSaga(String kind) : base(ukey)
-		{
-		}
-
 		protected override Task Handle(IHandleContext context, TaskPluginActionMessage message)
 		{
 			Int32 result = message.CorrelationId.Value.Value;
