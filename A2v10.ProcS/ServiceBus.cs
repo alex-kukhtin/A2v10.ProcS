@@ -16,19 +16,26 @@ namespace A2v10.ProcS
 		public ServiceBusItem(IMessage message)
 		{
 			Message = message;
-			After = Array.Empty<ServiceBusItem>();
+			Next = Array.Empty<ServiceBusItem>();
+			After = null;
 		}
 
-		public ServiceBusItem(IMessage message, IEnumerable<ServiceBusItem> after)
+		public ServiceBusItem(IMessage message, DateTime after)
+			: this(message)
 		{
-			Message = message;
-			if (after == null) 
-				After = Array.Empty<ServiceBusItem>();
-			else After = after.ToArray();
+			After = after;
+		}
+
+		public ServiceBusItem(IMessage message, IEnumerable<ServiceBusItem> next)
+			: this(message)
+		{
+			if (next != null)
+				Next = next.ToArray();
 		}
 
 		public IMessage Message { get; private set; }
-		public IServiceBusItem[] After { get; private set; }
+		public IServiceBusItem[] Next { get; private set; }
+		public DateTime? After { get; private set; }
 	}
 
 	public abstract class ServiceBusBase : IServiceBus
@@ -81,6 +88,11 @@ namespace A2v10.ProcS
 			Send(new ServiceBusItem(message));
 		}
 
+		public void SendAfter(DateTime after, IMessage message)
+		{
+			Send(new ServiceBusItem(message, after));
+		}
+
 		private static ServiceBusItem GetSequenceItem(IEnumerator<IMessage> en)
 		{
 			if (en.MoveNext())
@@ -127,7 +139,7 @@ namespace A2v10.ProcS
 						var hc = new HandleContext(this, _repository, scriptContext);
 						await saga.Handle(hc, item.ServiceBusItem.Message);
 					}
-					Send(item.ServiceBusItem.After);
+					Send(item.ServiceBusItem.Next);
 					await _sagaKeeper.ReleaseSaga(item);
 				}
 				catch (Exception e)

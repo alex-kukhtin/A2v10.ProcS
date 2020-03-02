@@ -119,6 +119,11 @@ namespace A2v10.ProcS
 		{
 			while (_messages.TryDequeue(out var message))
 			{
+				if (message.After.HasValue && message.After.Value >= DateTime.UtcNow)
+				{
+					_messages.Enqueue(message);
+					continue;
+				}
 				var saga = GetSagaForMessage(message.Message);
 				if (saga == default)
 				{

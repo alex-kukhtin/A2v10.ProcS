@@ -128,9 +128,9 @@ namespace A2v10.ProcS.SqlServer
 			await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", prm);
 			// TODO: msgId ????
 			Int64 msgId = prm.Get<Int64>("Id");
-			if (item.After != null)
+			if (item.Next != null)
 			{
-				foreach (var a in item.After)
+				foreach (var a in item.Next)
 				{
 					var aftermsg = _resourceWrapper.Wrap(a.Message).Store(_resourceWrapper);
 					var afterjson = DynamicObjectConverters.ToJson(aftermsg);

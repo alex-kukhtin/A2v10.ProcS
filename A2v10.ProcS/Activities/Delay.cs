@@ -11,13 +11,14 @@ namespace A2v10.ProcS
 	[ResourceKey(ProcS.ResName + ":" + nameof(Delay))]
 	public class Delay : IActivity
 	{
-		public String Duration { get; set; }
+		public TimeSpan Duration { get; set; }
 
 		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
-			//TimeSpan span = TimeSpan.Parse(Duration);
-			//String bookmark = Guid.NewGuid().ToString();
-			// TODO
+			if (context.IsContinue)
+				return ActivityExecutionResult.Complete;
+			var m = new ContinueActivityMessage(context.Instance.Id, String.Empty);
+			context.SendMessageAfter(DateTime.UtcNow.Add(Duration), m);
 			return ActivityExecutionResult.Idle;
 		}
 	}
