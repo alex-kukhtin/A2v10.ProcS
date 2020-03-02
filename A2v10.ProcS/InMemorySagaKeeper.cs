@@ -53,6 +53,7 @@ namespace A2v10.ProcS
 
 		public ISaga Saga { get; }
 		public Int32 HoldLevel;
+		public Exception FailedException;
 	}
 
 	public class InMemorySagaKeeper : ISagaKeeper
@@ -75,8 +76,11 @@ namespace A2v10.ProcS
 				var saga = sagaFactory.CreateSaga();
 				return new SagaState(saga);
 			});
-			if (Interlocked.CompareExchange(ref state.HoldLevel, 1, 0) == 0)
+			var hst = Interlocked.CompareExchange(ref state.HoldLevel, 1, 0);
+			if (hst == 0)
 				return (key, state.Saga);
+			if (hst == 2)
+				throw state.FailedException ?? new Exception("Requested Saga is failed");
 			return default;
 		}
 
@@ -91,6 +95,16 @@ namespace A2v10.ProcS
 				var ns = new SagaState(saga);
 				sagas.AddOrUpdate(new SagaKeeperKey(saga), ns, (k, s) => ns);
 			}
+		}
+
+		private void SagaFailed(ISaga saga, ISagaKeeperKey key, Exception exception)
+		{
+			var ns = new SagaState(saga)
+			{
+				HoldLevel = 2,
+				FailedException = exception
+			};
+			sagas.AddOrUpdate(key, ns, (k, s) => ns);
 		}
 
 		private readonly ConcurrentQueue<IServiceBusItem> _messages = new ConcurrentQueue<IServiceBusItem>();
@@ -127,6 +141,16 @@ namespace A2v10.ProcS
 			if (!picked.Available || !this.picked.ContainsKey(picked.Id.Value)) 
 				throw new Exception("Saga is not picked");
 			SagaUpdate(picked.Saga, this.picked[picked.Id.Value]);
+			return Task.CompletedTask;
+		}
+
+		public Task FailSaga(PickedSaga picked, Exception exception)
+		{
+			if (picked.Id == null)
+				return Task.CompletedTask;
+			if (!picked.Available || !this.picked.ContainsKey(picked.Id.Value))
+				throw new Exception("Saga is not picked");
+			SagaFailed(picked.Saga, this.picked[picked.Id.Value], exception);
 			return Task.CompletedTask;
 		}
 	}

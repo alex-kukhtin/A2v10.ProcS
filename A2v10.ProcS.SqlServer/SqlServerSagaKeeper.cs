@@ -163,6 +163,7 @@ namespace A2v10.ProcS.SqlServer
 			return _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Saga.Update]", prms);
 		}
 
+		
 
 		async Task SaveSagaMap()
 		{
@@ -173,5 +174,11 @@ namespace A2v10.ProcS.SqlServer
 			_sagaMapSaved = true;
 		}
 
+
+		public Task FailSaga(PickedSaga picked, Exception exception)
+		{
+			//TODO: Implemet Filed Saga processing
+			throw new NotImplementedException("Filed Saga processing is not implemented", exception);
+		}
 	}
 }

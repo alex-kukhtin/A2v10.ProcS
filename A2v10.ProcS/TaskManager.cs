@@ -18,7 +18,7 @@ namespace A2v10.ProcS
 			}
 			catch (Exception e)
 			{
-				p.SignalEception(e);
+				p.SignalException(e);
 				return p;
 			}
 			p.SignalDone();

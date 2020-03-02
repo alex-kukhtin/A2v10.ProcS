@@ -83,7 +83,7 @@ namespace A2v10.ProcS
 		{
 			if (obj == null || obj.IsEmpty)
 				return null;
-			return JsonConvert.SerializeObject(obj.Root);
+			return JsonConvert.SerializeObject(obj.Root, new StringEnumConverter());
 		}
 
 		public static T To<T>(this IDynamicObject obj) where T : class
