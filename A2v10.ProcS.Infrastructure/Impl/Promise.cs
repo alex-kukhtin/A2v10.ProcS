@@ -7,6 +7,25 @@ using System.Threading.Tasks;
 
 namespace A2v10.ProcS.Infrastructure
 {
+	public static class PromiseExtensions
+	{
+		public static Task WaitFor(this IPromise promise)
+		{
+			var tc = new TaskCompletionSource<bool>();
+			promise.Done(() => tc.SetResult(true));
+			promise.Catch(e => tc.SetException(e));
+			return tc.Task;
+		}
+
+		public static Task WaitFor<T>(this IPromise<T> promise)
+		{
+			var tc = new TaskCompletionSource<T>();
+			promise.Done(r => tc.SetResult(r));
+			promise.Catch(e => tc.SetException(e));
+			return tc.Task;
+		}
+	}
+
 	public abstract class PromiseBase
 	{
 		protected Boolean isDone = false;
@@ -14,7 +33,7 @@ namespace A2v10.ProcS.Infrastructure
 		protected Action<Exception> onException = null;
 		protected Exception exception = null;
 
-		public void SignalEception(Exception e)
+		public void SignalException(Exception e)
 		{
 			lock (this)
 			{
@@ -143,7 +162,7 @@ namespace A2v10.ProcS.Infrastructure
 			tasks = promises.Select(p =>
 			{
 				var cs = new TaskCompletionSource<Boolean>();
-				p.Done(() => cs.SetResult(true)).Catch(promise.SignalEception);
+				p.Done(() => cs.SetResult(true)).Catch(promise.SignalException);
 				return cs.Task;
 			}).ToArray();
 		}

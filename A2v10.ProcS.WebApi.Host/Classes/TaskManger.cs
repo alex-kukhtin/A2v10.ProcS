@@ -23,8 +23,8 @@ namespace A2v10.ProcS.WebApi.Host.Classes
 			var t = Task.Run(task).ContinueWith(t =>
 			{
 				if (t.IsCompleted) p.SignalDone();
-				if (t.IsFaulted) p.SignalEception(t.Exception);
-				if (t.IsCanceled) p.SignalEception(new TaskCanceledException(t));
+				if (t.IsFaulted) p.SignalException(t.Exception);
+				if (t.IsCanceled) p.SignalException(new TaskCanceledException(t));
 			});
 			promises.Add((t, p));
 			return p;

@@ -49,25 +49,20 @@ namespace A2v10.ProcS
 
 		protected abstract void SignalUpdate();
 
+		protected abstract void SignalFail(Exception e);
+
 		private IPromise SendInternal(IServiceBusItem item)
 		{
 			async Task task()
 			{
-				try
-				{
-					await _sagaKeeper.SendMessage(item);
-				} 
-				catch (Exception ex)
-				{
-					int z = 55;
-				}
+				await _sagaKeeper.SendMessage(item);
 			}
 			return _taskManager.AddTask(task);
 		}
 
 		protected void Send(IServiceBusItem item)
 		{
-			SendInternal(item).Done(SignalUpdate);
+			SendInternal(item).Done(SignalUpdate).Catch(SignalFail);
 		}
 
 		protected void Send(IEnumerable<IServiceBusItem> items)
@@ -124,16 +119,23 @@ namespace A2v10.ProcS
 		{
 			async Task task()
 			{
-				var saga = item.Saga;
-				using (var scriptContext = _scriptEngine.CreateContext())
+				try
 				{
-					var hc = new HandleContext(this, _repository, scriptContext);
-					await saga.Handle(hc, item.ServiceBusItem.Message);
+					var saga = item.Saga;
+					using (var scriptContext = _scriptEngine.CreateContext())
+					{
+						var hc = new HandleContext(this, _repository, scriptContext);
+						await saga.Handle(hc, item.ServiceBusItem.Message);
+					}
+					Send(item.ServiceBusItem.After);
+					await _sagaKeeper.ReleaseSaga(item);
 				}
-				Send(item.ServiceBusItem.After);
-				await _sagaKeeper.ReleaseSaga(item);
+				catch (Exception e)
+				{
+					await _sagaKeeper.FailSaga(item, e);
+				}
 			}
-			_taskManager.AddTask(task);
+			_taskManager.AddTask(task).Catch(SignalFail);
 		}
 	}
 
@@ -150,9 +152,19 @@ namespace A2v10.ProcS
 			mre.Set();
 		}
 
+		protected override void SignalFail(Exception e)
+		{
+			exception = e;
+			failed = true;
+			running = false;
+			SignalUpdate();
+		}
+
 		private readonly ManualResetEvent mre = new ManualResetEvent(false);
 
+		private Exception exception = null;
 		private volatile Boolean running = false;
+		private volatile Boolean failed = false;
 
 		public void Stop()
 		{
@@ -170,6 +182,10 @@ namespace A2v10.ProcS
 					Process(CancellationToken.None).Wait();
 					mre.Reset();
 					mre.WaitOne(50);
+				}
+				if (failed)
+				{
+					throw exception ?? new Exception("Error while ServiceBus processing");
 				}
 			}
 		}
@@ -189,6 +205,19 @@ namespace A2v10.ProcS
 			try
 			{
 				ts?.TrySetResult(true);
+			}
+			finally
+			{
+				rwl.ReleaseReaderLock();
+			}
+		}
+
+		protected override void SignalFail(Exception e)
+		{
+			rwl.AcquireReaderLock(10);
+			try
+			{
+				ts.SetException(e);
 			}
 			finally
 			{

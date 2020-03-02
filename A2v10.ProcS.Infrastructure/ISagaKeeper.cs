@@ -40,5 +40,6 @@ namespace A2v10.ProcS.Infrastructure
 		Task SendMessage(IServiceBusItem item);
 		Task<PickedSaga> PickSaga();
 		Task ReleaseSaga(PickedSaga picked);
+		Task FailSaga(PickedSaga picked, Exception exception);
 	}
 }
