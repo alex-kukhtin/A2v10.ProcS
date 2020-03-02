@@ -196,7 +196,7 @@ namespace A2v10.ProcS
 		{
 			var instance = await context.LoadInstance(message.InstanceId);
 			var continueContext = context.CreateExecuteContext(instance, message.Bookmark, message.Result);
-			continueContext.ScriptContext.SetValue("reply", message.Result);
+			continueContext.ScriptContext.SetValue("reply", message?.Result ?? new DynamicObject());
 			continueContext.IsContinue = true;
 			await instance.Workflow.Continue(continueContext);
 		}

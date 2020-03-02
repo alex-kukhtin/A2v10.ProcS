@@ -5,7 +5,7 @@
 		"S1": {
 			"OnEntry": {
 				"$type": "A2v10.ProcS.Delay, A2v10.ProcS",
-				"Duration": "00:00:01"
+				"Duration": "00:00:00.500"
 			},
 			"Transitions": {
 				"S1->End": {

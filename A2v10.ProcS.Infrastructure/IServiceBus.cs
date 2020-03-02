@@ -33,6 +33,7 @@ namespace A2v10.ProcS.Infrastructure
 	public interface IServiceBus
 	{
 		void Send(IMessage message);
+		void SendAfter(DateTime after, IMessage message);
 		void Send(IEnumerable<IMessage> messages);
 		void SendSequence(IEnumerable<IMessage> messages);
 	}
@@ -40,6 +41,7 @@ namespace A2v10.ProcS.Infrastructure
 	public interface IServiceBusItem
 	{
 		IMessage Message { get; }
-		IServiceBusItem[] After { get; }
+		IServiceBusItem[] Next { get; }
+		DateTime? After { get; }
 	}
 }

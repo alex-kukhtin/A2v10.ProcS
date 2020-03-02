@@ -10,6 +10,7 @@ namespace A2v10.ProcS.Infrastructure
 		Task<IInstance> LoadInstance(Guid id);
 
 		void SendMessage(IMessage message);
+		void SendMessageAfter(DateTime after, IMessage message);
 		void SendMessagesSequence(params IMessage[] messages);
 
 		IScriptContext ScriptContext { get; }
