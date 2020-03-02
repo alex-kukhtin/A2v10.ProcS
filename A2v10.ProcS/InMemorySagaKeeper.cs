@@ -79,8 +79,6 @@ namespace A2v10.ProcS
 			var hst = Interlocked.CompareExchange(ref state.HoldLevel, 1, 0);
 			if (hst == 0)
 				return (key, state.Saga);
-			if (hst == 2)
-				throw state.FailedException ?? new Exception("Requested Saga is failed");
 			return default;
 		}
 

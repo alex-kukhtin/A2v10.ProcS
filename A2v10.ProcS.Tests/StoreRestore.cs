@@ -89,8 +89,8 @@ namespace A2v10.ProcS.Tests.StoreRestore
 		public static KeyValuePair<String, Type>[] GetParams(TypeResourceFactory factory)
 		{
 			var fld = factory.GetType().GetField("ct", BindingFlags.NonPublic | BindingFlags.Instance);
-			var ddd = ((ConstructorInfo c, ParameterInfo[] prms))fld.GetValue(factory);
-			return ddd.prms.Select(p => new KeyValuePair<String, Type>(p.Name, p.ParameterType)).ToArray();
+			var (c, prms) = ((ConstructorInfo c, ParameterInfo[] prms))fld.GetValue(factory);
+			return prms.Select(p => new KeyValuePair<String, Type>(p.Name, p.ParameterType)).ToArray();
 		}
 
 		public void RegisterResourceFactory(String key, IResourceFactory factory)
@@ -312,9 +312,7 @@ namespace A2v10.ProcS.Tests.StoreRestore
 			var storedJson = DynamicObjectConverters.ToJson(stored);
 			var restoredJson = DynamicObjectConverters.ToJson(restored);
 
-			Assert.IsTrue(JToken.DeepEquals(JToken.Parse(storedJson), JToken.Parse(restoredJson)));
-
-
+			Assert.IsTrue(JToken.DeepEquals(JToken.Parse(storedJson), JToken.Parse(restoredJson)), $"Stored and Restoread are different for {key}");
 		}
 
 		public class Dno : DynamicObject, IDynamicObject
@@ -358,12 +356,14 @@ namespace A2v10.ProcS.Tests.StoreRestore
 
 		public static void TestRegistred(IResourceWrapper rw, IEnumerable<KeyValuePair<String, KeyValuePair<String, Type>[]>> list, IEnumerable<KeyValuePair<Type, Type>> im = null)
 		{
-			var impl = new Dictionary<Type, Type>();
-			impl.Add(typeof(IDynamicObject), typeof(Dno));
-			impl.Add(typeof(IActivity), typeof(CodeActivity));
-			impl.Add(typeof(IMessage), typeof(CallbackMessage));
-			impl.Add(typeof(IResultMessage), typeof(ContinueActivityMessage));
-			
+			var impl = new Dictionary<Type, Type>
+			{
+				{ typeof(IDynamicObject), typeof(Dno) },
+				{ typeof(IActivity), typeof(CodeActivity) },
+				{ typeof(IMessage), typeof(CallbackMessage) },
+				{ typeof(IResultMessage), typeof(ContinueActivityMessage) }
+			};
+
 			if (im != null) foreach (var ii in im) impl.Add(ii.Key, ii.Value);
 
 			foreach (var obj in list)

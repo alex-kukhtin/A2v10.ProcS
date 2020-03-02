@@ -10,15 +10,16 @@ namespace A2v10.ProcS.Infrastructure
 
 	public static class ValueTypeHelper
 	{
-		public static Boolean IsNullable<T>(T t) { return false; }
-		public static Boolean IsNullable<T>(T? t) where T : struct { return true; }
+		public static Boolean IsNullable<T>(T _) { return false; }
+		public static Boolean IsNullable<T>(T? _) where T : struct { return true; }
 	}
 
 	public class DynamicObject : IDynamicObject
 	{
+		#pragma warning disable IDE1006 // Naming Styles
 		private ExpandoObject _object;
-
 		private IDictionary<String, Object> _dictionary => _object;
+		#pragma warning restore IDE1006 // Naming Styles
 
 		public ExpandoObject Root => _object;
 
@@ -74,7 +75,7 @@ namespace A2v10.ProcS.Infrastructure
 		public static T ConvertTo<T>(Object val)
 		{
 			if (val == null)
-				return default(T);
+				return default;
 			return (T) ConvertTo(val, typeof(T));
 		}
 

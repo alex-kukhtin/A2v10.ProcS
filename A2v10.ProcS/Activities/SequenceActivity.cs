@@ -11,7 +11,7 @@ namespace A2v10.ProcS
 	{
 		public List<IActivity> Activities { get; set; }
 
-		Int32 _currentAction { get; set; }
+		Int32 _currentAction;
 
 		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
