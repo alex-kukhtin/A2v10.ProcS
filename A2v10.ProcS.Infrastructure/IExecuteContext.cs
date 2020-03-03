@@ -1,5 +1,6 @@
 ﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ namespace A2v10.ProcS.Infrastructure
 		void SendMessagesSequence(params IMessage[] messages);
 
 		IScriptContext ScriptContext { get; }
+		ILogger Logger { get; }
 
 		IExecuteContext CreateExecuteContext(IInstance instance, String bookmark = null, IDynamicObject result = null);
 		Task<IInstance> StartProcess(String processId, Guid parentId, IDynamicObject data = null);

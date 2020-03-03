@@ -7,17 +7,25 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 
 using A2v10.ProcS.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace A2v10.ProcS.Tests
 {
 	public static class ProcessEngine
 	{
+		static ILogger<IWorkflowEngine> CreateLogger()
+		{
+			using var factory = LoggerFactory.Create(builder => builder.AddConsole());
+			return factory.CreateLogger<IWorkflowEngine>();
+		}
+
 		public static (WorkflowEngine engine, IRepository repository, ServiceBus bus) CreateEngine()
 		{
 			var rm = new ResourceManager(null);
 
 			var storage = new FakeStorage(rm);
 			var pmr = new PluginManager(null);
+			var logger = CreateLogger();
 
 			String pluginPath = GetPluginPath();
 			var configuration = new ConfigurationBuilder().Build();
@@ -31,8 +39,9 @@ namespace A2v10.ProcS.Tests
 			var keeper = new InMemorySagaKeeper(mgr.Resolver);
 			var scriptEngine = new ScriptEngine();
 			var repository = new Repository(storage, storage);
-			var bus = new ServiceBus(taskManager, keeper, repository, scriptEngine);
-			var engine = new WorkflowEngine(repository, bus, scriptEngine);
+			var bus = new ServiceBus(taskManager, keeper, repository, scriptEngine, logger);
+
+			var engine = new WorkflowEngine(repository, bus, scriptEngine, logger);
 			return (engine, repository, bus);
 		}
 

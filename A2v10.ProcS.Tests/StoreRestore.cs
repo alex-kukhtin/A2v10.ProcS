@@ -141,7 +141,7 @@ namespace A2v10.ProcS.Tests.StoreRestore
 				if (optype != null)
 				{
 					if (!type.IsAssignableFrom(optype)) throw new Exception("Bad implementation");
-					bool fill;
+					Boolean fill;
 					var rk = optype.GetCustomAttribute<ResourceKeyAttribute>();
 					if (rk != null)
 					{
@@ -241,7 +241,7 @@ namespace A2v10.ProcS.Tests.StoreRestore
 			}
 		}
 
-		public static bool Check(object item)
+		public static Boolean Check(Object item)
 		{
 			if (item is IMessage)
 				Assert.IsTrue(item is IStorable);
@@ -315,7 +315,7 @@ namespace A2v10.ProcS.Tests.StoreRestore
 			Assert.IsTrue(JToken.DeepEquals(JToken.Parse(storedJson), JToken.Parse(restoredJson)), $"Stored and Restoread are different for {key}");
 		}
 
-		public class Dno : DynamicObject, IDynamicObject
+		class Dno : DynamicObject, IDynamicObject
 		{
 			public Guid DynamicGuid
 			{

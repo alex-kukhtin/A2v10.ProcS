@@ -2,9 +2,11 @@
 
 using System;
 using System.Threading.Tasks;
-using A2v10.ProcS.Infrastructure;
+
+using Microsoft.Extensions.Logging;
 
 using A2v10.Data.Interfaces;
+using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS.SqlServer
 {
@@ -12,18 +14,18 @@ namespace A2v10.ProcS.SqlServer
 	{
 		private readonly IDbContext _dbContext;
 		private readonly IWorkflowStorage _workflowStorage;
-		private readonly ISagaResolver _sagaResolver;
 		private readonly IResourceWrapper _resourceWrapper;
+		private readonly ILogger _logger;
 
 
 		private const String Schema = "[A2v10_ProcS]";
 
-		public SqlServerInstanceStorage(ISagaResolver sagaResolver, IWorkflowStorage workflowStorage, IDbContext dbContext, IResourceWrapper resourceWrapper)
+		public SqlServerInstanceStorage(IWorkflowStorage workflowStorage, IDbContext dbContext, IResourceWrapper resourceWrapper, ILogger logger)
 		{
 			_workflowStorage = workflowStorage ?? throw new ArgumentNullException(nameof(workflowStorage));
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-			_sagaResolver = sagaResolver ?? throw new ArgumentNullException(nameof(sagaResolver));
 			_resourceWrapper = resourceWrapper ?? throw new ArgumentNullException(nameof(resourceWrapper));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
 		public async Task<IInstance> Load(Guid instanceId)
@@ -42,6 +44,7 @@ namespace A2v10.ProcS.SqlServer
 			};
 			var instanceState = DynamicObjectConverters.FromJson(di.Get<String>("InstanceState"));
 			var workflowState = DynamicObjectConverters.FromJson(di.Get<String>("WorkflowState"));
+			_logger.LogInformation($"Instance.Load. Id:'{instanceId}'");
 			inst.Restore(instanceState, _resourceWrapper);
 			inst.Workflow.Restore(workflowState, _resourceWrapper);
 			return inst;
@@ -64,6 +67,7 @@ namespace A2v10.ProcS.SqlServer
 			di.Set("WorkflowState", wfState.ToJson());
 			di.Set("InstanceState", instanceState.ToJson());
 
+			_logger.LogInformation($"Instance.Save. Id:'{instance.Id}'");
 			await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Instance.Save]", di.Root);
 		}
 	}

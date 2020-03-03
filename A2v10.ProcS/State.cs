@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using A2v10.ProcS.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace A2v10.ProcS
 {
@@ -30,6 +31,7 @@ namespace A2v10.ProcS
 
 		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
+			context.Logger.LogInformation($"State.Exectue. InstanceId='{context.Instance.Id}', State='{context.Instance.CurrentState}', IsContinue={context.IsContinue}");
 			ActivityExecutionResult result;
 			String nextState = NextState;
 			// on entry
