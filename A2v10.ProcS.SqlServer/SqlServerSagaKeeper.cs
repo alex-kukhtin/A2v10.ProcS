@@ -81,7 +81,7 @@ namespace A2v10.ProcS.SqlServer
 
 			Guid? sagaId = dobj.Get<Guid?>("SagaId");
 
-			
+
 			var sagakind = dobj.Get<String>("SagaKind");
 			var sagabodyjson = dobj.Get<String>("SagaBody");
 
@@ -120,6 +120,7 @@ namespace A2v10.ProcS.SqlServer
 				{ "Body", json },
 				{ "Id", (Int64)0 },
 				{ "Kind", msg.Get<String>("$res") },
+				{ "After", item.After },
 				{ "CorrelationId", item.Message.CorrelationId.ToString() }
 			};
 
@@ -163,7 +164,7 @@ namespace A2v10.ProcS.SqlServer
 			return _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Saga.Update]", prms);
 		}
 
-		
+
 
 		async Task SaveSagaMap()
 		{
@@ -175,10 +176,31 @@ namespace A2v10.ProcS.SqlServer
 		}
 
 
-		public Task FailSaga(PickedSaga picked, Exception exception)
+		async public Task FailSaga(PickedSaga picked, Exception exception)
 		{
-			//TODO: Implemet Filed Saga processing
-			throw new NotImplementedException("Filed Saga processing is not implemented", exception);
+			try
+			{
+				var correlationId = picked.ServiceBusItem?.Message?.CorrelationId?.ToString();
+				var dobj = new DynamicObject()
+				{
+					{"Id", picked.Id },
+					{"Exception",  exception.Message},
+					{"SagaKind", picked.Saga?.Kind},
+					{"StackTrace", exception.StackTrace },
+					{"CorrelationId", correlationId }
+				};
+				_tracker.Track($"Fail saga. id:{picked.Id}, kind:{picked.Saga.Kind}, correlationId: {correlationId}");
+				await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Saga.Fail]", dobj);
+			}
+			catch (Exception ex)
+			{
+				LogSystemException(ex);
+			}
+		}
+
+		void LogSystemException(Exception ex)
+		{
+			// TODO: (
 		}
 	}
 }

@@ -1,6 +1,8 @@
-﻿/* Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved. */
+﻿/* Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved. 
 
--- TODO drop create or alter
+LastModified: 03 Mar 2020
+
+*/
 
 ------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.SCHEMATA where SCHEMA_NAME=N'A2v10_ProcS')
@@ -39,7 +41,7 @@ begin
 		IsComplete bit not null constraint DF_Instances_IsCompelte default(0),
 		WorkflowState nvarchar(max) null,
 		InstanceState nvarchar(max) null,
-		DateCreated datetime2 not null constraint DF_Instances_DateCreated default(getutcdate())
+		DateCreated datetime2 not null constraint DF_Instances_DateCreated default(sysutcdatetime())
 	);
 end
 go
@@ -59,9 +61,10 @@ begin
 			constraint FK_MessageQueue_Parent_MessageQueue references A2v10_ProcS.MessageQueue(Id),
 		[Kind] nvarchar(255),
 		[Body] nvarchar(max),
+		[After] datetime2 null,
 		[State] nvarchar(32) not null
 			constraint DF_MessageQueue_State default(N'Init'),
-		DateCreated datetime2 not null constraint DF_MessageQueue_DateCreated default(getutcdate())
+		DateCreated datetime2 not null constraint DF_MessageQueue_DateCreated default(sysutcdatetime())
 	)
 end
 go
@@ -75,8 +78,27 @@ begin
 		[Kind] nvarchar(255) null,
 		[Body] nvarchar(max) null,
 		[Hold] bit not null constraint DF_Sagas_Hold default(0),
+		[Fault] bit not null constraint DF_Sagas_Fault default(0),
 		MessageId bigint null,
-		DateCreated datetime2 not null constraint DF_Sagas_DateCreated default(getutcdate())
+		DateCreated datetime2 not null constraint DF_Sagas_DateCreated default(sysutcdatetime())
+	);
+end
+go
+------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'Log')
+begin
+	create table A2v10_ProcS.[Log]
+	(
+		Id bigint not null identity(100, 1) constraint PK_Log primary key,
+		EventTime datetime2 not null constraint DF_Log_EventTime default(sysutcdatetime()),
+		Severity nchar(1) not null constraint CK_Log_Severity check (Severity in (N'I', N'W', N'E', N'C')),
+		[SagaId] uniqueidentifier sparse null,
+		[MessageId] bigint sparse null,
+		[InstanceId] bigint sparse null,
+		[CorrelationId] nvarchar(255) sparse null,
+		[SagaKind] nvarchar(255) null,
+		[Message] nvarchar(max) null,
+		[StackTrace] nvarchar(max) null
 	);
 end
 go
@@ -137,6 +159,7 @@ create procedure A2v10_ProcS.[Message.Send]
 @CorrelationId nvarchar(255) = null,
 @Body nvarchar(max),
 @Parent bigint = null,
+@After datetime2 = null,
 @RetId bigint output
 as
 begin
@@ -145,9 +168,10 @@ begin
 	set xact_abort on;
 	declare @rtable table(Id bigint);
 
-	insert into A2v10_ProcS.MessageQueue ([Kind], CorrelationId, [Body], Parent, [State]) 
+	insert into A2v10_ProcS.MessageQueue ([Kind], CorrelationId, [Body], Parent, [After], [State]) 
 	output inserted.Id into @rtable(id)
-	values (@Kind, @CorrelationId, @Body, @Parent, case when @Parent is not null then N'Wait' else N'Init' end);
+	values (@Kind, @CorrelationId, @Body, @Parent, @After,
+		case when @Parent is not null then N'Wait' else N'Init' end);
 
 	select top(1) @RetId = Id from @rtable;
 end
@@ -209,6 +233,8 @@ begin
 	declare @sagaTable table(Id uniqueidentifier);
 	declare @sagaId uniqueidentifier;
 	declare @queueId bigint;
+	declare @currentTime datetime2;
+	set @currentTime = sysutcdatetime();
 
 	begin tran;
 	with T
@@ -219,6 +245,7 @@ begin
 			inner join A2v10_ProcS.SagaMap m on q.Kind = m.MessageKind
 			left join A2v10_ProcS.Sagas s on s.[Kind] = m.SagaKind and q.CorrelationId = s.CorrelationId
 		where m.Host = @Host and q.[State] = N'Init' and isnull(s.Hold, 0) = 0
+		and (q.[After] is null or q.[After] < @currentTime)
 		order by QueueId
 	)
 	update A2v10_ProcS.MessageQueue set [State] = N'Hold'
@@ -275,7 +302,12 @@ begin
 
 	if @IsComplete = 1 or @CorrelationId is null
 	begin
+		begin tran;
+		delete from A2v10_ProcS.MessageQueue 
+			from A2v10_ProcS.MessageQueue q inner join A2v10_ProcS.Sagas s on q.Id = s.MessageId
+			where s.Id = @Id;
 		delete from A2v10_ProcS.Sagas where Id=@Id;
+		commit tran;
 	end
 	else
 	begin
@@ -283,11 +315,39 @@ begin
 	end
 end
 go
+------------------------------------------------
+if exists (select * from INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA=N'A2v10_ProcS' and ROUTINE_NAME=N'Saga.Fail')
+	drop procedure A2v10_ProcS.[Saga.Fail]
+go
+------------------------------------------------
+create procedure A2v10_ProcS.[Saga.Fail]
+@Id uniqueidentifier,
+@Exception nvarchar(255) = null,
+@SagaKind nvarchar(255) = null,
+@StackTrace nvarchar(max) = null,
+@CorrelationId nvarchar(255) = null
+as
+begin
+	set nocount on;
+	set transaction isolation level serializable;
+	set xact_abort on;
+	begin tran;
+	update A2v10_ProcS.[Sagas] set Fault = 1, Hold=1 where Id=@Id;
+	-- write to log
+	insert into A2v10_ProcS.[Log] (Severity, [Message], SagaKind, SagaId, StackTrace, CorrelationId)
+		values (N'E', @Exception, @SagaKind, @Id, @StackTrace, @CorrelationId);
+	commit tran;
+end
+go
 
+
+/*
 select * from A2v10_ProcS.[MessageQueue] order by Id desc;
 select * from A2v10_ProcS.Instances order by DateCreated desc
 select * from A2v10_ProcS.[Sagas] order by DateCreated desc;
+select * from A2v10_ProcS.[Log] order by Id desc;
 --select * from A2v10_ProcS.[SagaMap]
+*/
 
 
 

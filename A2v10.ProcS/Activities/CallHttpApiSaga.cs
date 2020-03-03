@@ -112,6 +112,10 @@ namespace A2v10.ProcS
 						Result = result
 					};
 					context.SendMessage(responseMessage);
+				} 
+				else
+				{
+					// FAIL?
 				}
 			}
 			return message.CorrelationId.Value;
