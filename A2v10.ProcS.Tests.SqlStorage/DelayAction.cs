@@ -19,18 +19,12 @@ namespace A2v10.ProcS.Tests.SqlStorage
 		{
 			var (engine, repository, bus) = ProcessEngine.CreateSqlEngine();
 
-			var sw = new Stopwatch();
-			sw.Start();
-
 			var instance = await engine.StartWorkflow("delay.json");
 			var stm = instance.Workflow as StateMachine;
 
 			await bus.Process();
-			sw.Stop();
 
-			Assert.IsTrue(sw.ElapsedMilliseconds < 500);
-
-			await Task.Delay(500);
+			await Task.Delay(1500);
 			await bus.Process();
 
 			var ni = await repository.Get(instance.Id);
