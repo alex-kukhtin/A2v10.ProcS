@@ -11,7 +11,7 @@ namespace A2v10.ProcS.Infrastructure
 	{
 		public static Task WaitFor(this IPromise promise)
 		{
-			var tc = new TaskCompletionSource<bool>();
+			var tc = new TaskCompletionSource<Boolean>();
 			promise.Done(() => tc.SetResult(true));
 			promise.Catch(e => tc.SetException(e));
 			return tc.Task;
@@ -76,7 +76,8 @@ namespace A2v10.ProcS.Infrastructure
 		{
 			lock (this)
 			{
-				if (!SignalDoneCheck()) return;
+				if (!SignalDoneCheck()) 
+					return;
 				isDone = true;
 				onDone?.Invoke();
 			}
@@ -86,9 +87,11 @@ namespace A2v10.ProcS.Infrastructure
 		{
 			lock (this)
 			{
-				if (onDone != null) DoneThrow();
+				if (onDone != null) 
+					DoneThrow();
 				onDone = action;
-				if (isDone) onDone?.Invoke();
+				if (isDone) 
+					onDone?.Invoke();
 			}
 			return this;
 		}

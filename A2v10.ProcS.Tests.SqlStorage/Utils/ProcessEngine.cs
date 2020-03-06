@@ -10,12 +10,20 @@ using A2v10.Data;
 using A2v10.Data.Interfaces;
 using A2v10.ProcS.Infrastructure;
 using A2v10.ProcS.SqlServer;
-using Microsoft.Extensions.Configuration.UserSecrets;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace A2v10.ProcS.Tests.SqlStorage
 {
 	public static class ProcessEngine
 	{
+
+		static ILogger<IWorkflowEngine> CreateLogger()
+		{
+			using var factory = LoggerFactory.Create(builder => builder.AddConsole());
+			return factory.CreateLogger<IWorkflowEngine>();
+		}
+
 		public static (WorkflowEngine engine, IRepository repository, ServiceBus bus) CreateSqlEngine()
 		{
 			var fullPath = Path.GetFullPath("../../../tests.config.json");
@@ -31,11 +39,12 @@ namespace A2v10.ProcS.Tests.SqlStorage
 			var dbContext = new SqlDbContext(profiler, dbConfig, localizer);
 			var workflowStorage = new FileSystemWorkflowStorage();
 			var taskManager = new SyncTaskManager();
-			
+			var logger = CreateLogger();
+
 			var rm = new ResourceManager(null);
 			var mgr = new SagaManager(null);
 
-			var instanceStorage = new SqlServerInstanceStorage(mgr.Resolver, workflowStorage, dbContext, rm);
+			var instanceStorage = new SqlServerInstanceStorage(workflowStorage, dbContext, rm, logger);
 			var repository = new Repository(workflowStorage, instanceStorage);
 
 			ProcS.RegisterSagas(rm, mgr);
@@ -43,9 +52,9 @@ namespace A2v10.ProcS.Tests.SqlStorage
 			var keeper = new SqlServerSagaKeeper(mgr.Resolver, dbContext, rm);
 
 			var scriptEngine = new ScriptEngine();
-			var bus = new ServiceBus(taskManager, keeper, repository, scriptEngine);
+			var bus = new ServiceBus(taskManager, keeper, repository, scriptEngine, logger);
 
-			var engine = new WorkflowEngine(repository, bus, scriptEngine);
+			var engine = new WorkflowEngine(repository, bus, scriptEngine, new NullLogger<IWorkflowEngine>());
 			return (engine, repository, bus);
 		}
 

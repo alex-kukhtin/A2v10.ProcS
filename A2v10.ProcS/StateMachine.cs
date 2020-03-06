@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace A2v10.ProcS
 {
@@ -22,6 +23,7 @@ namespace A2v10.ProcS
 
 		public Task Run(IExecuteContext context)
 		{
+			context.Logger.LogInformation($"Workflow.Start:  ProcessId:'{_identity.ProcessId}', Version:'{_identity.Version}', InstanceId='{context.Instance.Id}'");
 			return Execute(context);
 		}
 
@@ -68,6 +70,7 @@ namespace A2v10.ProcS
 
 		public Task Continue(IExecuteContext context)
 		{
+			context.Logger.LogInformation($"Workflow.Continue: InstanceId='{context.Instance.Id}'");
 			return DoContinue(context.Instance, context);
 		}
 

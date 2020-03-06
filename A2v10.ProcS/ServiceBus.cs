@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using A2v10.ProcS.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace A2v10.ProcS
 {
@@ -45,12 +46,14 @@ namespace A2v10.ProcS
 		private readonly ITaskManager _taskManager;
 
 		private readonly IRepository _repository;
+		private readonly ILogger _logger;
 
-		protected ServiceBusBase(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine)
+		protected ServiceBusBase(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine, ILogger logger)
 		{
 			_taskManager = taskManager;
 			_repository = repository ?? throw new ArgumentNullException(nameof(_repository));
 			_scriptEngine = scriptEngine ?? throw new ArgumentNullException(nameof(scriptEngine));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_sagaKeeper = sagaKeeper;
 		}
 
@@ -136,7 +139,7 @@ namespace A2v10.ProcS
 					var saga = item.Saga;
 					using (var scriptContext = _scriptEngine.CreateContext())
 					{
-						var hc = new HandleContext(this, _repository, scriptContext);
+						var hc = new HandleContext(this, _repository, scriptContext, _logger);
 						await saga.Handle(hc, item.ServiceBusItem.Message);
 					}
 					Send(item.ServiceBusItem.Next);
@@ -153,8 +156,8 @@ namespace A2v10.ProcS
 
 	public class ServiceBus : ServiceBusBase
 	{
-		public ServiceBus(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine)
-			: base(taskManager, sagaKeeper, repository, scriptEngine)
+		public ServiceBus(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine, ILogger logger)
+			: base(taskManager, sagaKeeper, repository, scriptEngine, logger)
 		{
 			
 		}
@@ -205,8 +208,8 @@ namespace A2v10.ProcS
 
 	public class ServiceBusAsync : ServiceBusBase
 	{
-		public ServiceBusAsync(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine)
-			: base(taskManager, sagaKeeper, repository, scriptEngine)
+		public ServiceBusAsync(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine, ILogger logger)
+			: base(taskManager, sagaKeeper, repository, scriptEngine, logger)
 		{
 
 		}

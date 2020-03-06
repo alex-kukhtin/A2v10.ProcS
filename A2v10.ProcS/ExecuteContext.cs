@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using A2v10.ProcS.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace A2v10.ProcS
 {
@@ -14,15 +15,18 @@ namespace A2v10.ProcS
 		protected readonly IServiceBus _serviceBus;
 		protected readonly IRepository _repository;
 		protected readonly IScriptContext _scriptContext;
+		protected readonly ILogger _logger;
 
-		public HandleContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext)
+		public HandleContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext, ILogger logger)
 		{
 			_serviceBus = bus ?? throw new ArgumentNullException(nameof(bus));
 			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
 			_scriptContext = scriptContext ?? throw new ArgumentNullException(nameof(scriptContext));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
-		public IScriptContext ScriptContext => _scriptContext; 
+		public IScriptContext ScriptContext => _scriptContext;
+		public ILogger Logger => _logger;
 
 		public Task<IInstance> LoadInstance(Guid id)
 		{
@@ -46,7 +50,7 @@ namespace A2v10.ProcS
 
 		public IExecuteContext CreateExecuteContext(IInstance instance, String bookmark = null, IDynamicObject result = null)
 		{
-			return new ExecuteContext(_serviceBus, _repository, _scriptContext, instance)
+			return new ExecuteContext(_serviceBus, _repository, _scriptContext, _logger, instance)
 			{
 				Bookmark = bookmark,
 				Result = result
@@ -71,7 +75,7 @@ namespace A2v10.ProcS
 				instance.SetParameters(data);
 			using (var newScriptContext = _scriptContext.NewContext())
 			{
-				var context = new ExecuteContext(_serviceBus, _repository, newScriptContext, instance);
+				var context = new ExecuteContext(_serviceBus, _repository, newScriptContext, _logger, instance);
 				await instance.Workflow.Run(context);
 				return instance;
 			}
@@ -94,8 +98,8 @@ namespace A2v10.ProcS
 		public String Bookmark { get; set; }
 		public IDynamicObject Result { get; set; }
 
-		public ExecuteContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext, IInstance instance)
-			: base(bus, repository, scriptContext)
+		public ExecuteContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext, ILogger logger, IInstance instance)
+			: base(bus, repository, scriptContext, logger)
 		{
 			Instance = instance;
 			_scriptContext.SetValue("params", Instance.GetParameters());
