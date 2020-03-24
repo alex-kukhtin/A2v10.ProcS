@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace A2v10.ProcS.WebApi.Host
 {
@@ -32,7 +33,10 @@ namespace A2v10.ProcS.WebApi.Host
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllers(SetControllerOptions);
-			services.AddAuthentication(SetAuthenticationOptions).AddJwtBearer(SetJwtBearerOptions);
+			services
+				.AddAuthorization()
+				.AddAuthentication(SetAuthenticationOptions)
+				.AddJwtBearer(SetJwtBearerOptions);
 
 			services.AddMvc(opt =>
 			{
@@ -47,20 +51,28 @@ namespace A2v10.ProcS.WebApi.Host
 
 		public void SetAuthenticationOptions(AuthenticationOptions options)
 		{
-
 		}
 
 		public void SetJwtBearerOptions(JwtBearerOptions options)
 		{
+			options.RequireHttpsMetadata = false;
+			options.TokenValidationParameters = new TokenValidationParameters
+			{
+				ValidateLifetime = true,
+				ValidateIssuer = true,
+				ValidateAudience = true,
+				ValidIssuer = "VALID_ISSUER",
+				ValidateIssuerSigningKey = true,
+				ValidAudiences = new List<String>() { "Audience1", "Audience2" },
+				//IssuerSigningKey = 
+			};
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
 			if (env.IsDevelopment())
-			{
 				app.UseDeveloperExceptionPage();
-			}
 
 			app.UseRouting();
 

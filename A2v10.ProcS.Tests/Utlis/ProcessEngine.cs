@@ -13,7 +13,7 @@ namespace A2v10.ProcS.Tests
 {
 	public static class ProcessEngine
 	{
-		static ILogger<IWorkflowEngine> CreateLogger()
+		static ILogger CreateLogger()
 		{
 			using var factory = LoggerFactory.Create(builder => builder.AddConsole());
 			return factory.CreateLogger<IWorkflowEngine>();

@@ -24,8 +24,19 @@ namespace A2v10.ProcS.WebApi.Host
 			CreateHostBuilder(args).Build().Run();
 		}
 
+		private static ILogger CreateLogger()
+		{
+			using var factory = LoggerFactory.Create(builder => builder.AddConsole());
+			return factory.CreateLogger<IWorkflowEngine>();
+		}
+
+
 		public static IHostBuilder CreateHostBuilder(String[] args) =>
 			Host.CreateDefaultBuilder(args)
+				.ConfigureLogging(logging => {
+					logging.ClearProviders();
+					logging.AddConsole();
+				})
 				.ConfigureServices((ctx, services) =>
 				{
 					var conf = ctx.Configuration;
@@ -33,11 +44,9 @@ namespace A2v10.ProcS.WebApi.Host
 					services.AddHostedService<Service>();
 
 					var tm = new Classes.TaskManager();
-
 					services.AddSingleton<ITaskManager>(tm);
 
 					var storage = new Classes.FakeStorage(conf["ProcS:Workflows"]);
-
 					var epm = new EndpointManager();
 
 					services.AddSingleton<IEndpointManager>(epm);
@@ -51,6 +60,7 @@ namespace A2v10.ProcS.WebApi.Host
 					services.AddSingleton<ServiceBus>();
 					services.AddSingleton<ServiceBusAsync>();
 
+					services.AddSingleton<ILogger>(CreateLogger());
 					services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
 
 					services.AddSingleton<ISagaKeeper, InMemorySagaKeeper>();

@@ -15,11 +15,11 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 	[ApiController]
 	public class EndpointsController : ControllerBase
 	{
-		private readonly IEndpointResolver _endointManager;
+		private readonly IEndpointResolver _endpointManager;
 
-		public EndpointsController(IEndpointResolver endointManager)
+		public EndpointsController(IEndpointResolver endpointManager)
 		{
-			_endointManager = endointManager;
+			_endpointManager = endpointManager;
 		}
 
 		[HttpPost]
@@ -27,7 +27,7 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		[Route("{key}/{*extra}")]
 		public async Task<IActionResult> Handle([FromBody] String body, String key, String extra)
 		{
-			var handler = _endointManager.GetHandler(key);
+			var handler = _endpointManager.GetHandler(key);
 			if (handler == null) return NotFound();
 			var ret = await handler.HandleAsync(body, extra);
 			return Content(ret.body, ret.type);
