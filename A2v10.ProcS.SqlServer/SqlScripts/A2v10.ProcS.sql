@@ -363,3 +363,81 @@ drop table A2v10_ProcS.Instances;
 drop table A2v10_ProcS.[Sagas];
 --drop table A2v10_ProcS.[SagaMap];
 */
+
+
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'Workflows')
+begin
+	create table A2v10_ProcS.Workflows
+	(
+		[Id] nvarchar(255) not null,
+		[Version] int not null,
+			constraint PK_Workflows primary key ([Id], [Version]),
+		[Hash] uniqueidentifier null,
+		[Body] nvarchar(max) null
+	);
+end
+go
+------------------------------------------------
+if exists (select * from INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA=N'A2v10_ProcS' and ROUTINE_NAME=N'Workflows.Load')
+	drop procedure A2v10_ProcS.[Workflows.Load]
+go
+------------------------------------------------
+create procedure A2v10_ProcS.[Workflows.Load]
+@Id nvarchar(255),
+@Version int
+as
+begin
+	set nocount on;
+
+	select Id, [Version], [Hash], [Body]
+	from A2v10_ProcS.Workflows
+	where Id=@Id and [Version]=@Version;
+
+end
+go
+------------------------------------------------
+if exists (select * from INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA=N'A2v10_ProcS' and ROUTINE_NAME=N'Workflows.Update')
+	drop procedure A2v10_ProcS.[Workflows.Update]
+go
+------------------------------------------------
+create procedure A2v10_ProcS.[Workflows.Update]
+@Id nvarchar(255),
+@Body nvarchar(max),
+@Hash uniqueidentifier
+as
+begin
+	set nocount on;
+	set transaction isolation level serializable;
+	set xact_abort on;
+
+	begin tran;
+
+	declare @t table (
+		n int not null primary key,
+		h uniqueidentifier,
+		v int
+	)
+
+	insert into @t (n, h, v) values (0, null, 0);
+
+	insert into @t (n, h, v)
+	select top (1) 1, [Hash], [Version]
+	from A2v10_ProcS.Workflows
+	where Id=@Id
+	order by [Version] desc;
+	
+	insert into A2v10_ProcS.Workflows (Id, [Version], [Hash], [Body])
+	output 2, INSERTED.[Hash], INSERTED.[Version] into @t (n, h, v)
+	select @Id, v+1, @Hash, @Body
+	from (
+		select top (1) * from @t order by n desc
+	) s
+	where n=0 or h<>@Hash;
+
+	select top (1) [Id]=@Id, [Version]=v, [Hash]=h, [Body]=@Body
+	from @t
+	order by n desc;
+
+	commit tran;
+end
+go
