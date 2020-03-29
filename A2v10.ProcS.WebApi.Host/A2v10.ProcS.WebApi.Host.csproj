@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <Folder Include="Config\" />
+    <Folder Include="Authentication\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties docs_4openapi1_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>

@@ -1,11 +1,10 @@
 ﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
-using Microsoft.AspNetCore.Mvc.Formatters;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace A2v10.ProcS.WebApi.Host.MvcExtensions
 {

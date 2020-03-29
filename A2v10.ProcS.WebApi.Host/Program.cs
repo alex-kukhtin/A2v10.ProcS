@@ -28,6 +28,12 @@ namespace A2v10.ProcS.WebApi.Host
 			CreateHostBuilder(args).Build().Run();
 		}
 
+		private static ILogger CreateLogger()
+		{
+			using var factory = LoggerFactory.Create(builder => builder.AddConsole());
+			return factory.CreateLogger<IWorkflowEngine>();
+		}
+
 		private class DatabaseConfig : IDataConfiguration
 		{
 			private readonly IConfiguration _config;
@@ -35,7 +41,6 @@ namespace A2v10.ProcS.WebApi.Host
 			{
 				_config = config;
 			}
-
 			public String ConnectionString(String source)
 			{
 				if (String.IsNullOrEmpty(source))
@@ -46,6 +51,10 @@ namespace A2v10.ProcS.WebApi.Host
 
 		public static IHostBuilder CreateHostBuilder(String[] args) =>
 			Host.CreateDefaultBuilder(args)
+				.ConfigureLogging(logging => {
+					logging.ClearProviders();
+					logging.AddConsole();
+				})
 				.ConfigureServices((ctx, services) =>
 				{
 					var conf = ctx.Configuration;
@@ -62,12 +71,10 @@ namespace A2v10.ProcS.WebApi.Host
 					services.AddSingleton<ILogger, FakeLogger>();
 
 					var tm = new TaskManager();
-
 					services.AddSingleton<ITaskManager>(tm);
 
 					var cat = new FilesystemWorkflowCatalogue(conf["ProcS:Workflows"]);
 					services.AddSingleton<IWorkflowCatalogue>(cat);
-
 					var epm = new EndpointManager();
 
 					services.AddSingleton<IEndpointManager>(epm);
@@ -81,6 +88,7 @@ namespace A2v10.ProcS.WebApi.Host
 					services.AddSingleton<ServiceBus>();
 					services.AddSingleton<ServiceBusAsync>();
 
+					services.AddSingleton<ILogger>(CreateLogger());
 					services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
 
 					services.AddSingleton<ISagaKeeper, SqlServerSagaKeeper>();
@@ -96,6 +104,8 @@ namespace A2v10.ProcS.WebApi.Host
 					services.AddSingleton<IServiceBus, ServiceBusAsync>();
 
 					services.AddSingleton(svc => svc.GetService<ISagaManager>().Resolver);
+
+					services.AddSingleton<Api.ProcessApi>();
 				})
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
