@@ -6,20 +6,20 @@
 		"S1": {
 			"Description": "Sequence",
 			"OnEntry": {
-				"$type": "A2v10.ProcS.SequenceActivity, A2v10.ProcS",
+				"$res": "com.a2v10.procs:SequenceActivity",
 				"Activities": [
 					{ "Code": "data.counter = params.value" },
 					{
-						"$type": "A2v10.ProcS.ParallelActivity, A2v10.ProcS",
+						"$res": "com.a2v10.procs:ParallelActivity",
 						"Activities": [
 							{
-								"$type": "A2v10.ProcS.CallHttpApiActivity, A2v10.ProcS",
+								"$res": "com.a2v10.procs:CallHttpApiActivity",
 								"Url": "https://samples.openweathermap.org/data/2.5/weather?q=London&appid=b6907d289e10d714a6e88b30761fae22",
 								"Method": "Get",
 								"CodeAfter": "data.counter += Math.round(reply.main.temp - 273.0)"
 							},
 							{
-								"$type": "A2v10.ProcS.CallHttpApiActivity, A2v10.ProcS",
+								"$res": "com.a2v10.procs:CallHttpApiActivity",
 								"Url": "https://samples.openweathermap.org/data/2.5/weather?q=London&appid=b6907d289e10d714a6e88b30761fae22",
 								"Method": "Get",
 								"CodeAfter": "data.counter += Math.round(reply.main.temp - 273.0)"

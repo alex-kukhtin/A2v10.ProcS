@@ -16,7 +16,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Converters;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Serialization;
 
 namespace A2v10.ProcS.WebApi.Host
 {
@@ -32,16 +34,26 @@ namespace A2v10.ProcS.WebApi.Host
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddControllers(SetControllerOptions);
+			services.AddControllers(SetControllerOptions).AddNewtonsoftJson(ConfigureNewtonsoft);
 			services
 				.AddAuthorization()
 				.AddAuthentication(SetAuthenticationOptions)
 				.AddJwtBearer(SetJwtBearerOptions);
 
-			services.AddMvc(opt =>
-			{
-				opt.InputFormatters.Insert(0, new MvcExtensions.RawJsonBodyInputFormatter());
-			});
+			services.AddMvc(ConfigureMvc).AddNewtonsoftJson( ConfigureNewtonsoft);
+		}
+
+		private static void ConfigureMvc(MvcOptions opt)
+		{
+			opt.InputFormatters.Insert(0, new MvcExtensions.RawJsonBodyInputFormatter());
+		}
+
+		private static void ConfigureNewtonsoft(MvcNewtonsoftJsonOptions opt)
+		{
+			opt.SerializerSettings.ContractResolver = new DefaultContractResolver();
+			opt.SerializerSettings.Converters.Add(new StringEnumConverter());
+			opt.SerializerSettings.Converters.Add(new ExpandoObjectConverter());
+			opt.SerializerSettings.Converters.Add(new DynamicObjectConverter());
 		}
 
 		public static void SetControllerOptions(MvcOptions options)

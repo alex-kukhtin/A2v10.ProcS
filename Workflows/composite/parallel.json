@@ -6,11 +6,11 @@
 		"S1": {
 			"Description": "Sequence",
 			"OnEntry": {
-				"$type": "A2v10.ProcS.SequenceActivity, A2v10.ProcS",
+				"$res": "com.a2v10.procs:SequenceActivity",
 				"Activities": [
 					{ "Code": "data.counter = params.value" },
 					{
-						"$type": "A2v10.ProcS.ParallelActivity, A2v10.ProcS",
+						"$res": "com.a2v10.procs:ParallelActivity",
 						"Activities": [
 							{ "Code": "data.counter += 1" },
 							{ "Code": "data.counter += 1" },

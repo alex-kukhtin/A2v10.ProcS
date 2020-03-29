@@ -5,7 +5,7 @@
 	"States": {
 		"S1": {
 			"OnEntry": {
-				"$type": "A2v10.ProcS.CodeActivity, A2v10.ProcS",
+				"$res": "com.a2v10.procs:CodeActivity",
 				"Code": "result.value = 42;\nresult.array = [{x:'x'}, {y:'y'}]"
 			}
 		}

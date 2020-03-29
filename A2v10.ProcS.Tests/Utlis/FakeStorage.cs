@@ -8,6 +8,7 @@ using A2v10.ProcS.Infrastructure;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace A2v10.ProcS.Tests
 {
@@ -18,7 +19,7 @@ namespace A2v10.ProcS.Tests
 		public IIdentity WorkflowIdentity;
 	}
 
-	public class FakeStorage : IWorkflowStorage, IInstanceStorage
+	public class FakeStorage : WorkflowStorageBase, IWorkflowStorage, IInstanceStorage
 	{
 		private readonly Dictionary<Guid, InstanceItem> _instances = new Dictionary<Guid, InstanceItem>();
 
@@ -30,7 +31,7 @@ namespace A2v10.ProcS.Tests
 			
 		}
 
-		public FakeStorage(IResourceWrapper wrapper, String path)
+		public FakeStorage(IResourceWrapper wrapper, String path) : base(wrapper)
 		{
 			_wrapper = wrapper;
 			this.path = path;
@@ -102,17 +103,31 @@ namespace A2v10.ProcS.Tests
 			throw new NotImplementedException(nameof(WorkflowFromString));
 		}
 
-		public Task<IWorkflowDefinition> WorkflowFromStorage(IIdentity identity)
+		public override Task<IWorkflowDefinition> WorkflowFromStorage(IIdentity identity)
 		{
 			String json = File.ReadAllText(Path.Combine(path, identity.ProcessId));
-			var result = JsonConvert.DeserializeObject<StateMachine>(json, new JsonSerializerSettings()
-			{
-				TypeNameHandling = TypeNameHandling.Auto,
-				ContractResolver = new ActivityContractResolver()
-			}) as IWorkflowDefinition;
+			var result = WorkflowFromJson(json);
 			result.SetIdentity(identity);
 			return Task.FromResult(result);
 		}
 		#endregion
+	}
+
+	public class FakeLogger : ILogger
+	{
+		public IDisposable BeginScope<TState>(TState state)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool IsEnabled(LogLevel logLevel)
+		{
+			return false;
+		}
+
+		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+		{
+
+		}
 	}
 }

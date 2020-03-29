@@ -28,6 +28,12 @@ namespace A2v10.ProcS
 				resourceManager.RegisterResources(typeof(StartProcessMessage), typeof(ContinueActivityMessage));
 			}
 			{
+				var fact = new ConstructSagaFactory<SetBookmarkSaga>(SetBookmarkSaga.ukey);
+				resourceManager.RegisterResourceFactory(fact.SagaKind, new SagaResourceFactory(fact));
+				sagaManager.RegisterSagaFactory<WaitBookmarkResumeMessage, BookmarkResumeMessage>(fact);
+				resourceManager.RegisterResources(typeof(WaitBookmarkResumeMessage), typeof(BookmarkResumeMessage));
+			}
+			{
 				var fact = new ConstructSagaFactory<CallHttpApiSaga>(CallHttpApiSaga.ukey);
 				resourceManager.RegisterResourceFactory(fact.SagaKind, new SagaResourceFactory(fact));
 				sagaManager.RegisterSagaFactory<CallApiRequestMessage, CallApiResponseMessage>(fact);
@@ -51,11 +57,12 @@ namespace A2v10.ProcS
 		{
 			resourceManager.RegisterResource<CallHttpApiActivity>();
 			resourceManager.RegisterResource<CodeActivity>();
-			resourceManager.RegisterResource<Delay>();
+			resourceManager.RegisterResource<DelayActivity>();
 			resourceManager.RegisterResource<SequenceActivity>();
 			resourceManager.RegisterResource<ParallelActivity>();
 			resourceManager.RegisterResource<StartProcessActivity>();
-			resourceManager.RegisterResource<WaitApiCallback>();
+			resourceManager.RegisterResource<SetBookmarkActivity>();
+			resourceManager.RegisterResource<WaitApiCallbackActivity>();
 		}
 	}
 }

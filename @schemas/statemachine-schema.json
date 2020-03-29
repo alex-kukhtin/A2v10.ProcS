@@ -6,7 +6,7 @@
 		"action": {
 			"type": "object",
 			"properties": {
-				"$type": { "type": "string" }
+				"$res": { "type": "string" }
 			},
 			"additionalProperties": true	
 		}

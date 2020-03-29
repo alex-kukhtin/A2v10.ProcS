@@ -11,6 +11,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using A2v10.ProcS.Infrastructure;
+using A2v10.ProcS.WebApi.Host.Classes;
+using A2v10.ProcS.SqlServer;
+using A2v10.Data;
+using A2v10.Data.Interfaces;
 
 namespace A2v10.ProcS.WebApi.Host
 {
@@ -30,6 +34,20 @@ namespace A2v10.ProcS.WebApi.Host
 			return factory.CreateLogger<IWorkflowEngine>();
 		}
 
+		private class DatabaseConfig : IDataConfiguration
+		{
+			private readonly IConfiguration _config;
+			public DatabaseConfig(IConfiguration config)
+			{
+				_config = config;
+			}
+			public String ConnectionString(String source)
+			{
+				if (String.IsNullOrEmpty(source))
+					source = "Default";
+				return _config.GetConnectionString(source);
+			}
+		}
 
 		public static IHostBuilder CreateHostBuilder(String[] args) =>
 			Host.CreateDefaultBuilder(args)
@@ -43,17 +61,27 @@ namespace A2v10.ProcS.WebApi.Host
 
 					services.AddHostedService<Service>();
 
-					var tm = new Classes.TaskManager();
+					var dbc = new DatabaseConfig(conf);
+
+					services.AddSingleton<IDataProfiler, NullDataProfiler>();
+					services.AddSingleton<IDataConfiguration>(dbc);
+					services.AddSingleton<IDataLocalizer, NullDataLocalizer>();
+					services.AddSingleton<IDbContext, SqlDbContext>();
+
+					services.AddSingleton<ILogger, FakeLogger>();
+
+					var tm = new TaskManager();
 					services.AddSingleton<ITaskManager>(tm);
 
-					var storage = new Classes.FakeStorage(conf["ProcS:Workflows"]);
+					var cat = new FilesystemWorkflowCatalogue(conf["ProcS:Workflows"]);
+					services.AddSingleton<IWorkflowCatalogue>(cat);
 					var epm = new EndpointManager();
 
 					services.AddSingleton<IEndpointManager>(epm);
 					services.AddSingleton<IEndpointResolver>(epm);
 
-					services.AddSingleton<IWorkflowStorage>(storage);
-					services.AddSingleton<IInstanceStorage>(storage);
+					services.AddSingleton<IWorkflowStorage, SqlServerWorkflowStorage>();
+					services.AddSingleton<IInstanceStorage, SqlServerInstanceStorage>();
 
 					services.AddSingleton<IScriptEngine, ScriptEngine>();
 					services.AddSingleton<IRepository, Repository>();
@@ -63,18 +91,21 @@ namespace A2v10.ProcS.WebApi.Host
 					services.AddSingleton<ILogger>(CreateLogger());
 					services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
 
-					services.AddSingleton<ISagaKeeper, InMemorySagaKeeper>();
+					services.AddSingleton<ISagaKeeper, SqlServerSagaKeeper>();
 
 					services.AddSingleton<ResourceManager>();
 					services.AddSingleton<SagaManager>();
 					services.AddSingleton<PluginManager>();
 
-					services.AddSingleton<IResourceManager, ResourceManager>();
+					services.AddSingleton<IResourceManager>(svc => svc.GetService<ResourceManager>());
+					services.AddSingleton<IResourceWrapper>(svc => svc.GetService<ResourceManager>());
 					services.AddSingleton<ISagaManager, SagaManager>();
 					services.AddSingleton<IPluginManager, PluginManager>();
 					services.AddSingleton<IServiceBus, ServiceBusAsync>();
 
 					services.AddSingleton(svc => svc.GetService<ISagaManager>().Resolver);
+
+					services.AddSingleton<Api.ProcessApi>();
 				})
 				.ConfigureWebHostDefaults(webBuilder =>
 				{

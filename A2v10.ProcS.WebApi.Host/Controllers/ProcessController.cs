@@ -6,49 +6,82 @@ using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
 
-using A2v10.ProcS.Infrastructure;
+using A2v10.ProcS.Api;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
+using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS.WebApi.Host.Controllers
 {
-	public class StartProcessRequest
+	[JsonObject]
+	public class Request
 	{
-		public String ProcessId { get; set; }
-		public ExpandoObject Parameters { get; set; }
+
 	}
 
-	public class ResumeProcessRequest
+	[JsonObject]
+	public class StartProcessRequest : Request, IStartProcessRequest
 	{
+		[JsonProperty("processId")]
+		public String ProcessId { get; set; }
+		[JsonProperty("parameters")]
+		public IDynamicObject Parameters { get; set; }
+	}
+
+	[JsonObject]
+	public class ResumeProcessRequest : Request, IResumeProcessRequest
+	{
+		[JsonProperty("instanceId")]
 		public Guid InstanceId { get; set; }
+		[JsonProperty("bookmark")]
 		public String Bookmark { get; set; }
-		public ExpandoObject Result { get; set; }
+		[JsonProperty("result")]
+		public IDynamicObject Result { get; set; }
+	}
+
+	[JsonObject]
+	public class Response
+	{
+		
+	}
+
+	[JsonObject]
+	public class InstanceResponse : Response
+	{
+		[JsonProperty("instanceId")]
+		public Guid InstanceId { get; set; }
 	}
 
 	[Route("api/[controller]")]
 	[ApiController]
 	public class ProcessController : ControllerBase
 	{
-		private readonly IWorkflowEngine _engine;
+		private readonly ProcessApi _api;
 
-		public ProcessController(IWorkflowEngine engine)
+		public ProcessController(ProcessApi api)
 		{
-			_engine = engine;
+			_api = api;
 		}
 
 		[HttpPost]
 		//[Authorize]
 		[Route("start")]
-		public async Task StartProcess([FromBody] StartProcessRequest prm)
+		public async Task<Response> StartProcess([FromBody] StartProcessRequest prm)
 		{
-			await _engine.StartWorkflow(prm.ProcessId, DynamicObjectConverters.From(prm.Parameters));
+			var wf = await _api.StartProcess(prm);
+			return new InstanceResponse()
+			{
+				InstanceId = wf.Id
+			};
 		}
 
 		[HttpPost]
 		//[Authorize]
 		[Route("resume")]
-		public async Task Resume([FromBody] ResumeProcessRequest prm)
+		public async Task<Response> Resume([FromBody] ResumeProcessRequest prm)
 		{
-			await _engine.ResumeWorkflow(prm.InstanceId, prm.Bookmark, DynamicObjectConverters.From(prm.Result));
+			await _api.Resume(prm);
+			return new Response();
 		}
 	}
 }

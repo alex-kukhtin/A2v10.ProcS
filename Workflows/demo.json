@@ -5,7 +5,7 @@
 	"States": {
 		"S1": {
 			"OnEntry": {
-				"$type": "A2v10.ProcS.CallHttpApi, A2v10.ProcS",
+				"$res": "com.a2v10.procs:CallHttpApiActivity",
 				"Timeout": "30",
 				"Url": "{{environment.OpenWeatherMapApi.url}}?q={{params.city}}&appid={{environment.OpenWeatherMapApi.appId}}",
 				"OnSuccess": "/*Kelvin!*/\ndata.temp = Math.round(response.body.main.temp - 273.0)",
@@ -29,7 +29,7 @@
 				
 			},
 			"OnExit": {
-				"$type": "\"A2v10.ProcS.Sequence, A2v10.ProcS",
+				"$res": "com.a2v10.procs:SequenceActivity",
 				"Actions": [
 
 				]

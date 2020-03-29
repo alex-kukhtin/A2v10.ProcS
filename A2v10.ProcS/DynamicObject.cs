@@ -9,6 +9,9 @@ using Newtonsoft.Json.Serialization;
 using System.Reflection;
 using System.Dynamic;
 using DynamicObject = A2v10.ProcS.Infrastructure.DynamicObject;
+using Newtonsoft.Json.Linq;
+using System.IO;
+using System.Text;
 
 namespace A2v10.ProcS
 {
@@ -96,6 +99,20 @@ namespace A2v10.ProcS
 		public static String Serialize(Object obj)
 		{
 			return JsonConvert.SerializeObject(obj);
+		}
+	}
+
+	public class DynamicObjectConverter : JsonConverter<IDynamicObject>
+	{
+		public override void WriteJson(JsonWriter writer, IDynamicObject value, JsonSerializer serializer)
+		{
+			serializer.Serialize(writer, value.Root);
+		}
+
+		public override IDynamicObject ReadJson(JsonReader reader, Type objectType, IDynamicObject existingValue, bool hasExistingValue, JsonSerializer serializer)
+		{
+			var e = serializer.Deserialize<ExpandoObject>(reader);
+			return new DynamicObject(e);
 		}
 	}
 }
