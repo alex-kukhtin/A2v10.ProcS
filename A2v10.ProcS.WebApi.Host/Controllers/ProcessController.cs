@@ -35,7 +35,7 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		public Guid InstanceId { get; set; }
 		[JsonProperty("bookmark")]
 		public String Bookmark { get; set; }
-		[JsonProperty("bookmark")]
+		[JsonProperty("result")]
 		public IDynamicObject Result { get; set; }
 	}
 

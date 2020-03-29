@@ -355,6 +355,7 @@ select * from A2v10_ProcS.[Log] order by Id desc;
 	delete from A2v10_ProcS.[MessageQueue];
 	delete from A2v10_ProcS.Instances;
 	delete from A2v10_ProcS.[Sagas];
+	delete from A2v10_ProcS.[SagaMap];
 */
 
 /*
@@ -362,6 +363,8 @@ drop table A2v10_ProcS.[MessageQueue];
 drop table A2v10_ProcS.Instances;
 drop table A2v10_ProcS.[Sagas];
 --drop table A2v10_ProcS.[SagaMap];
+
+delete from A2v10_ProcS.Workflows;
 */
 
 
