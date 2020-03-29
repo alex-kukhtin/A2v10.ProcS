@@ -27,6 +27,8 @@ namespace A2v10.ProcS.Tests
 			var pmr = new PluginManager(null);
 			var logger = CreateLogger();
 
+			ProcS.RegisterActivities(rm);
+
 			String pluginPath = GetPluginPath();
 			var configuration = new ConfigurationBuilder().Build();
 			pmr.LoadPlugins(pluginPath, configuration);

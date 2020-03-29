@@ -14,7 +14,13 @@ using A2v10.ProcS.Infrastructure;
 namespace A2v10.ProcS.WebApi.Host.Controllers
 {
 	[JsonObject]
-	public class StartProcessRequest : IStartProcessRequest
+	public class Request
+	{
+
+	}
+
+	[JsonObject]
+	public class StartProcessRequest : Request, IStartProcessRequest
 	{
 		[JsonProperty("processId")]
 		public String ProcessId { get; set; }
@@ -23,7 +29,7 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 	}
 
 	[JsonObject]
-	public class ResumeProcessRequest : IResumeProcessRequest
+	public class ResumeProcessRequest : Request, IResumeProcessRequest
 	{
 		[JsonProperty("instanceId")]
 		public Guid InstanceId { get; set; }
@@ -34,7 +40,13 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 	}
 
 	[JsonObject]
-	public class InstanceResponse
+	public class Response
+	{
+		
+	}
+
+	[JsonObject]
+	public class InstanceResponse : Response
 	{
 		[JsonProperty("instanceId")]
 		public Guid InstanceId { get; set; }
@@ -44,19 +56,19 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 	[ApiController]
 	public class ProcessController : ControllerBase
 	{
-		private readonly IWorkflowEngine _engine;
+		private readonly ProcessApi _api;
 
-		public ProcessController(IWorkflowEngine engine)
+		public ProcessController(ProcessApi api)
 		{
-			_engine = engine;
+			_api = api;
 		}
 
 		[HttpPost]
 		//[Authorize]
 		[Route("start")]
-		public async Task<InstanceResponse> StartProcess([FromBody] StartProcessRequest prm)
+		public async Task<Response> StartProcess([FromBody] StartProcessRequest prm)
 		{
-			var wf = await _engine.StartWorkflow(prm.ProcessId, DynamicObjectConverters.From(prm.Parameters));
+			var wf = await _api.StartProcess(prm);
 			return new InstanceResponse()
 			{
 				InstanceId = wf.Id
@@ -66,9 +78,10 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		[HttpPost]
 		//[Authorize]
 		[Route("resume")]
-		public async Task Resume([FromBody] ResumeProcessRequest prm)
+		public async Task<Response> Resume([FromBody] ResumeProcessRequest prm)
 		{
-			await _engine.ResumeWorkflow(prm.InstanceId, prm.Bookmark, DynamicObjectConverters.From(prm.Result));
+			await _api.Resume(prm);
+			return new Response();
 		}
 	}
 }

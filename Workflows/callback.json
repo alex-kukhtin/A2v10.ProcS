@@ -5,7 +5,7 @@
 	"States": {
 		"S1": {
 			"OnEntry": {
-				"$type": "A2v10.ProcS.WaitApiCallback, A2v10.ProcS",
+				"$res": "com.a2v10.procs:WaitApiCallbackActivity",
 				"Tag": "pseudopay",
 				"CorrelationValue": "123",
 				"CorrelationExpression": "reply.paymentId"

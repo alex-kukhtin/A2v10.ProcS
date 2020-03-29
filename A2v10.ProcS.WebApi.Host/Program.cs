@@ -89,8 +89,8 @@ namespace A2v10.ProcS.WebApi.Host
 					services.AddSingleton<SagaManager>();
 					services.AddSingleton<PluginManager>();
 
-					services.AddSingleton<IResourceManager, ResourceManager>();
-					services.AddSingleton<IResourceWrapper, ResourceManager>();
+					services.AddSingleton<IResourceManager>(svc => svc.GetService<ResourceManager>());
+					services.AddSingleton<IResourceWrapper>(svc => svc.GetService<ResourceManager>());
 					services.AddSingleton<ISagaManager, SagaManager>();
 					services.AddSingleton<IPluginManager, PluginManager>();
 					services.AddSingleton<IServiceBus, ServiceBusAsync>();

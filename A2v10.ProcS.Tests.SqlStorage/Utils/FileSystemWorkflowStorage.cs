@@ -8,28 +8,24 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS.Tests.SqlStorage
 {
-	public class FileSystemWorkflowStorage : IWorkflowStorage
+	public class FileSystemWorkflowStorage : WorkflowStorageBase, IWorkflowStorage
 	{
 		private readonly String path;
 
-		public FileSystemWorkflowStorage() : this("../../../../Workflows/")
+		public FileSystemWorkflowStorage(IResourceWrapper wrapper) : this(wrapper, "../../../../Workflows/")
 		{
 
 		}
 
-		public FileSystemWorkflowStorage(String path)
+		public FileSystemWorkflowStorage(IResourceWrapper wrapper, String path) : base(wrapper)
 		{
 			this.path = path;
 		}
 
-		public Task<IWorkflowDefinition> WorkflowFromStorage(IIdentity identity)
+		public override Task<IWorkflowDefinition> WorkflowFromStorage(IIdentity identity)
 		{
 			String json = File.ReadAllText(Path.Combine(path, identity.ProcessId));
-			var result = JsonConvert.DeserializeObject<StateMachine>(json, new JsonSerializerSettings()
-			{
-				TypeNameHandling = TypeNameHandling.Auto,
-				ContractResolver = new ActivityContractResolver()
-			}) as IWorkflowDefinition;
+			var result = WorkflowFromJson(json);
 			result.SetIdentity(identity);
 			return Task.FromResult(result);
 		}

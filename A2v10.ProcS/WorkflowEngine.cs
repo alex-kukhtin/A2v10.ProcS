@@ -36,23 +36,15 @@ namespace A2v10.ProcS
 
 		public Task<IInstance> StartWorkflow(String processId, IDynamicObject prms = null)
 		{
-			var identity = new Identity(processId);
 			return StartWorkflow(new Identity(processId), prms);
 		}
 
-		public async Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, IDynamicObject result)
+		public Task ResumeBookmark(Guid instaceId, String tag, IDynamicObject result)
 		{
-			var instance = await _repository.Get(instaceId);
-			using (var scriptContext = _scriptEngine.CreateContext())
-			{
-				var context = new ExecuteContext(_serviceBus, _repository, scriptContext, _logger, instance)
-				{
-					Bookmark = bookmark,
-					Result = result
-				};
-				await instance.Workflow.Continue(context);
-				return instance;
-			}
+			var m = new BookmarkResumeMessage(instaceId, tag);
+			m.Result = result;
+			_serviceBus.Send(m);
+			return Task.CompletedTask;
 		}
 
 		public IDynamicObject CreateDynamicObject()

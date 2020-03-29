@@ -10,7 +10,7 @@ namespace A2v10.ProcS.Infrastructure
 		Task<IInstance> StartWorkflow(IIdentity identity, IDynamicObject prms = null);
 		Task<IInstance> StartWorkflow(String processId, IDynamicObject prms = null);
 
-		Task<IInstance> ResumeWorkflow(Guid instaceId, String bookmark, IDynamicObject result);
+		Task ResumeBookmark(Guid instaceId, String tag, IDynamicObject result);
 
 		IDynamicObject CreateDynamicObject();
 

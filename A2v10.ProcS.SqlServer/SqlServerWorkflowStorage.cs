@@ -2,21 +2,18 @@
 
 using System;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using A2v10.Data.Interfaces;
 using A2v10.ProcS.Infrastructure;
-using Newtonsoft.Json;
 
 namespace A2v10.ProcS.SqlServer
 {
-	public class SqlServerWorkflowStorage : IWorkflowStorage
+	public class SqlServerWorkflowStorage : WorkflowStorageBase
 	{
 		private readonly IDbContext _dbContext;
 		private readonly IWorkflowCatalogue _catalogue;
 
-		public SqlServerWorkflowStorage(IDbContext dbContext, IWorkflowCatalogue catalogue)
+		public SqlServerWorkflowStorage(IDbContext dbContext, IWorkflowCatalogue catalogue, IResourceWrapper resourceWrapper) : base(resourceWrapper)
 		{
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 			_catalogue = catalogue ?? throw new ArgumentNullException(nameof(catalogue));
@@ -30,7 +27,7 @@ namespace A2v10.ProcS.SqlServer
 			public String Body { get; set; }
 		}
 
-		public async Task<IWorkflowDefinition> WorkflowFromStorage(IIdentity identity)
+		public override async Task<IWorkflowDefinition> WorkflowFromStorage(IIdentity identity)
 		{
 			Identity nid;
 			String json;
@@ -56,25 +53,9 @@ namespace A2v10.ProcS.SqlServer
 				nid = new Identity(dd.Id, dd.Version);
 				json = dd.Body;
 			}
-			var result = JsonConvert.DeserializeObject<StateMachine>(json, new JsonSerializerSettings()
-			{
-				TypeNameHandling = TypeNameHandling.Auto,
-				ContractResolver = new ActivityContractResolver()
-			}) as IWorkflowDefinition;
+			var result = WorkflowFromJson(json);
 			result.SetIdentity(nid);
 			return result;
-		}
-
-		private readonly Lazy<Regex> rr = new Lazy<Regex>(() => new Regex("[\\r\\n\\t ]", RegexOptions.Compiled));
-
-		public Guid GetJsonHash(String json)
-		{
-			var s = rr.Value.Replace(json, String.Empty);
-			using (System.Security.Cryptography.MD5 md5Hash = System.Security.Cryptography.MD5.Create())
-			{
-				var h = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(s));
-				return new Guid(h);
-			}
 		}
 	}
 }

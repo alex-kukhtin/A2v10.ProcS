@@ -28,14 +28,14 @@ namespace A2v10.ProcS.Api
 			_engine = engine;
 		}
 
-		public async Task StartProcess(IStartProcessRequest prm)
+		public Task<IInstance> StartProcess(IStartProcessRequest prm)
 		{
-			await _engine.StartWorkflow(prm.ProcessId, prm.Parameters);
+			return _engine.StartWorkflow(prm.ProcessId, prm.Parameters);
 		}
 
-		public async Task Resume(IResumeProcessRequest prm)
+		public Task Resume(IResumeProcessRequest prm)
 		{
-			await _engine.ResumeWorkflow(prm.InstanceId, prm.Bookmark, prm.Result);
+			return _engine.ResumeBookmark(prm.InstanceId, prm.Bookmark, prm.Result);
 		}
 	}
 }

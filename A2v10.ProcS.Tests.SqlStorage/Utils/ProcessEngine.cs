@@ -33,20 +33,23 @@ namespace A2v10.ProcS.Tests.SqlStorage
 				.AddUserSecrets<DatabaseConfig>()
 				.Build();
 
+			var rm = new ResourceManager(null);
+			var mgr = new SagaManager(null);
+
+
 			var profiler = new NullDataProfiler();
 			var localizer = new NullDataLocalizer();
 			var dbConfig = new DatabaseConfig(configuration);
 			var dbContext = new SqlDbContext(profiler, dbConfig, localizer);
-			var workflowStorage = new FileSystemWorkflowStorage();
+			var workflowStorage = new FileSystemWorkflowStorage(rm);
 			var taskManager = new SyncTaskManager();
 			var logger = CreateLogger();
 
-			var rm = new ResourceManager(null);
-			var mgr = new SagaManager(null);
-
+			
 			var instanceStorage = new SqlServerInstanceStorage(workflowStorage, dbContext, rm, logger);
 			var repository = new Repository(workflowStorage, instanceStorage);
 
+			ProcS.RegisterActivities(rm);
 			ProcS.RegisterSagas(rm, mgr);
 
 			var keeper = new SqlServerSagaKeeper(mgr.Resolver, dbContext, rm);

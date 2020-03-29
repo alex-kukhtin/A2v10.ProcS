@@ -4,7 +4,7 @@
 	"States": {
 		"S1": {
 			"OnEntry": {
-				"$type": "A2v10.ProcS.Delay, A2v10.ProcS",
+				"$res": "com.a2v10.procs:DelayActivity",
 				"Duration": "00:00:00.500"
 			},
 			"Transitions": {

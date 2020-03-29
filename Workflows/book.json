@@ -1,0 +1,36 @@
+{
+	"$schema": "../@schemas/statemachine-schema.json",
+	"Description": "First state machine",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"Description": "State 1",
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SetBookmarkActivity",
+				"Tag": "b1"
+			},
+			"Transitions": {
+				"S1->S2": {
+					"Description": "From S1 to S2",
+					"To": "S2"
+				}
+			}
+		},
+		"S2": {
+			"Description": "State 2",
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SetBookmarkActivity",
+				"Tag": "b2"
+			},
+			"Transitions": {
+				"S2->End": {
+					"Description": "From S2 to End",
+					"To": "End"
+				}
+			}
+		},
+		"End": {
+			"Description": "State End"
+		}
+	}
+}
