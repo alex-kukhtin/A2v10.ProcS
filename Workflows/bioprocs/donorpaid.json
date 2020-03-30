@@ -1,0 +1,48 @@
+{
+	"$schema": "../../@schemas/statemachine-schema.json#",
+	"Description": "PaidDonor",
+	"InitialState": "WaitSurvey",
+	"States": {
+		"WaitSurvey": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": {
+
+				}
+			},
+			"NextState": "Survey"
+		},
+		"Survey": {
+			"OnEntry": {
+
+			},
+			"NextState": "WaitDoctor"
+		},
+		"WaitDoctor": {
+			"OnEntry": {
+				
+			},
+			"NextState": "Doctor"
+		},
+		"Doctor": {
+			"OnEntry": {
+
+			},
+			"NextState": "WaitDonation"
+		},
+		"WaitDonation": {
+			"OnEntry": {
+
+			},
+			"NextState": "Donation"
+		},
+		"Donation": {
+			"OnEntry": {
+
+			},
+			"NextState": "End"
+		},
+		"End": {
+		}
+	}
+}
