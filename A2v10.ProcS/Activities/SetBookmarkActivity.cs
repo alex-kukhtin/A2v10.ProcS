@@ -7,8 +7,8 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
-	[ResourceKey(ProcS.ResName + ":" + nameof(SetBookmarkActivity))]
-	public class SetBookmarkActivity : IActivity
+	[ResourceKey(ProcS.ResName + ":" + nameof(WaitResumeActivity))]
+	public class WaitResumeActivity : IActivity
 	{
 		public String Tag { get; set; }
 

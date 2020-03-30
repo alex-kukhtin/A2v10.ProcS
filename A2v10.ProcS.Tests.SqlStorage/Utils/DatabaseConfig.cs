@@ -23,7 +23,7 @@ namespace A2v10.ProcS.Tests.SqlStorage
 			return _config.GetConnectionString(source);
 		}
 
-		public Int32 CommandTimeout { get; set; }
+		public TimeSpan CommandTimeout { get; set; }
 		#endregion
 	}
 }
