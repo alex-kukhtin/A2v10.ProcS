@@ -124,7 +124,7 @@ namespace A2v10.ProcS.SqlServer
 				{ "CorrelationId", item.Message.CorrelationId.ToString() }
 			};
 
-			_tracker.Track($"SendMessage. kind:{prm.Get<String>("Kind")}, correlationId: {item.Message.CorrelationId.ToString()}");
+			_tracker.Track($"SendMessage. kind:{prm.Get<String>("Kind")}, correlationId: {item.Message.CorrelationId}");
 
 			await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", prm);
 			// TODO: msgId ????
@@ -144,7 +144,7 @@ namespace A2v10.ProcS.SqlServer
 						{ "CorrelationId", a.Message.CorrelationId.ToString() }
 					};
 
-					_tracker.Track($"SendMessage. kind:{prmafter.Get<String>("Kind")}, correlationId: {a.Message.CorrelationId.ToString()}");
+					_tracker.Track($"SendMessage. kind:{prmafter.Get<String>("Kind")}, correlationId: {a.Message.CorrelationId}");
 					await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", prmafter);
 				}
 			}
@@ -160,7 +160,7 @@ namespace A2v10.ProcS.SqlServer
 				{ "Body", body },
 				{ "IsComplete", saga.IsComplete }
 			};
-			_tracker.Track($"Update saga. id: {id}, isComplete: {saga.IsComplete}, kind:{saga.Kind}, correlationId: {saga.CorrelationId.ToString()}");
+			_tracker.Track($"Update saga. id: {id}, isComplete: {saga.IsComplete}, kind:{saga.Kind}, correlationId: {saga.CorrelationId}");
 			return _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Saga.Update]", prms);
 		}
 

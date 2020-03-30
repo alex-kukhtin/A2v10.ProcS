@@ -1,0 +1,81 @@
+{
+	"$schema": "../../@schemas/statemachine-schema.json#",
+	"Description": "PaidDonor",
+	"InitialState": "WaitSurvey",
+	"States": {
+		"WaitSurvey": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Bookmark": "WaitSurvey"
+					}
+				]
+			},
+			"NextState": "Survey"
+		},
+		"Survey": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Bookmark": "Survey"
+					}
+				]
+			},
+			"NextState": "WaitDoctor"
+		},
+		"WaitDoctor": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Bookmark": "WaitDoctor"
+					}
+				]
+			},
+			"NextState": "Doctor"
+		},
+		"Doctor": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Bookmark": "WaitDoctor"
+					}
+				]
+			},
+			"NextState": "WaitDonation"
+		},
+		"WaitDonation": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Bookmark": "WaitDonation"
+					}
+				]
+			},
+			"NextState": "Donation"
+		},
+		"Donation": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Bookmark ": "Donation"
+					}
+				]
+			},
+			"NextState": "End"
+		},
+		"End": {
+		}
+	}
+}

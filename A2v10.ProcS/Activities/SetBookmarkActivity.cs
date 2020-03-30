@@ -7,10 +7,10 @@ using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
 {
-	[ResourceKey(ProcS.ResName + ":" + nameof(SetBookmarkActivity))]
-	public class SetBookmarkActivity : IActivity
+	[ResourceKey(ProcS.ResName + ":" + nameof(WaitResumeActivity))]
+	public class WaitResumeActivity : IActivity
 	{
-		public String Tag { get; set; }
+		public String Bookmark { get; set; }
 
 		public ActivityExecutionResult Execute(IExecuteContext context)
 		{
@@ -19,7 +19,7 @@ namespace A2v10.ProcS
 
 			var book = context.SetBookmark();
 
-			var mess = new WaitBookmarkResumeMessage(book, context.Instance.Id, Tag);
+			var mess = new WaitBookmarkResumeMessage(book, context.Instance.Id, Bookmark);
 
 			context.SendMessage(mess);
 
