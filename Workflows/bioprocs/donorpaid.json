@@ -9,7 +9,7 @@
 				"Activities": [
 					{
 						"$res": "com.a2v10.procs:WaitResumeActivity",
-						"Tag": "WaitSurvey"
+						"Bookmark": "WaitSurvey"
 					}
 				]
 			},
@@ -21,7 +21,7 @@
 				"Activities": [
 					{
 						"$res": "com.a2v10.procs:WaitResumeActivity",
-						"Tag": "Survey"
+						"Bookmark": "Survey"
 					}
 				]
 			},
@@ -33,7 +33,7 @@
 				"Activities": [
 					{
 						"$res": "com.a2v10.procs:WaitResumeActivity",
-						"Tag": "WaitDoctor"
+						"Bookmark": "WaitDoctor"
 					}
 				]
 			},
@@ -45,7 +45,7 @@
 				"Activities": [
 					{
 						"$res": "com.a2v10.procs:WaitResumeActivity",
-						"Tag": "WaitDoctor"
+						"Bookmark": "WaitDoctor"
 					}
 				]
 			},
@@ -57,7 +57,7 @@
 				"Activities": [
 					{
 						"$res": "com.a2v10.procs:WaitResumeActivity",
-						"Tag": "WaitDonation"
+						"Bookmark": "WaitDonation"
 					}
 				]
 			},
@@ -69,7 +69,7 @@
 				"Activities": [
 					{
 						"$res": "com.a2v10.procs:WaitResumeActivity",
-						"Tag": "Donation"
+						"Bookmark ": "Donation"
 					}
 				]
 			},
