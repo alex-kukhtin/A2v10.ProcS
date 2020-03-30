@@ -47,7 +47,7 @@ namespace A2v10.ProcS.WebApi.Host
 				return _config.GetConnectionString(source);
 			}
 
-			public TimeSpan CommandTimeout { get; set; }
+			public TimeSpan CommandTimeout => _config.GetValue<TimeSpan>("A2v10:Data:CommandTimeout");
 		}
 
 		public static IHostBuilder CreateHostBuilder(String[] args) =>

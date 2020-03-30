@@ -7,12 +7,12 @@ using A2v10.ProcS.Infrastructure;
 namespace A2v10.ProcS
 {
 	[ResourceKey(ukey)]
-	public class WaitBookmarkResumeMessage : MessageBase<String>
+	public class WaitResumeMessage : MessageBase<String>
 	{
-		public const String ukey = ProcS.ResName + ":" + nameof(WaitBookmarkResumeMessage);
+		public const String ukey = ProcS.ResName + ":" + nameof(WaitResumeMessage);
 
 		[RestoreWith]
-		public WaitBookmarkResumeMessage(Guid bookmark, Guid instance, String tag)
+		public WaitResumeMessage(Guid bookmark, Guid instance, String tag)
 			: base($"{instance}:{tag}")
 		{
 			BookmarkId = bookmark;
@@ -39,12 +39,12 @@ namespace A2v10.ProcS
 	}
 
 	[ResourceKey(ukey)]
-	public class BookmarkResumeMessage : MessageBase<String>
+	public class ResumeMessage : MessageBase<String>
 	{
-		public const String ukey = ProcS.ResName + ":" + nameof(BookmarkResumeMessage);
+		public const String ukey = ProcS.ResName + ":" + nameof(ResumeMessage);
 
 		[RestoreWith]
-		public BookmarkResumeMessage(Guid instance, String tag) : base($"{instance}:{tag}")
+		public ResumeMessage(Guid instance, String tag) : base($"{instance}:{tag}")
 		{
 			InstanceId = instance;
 			Tag = tag;
@@ -67,11 +67,11 @@ namespace A2v10.ProcS
 		}
 	}
 
-	public class SetBookmarkSaga : SagaBaseDispatched<String, WaitBookmarkResumeMessage, BookmarkResumeMessage>
+	public class WaitResumeSaga : SagaBaseDispatched<String, WaitResumeMessage, ResumeMessage>
 	{
-		public const String ukey = ProcS.ResName + ":" + nameof(SetBookmarkSaga);
+		public const String ukey = ProcS.ResName + ":" + nameof(WaitResumeSaga);
 
-		public SetBookmarkSaga() : base(ukey)
+		public WaitResumeSaga() : base(ukey)
 		{
 
 		}
@@ -79,14 +79,14 @@ namespace A2v10.ProcS
 		// serializable
 		private Guid bookmark;
 
-		protected override Task Handle(IHandleContext context, WaitBookmarkResumeMessage message)
+		protected override Task Handle(IHandleContext context, WaitResumeMessage message)
 		{
 			bookmark = message.BookmarkId;
 			SetCorrelation(message);
 			return Task.CompletedTask;
 		}
 
-		protected override Task Handle(IHandleContext context, BookmarkResumeMessage message)
+		protected override Task Handle(IHandleContext context, ResumeMessage message)
 		{
 			context.ResumeBookmark(bookmark, message.Result);
 			return Task.CompletedTask;

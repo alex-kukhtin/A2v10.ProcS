@@ -28,10 +28,10 @@ namespace A2v10.ProcS
 				resourceManager.RegisterResources(typeof(StartProcessMessage), typeof(ContinueActivityMessage));
 			}
 			{
-				var fact = new ConstructSagaFactory<SetBookmarkSaga>(SetBookmarkSaga.ukey);
+				var fact = new ConstructSagaFactory<WaitResumeSaga>(WaitResumeSaga.ukey);
 				resourceManager.RegisterResourceFactory(fact.SagaKind, new SagaResourceFactory(fact));
-				sagaManager.RegisterSagaFactory<WaitBookmarkResumeMessage, BookmarkResumeMessage>(fact);
-				resourceManager.RegisterResources(typeof(WaitBookmarkResumeMessage), typeof(BookmarkResumeMessage));
+				sagaManager.RegisterSagaFactory<WaitResumeMessage, ResumeMessage>(fact);
+				resourceManager.RegisterResources(typeof(WaitResumeMessage), typeof(ResumeMessage));
 			}
 			{
 				var fact = new ConstructSagaFactory<CallHttpApiSaga>(CallHttpApiSaga.ukey);

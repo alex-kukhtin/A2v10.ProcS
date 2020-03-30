@@ -19,7 +19,7 @@ namespace A2v10.ProcS
 
 			var book = context.SetBookmark();
 
-			var mess = new WaitBookmarkResumeMessage(book, context.Instance.Id, Bookmark);
+			var mess = new WaitResumeMessage(book, context.Instance.Id, Bookmark);
 
 			context.SendMessage(mess);
 

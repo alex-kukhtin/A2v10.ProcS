@@ -23,7 +23,7 @@ namespace A2v10.ProcS.Tests.SqlStorage
 			return _config.GetConnectionString(source);
 		}
 
-		public TimeSpan CommandTimeout { get; set; }
+		public TimeSpan CommandTimeout => _config.GetValue<TimeSpan>("A2v10:Data:CommandTimeout");
 		#endregion
 	}
 }
