@@ -17,7 +17,7 @@ namespace A2v10.ProcS.Infrastructure
 			return tc.Task;
 		}
 
-		public static Task WaitFor<T>(this IPromise<T> promise)
+		public static Task<T> WaitFor<T>(this IPromise<T> promise)
 		{
 			var tc = new TaskCompletionSource<T>();
 			promise.Done(r => tc.SetResult(r));

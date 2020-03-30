@@ -183,8 +183,10 @@ namespace A2v10.ProcS
 	{
 		public const String ukey = ProcS.ResName + ":" + nameof(ProcessSaga);
 
+		//private readonly IRepository _repository;
 		public ProcessSaga() : base(ukey)
 		{
+			//_repository = repository;
 		}
 
 		protected override Task Handle(IHandleContext context, StartProcessMessage message)
@@ -194,7 +196,7 @@ namespace A2v10.ProcS
 
 		protected async override Task Handle(IHandleContext context, ContinueActivityMessage message)
 		{
-			var instance = await context.LoadInstance(message.InstanceId);
+			var instance = await _repository.Get(message.InstanceId);
 			var continueContext = context.CreateExecuteContext(instance, message.Bookmark, message.Result);
 			continueContext.ScriptContext.SetValue("reply", message?.Result ?? new DynamicObject());
 			continueContext.IsContinue = true;

@@ -21,4 +21,10 @@ namespace A2v10.ProcS.Infrastructure
 	{
 		IPromise AddTask(Func<Task> task);
 	}
+
+	public interface INotifyManager
+	{
+		void Register(Guid id, Promise<String> promise);
+		Promise<String> GetAndRemove(Guid id);
+	}
 }

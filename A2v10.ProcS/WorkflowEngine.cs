@@ -19,13 +19,15 @@ namespace A2v10.ProcS
 		private readonly IRepository _repository;
 		private readonly IScriptEngine _scriptEngine;
 		private readonly ILogger _logger;
+		private readonly INotifyManager _notifyManager;
 
-		public WorkflowEngine(IRepository repository, IServiceBus serviceBus, IScriptEngine scriptEngine, ILogger logger)
+		public WorkflowEngine(IRepository repository, IServiceBus serviceBus, IScriptEngine scriptEngine, ILogger logger, INotifyManager notifyManager)
 		{
 			_serviceBus = serviceBus ?? throw new ArgumentNullException(nameof(serviceBus));
 			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
 			_scriptEngine = scriptEngine ?? throw new ArgumentNullException(nameof(scriptEngine));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_notifyManager = notifyManager ?? throw new ArgumentNullException(nameof(notifyManager));
 		}
 
 		#region IWorkflowEngine
@@ -61,7 +63,7 @@ namespace A2v10.ProcS
 				instance.SetParameters(data);
 			using (var scriptContext = _scriptEngine.CreateContext())
 			{
-				var context = new ExecuteContext(_serviceBus, _repository, scriptContext, _logger, instance);
+				var context = new ExecuteContext(_serviceBus, _repository, scriptContext, _logger, _notifyManager, instance);
 				await instance.Workflow.Run(context);
 				return instance;
 			}

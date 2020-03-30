@@ -66,6 +66,7 @@ namespace A2v10.ProcS.SqlServer
 			di.Set("IsComplete", instance.IsComplete);
 			di.Set("WorkflowState", wfState.ToJson());
 			di.Set("InstanceState", instanceState.ToJson());
+			di.Set("CurrentState", instance.CurrentState);
 
 			_logger.LogInformation($"Instance.Save. Id:'{instance.Id}'");
 			await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Instance.Save]", di.Root);

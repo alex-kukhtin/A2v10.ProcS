@@ -55,9 +55,11 @@ namespace A2v10.ProcS.Tests.SqlStorage
 			var keeper = new SqlServerSagaKeeper(mgr.Resolver, dbContext, rm);
 
 			var scriptEngine = new ScriptEngine();
-			var bus = new ServiceBus(taskManager, keeper, repository, scriptEngine, logger);
+			var notifyManager = new NotifyManager();
 
-			var engine = new WorkflowEngine(repository, bus, scriptEngine, new NullLogger<IWorkflowEngine>());
+			var bus = new ServiceBus(taskManager, keeper, repository, scriptEngine, logger, notifyManager); 
+
+			var engine = new WorkflowEngine(repository, bus, scriptEngine, new NullLogger<IWorkflowEngine>(), notifyManager);
 			return (engine, repository, bus);
 		}
 

@@ -42,7 +42,6 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 	[JsonObject]
 	public class Response
 	{
-		
 	}
 
 	[JsonObject]
@@ -50,6 +49,17 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 	{
 		[JsonProperty("instanceId")]
 		public Guid InstanceId { get; set; }
+	}
+
+	[JsonObject]
+	public class ResumeResponse: Response
+	{
+		[JsonProperty("status")]
+		public Status Status { get; set; }
+		[JsonProperty("message")]
+		public String Message { get; set; }
+		[JsonProperty("result")]
+		public String Result { get; set; }
 	}
 
 	[Route("api/[controller]")]
@@ -78,10 +88,15 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		[HttpPost]
 		//[Authorize]
 		[Route("resume")]
-		public async Task<Response> Resume([FromBody] ResumeProcessRequest prm)
+		public async Task<ResumeResponse> Resume([FromBody] ResumeProcessRequest prm)
 		{
-			await _api.Resume(prm);
-			return new Response();
+			var r = await _api.Resume(prm);
+			return new ResumeResponse()
+			{
+				Status = r.Status,
+				Message = r.Message,
+				Result = r.Result
+			};
 		}
 	}
 }

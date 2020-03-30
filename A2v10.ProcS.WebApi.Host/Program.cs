@@ -70,6 +70,7 @@ namespace A2v10.ProcS.WebApi.Host
 					services.AddSingleton<IDbContext, SqlDbContext>();
 
 					services.AddSingleton<ILogger, FakeLogger>();
+					services.AddSingleton<INotifyManager, NotifyManager>();
 
 					var tm = new TaskManager();
 					services.AddSingleton<ITaskManager>(tm);
@@ -97,6 +98,7 @@ namespace A2v10.ProcS.WebApi.Host
 					services.AddSingleton<ResourceManager>();
 					services.AddSingleton<SagaManager>();
 					services.AddSingleton<PluginManager>();
+					services.AddSingleton<NotifyManager>();
 
 					services.AddSingleton<IResourceManager>(svc => svc.GetService<ResourceManager>());
 					services.AddSingleton<IResourceWrapper>(svc => svc.GetService<ResourceManager>());
