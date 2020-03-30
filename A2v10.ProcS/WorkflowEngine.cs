@@ -41,7 +41,7 @@ namespace A2v10.ProcS
 
 		public Task ResumeBookmark(Guid instaceId, String tag, IDynamicObject result)
 		{
-			var m = new BookmarkResumeMessage(instaceId, tag);
+			var m = new ResumeMessage(instaceId, tag);
 			m.Result = result;
 			_serviceBus.Send(m);
 			return Task.CompletedTask;

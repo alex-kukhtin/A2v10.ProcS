@@ -1,0 +1,14 @@
+{
+	"$schema": "../@schemas/statemachine-schema.json",
+	"Description": "Callback",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SendCallbackActivity",
+				"Tag": "testcb",
+				"DataExpression": "params.cb"
+			}
+		}
+	}
+}
