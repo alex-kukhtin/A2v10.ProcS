@@ -1,15 +1,14 @@
 // Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+
 using A2v10.ProcS.Infrastructure;
 using A2v10.ProcS.WebApi.Host.Classes;
 using A2v10.ProcS.SqlServer;

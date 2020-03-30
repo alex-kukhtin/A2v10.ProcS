@@ -5,43 +5,73 @@
 	"States": {
 		"WaitSurvey": {
 			"OnEntry": {
-				"$res": "com.a2v10.procs:WaitResumeActivity",
-				"Tag": "WaitSurvey"
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Tag": "WaitSurvey"
+					}
+				]
 			},
 			"NextState": "Survey"
 		},
 		"Survey": {
 			"OnEntry": {
-				"$res": "com.a2v10.procs:WaitResumeActivity",
-				"Tag": "Survey"
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Tag": "Survey"
+					}
+				]
 			},
 			"NextState": "WaitDoctor"
 		},
 		"WaitDoctor": {
 			"OnEntry": {
-				"$res": "com.a2v10.procs:WaitResumeActivity",
-				"Tag": "WaitDoctor"
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Tag": "WaitDoctor"
+					}
+				]
 			},
 			"NextState": "Doctor"
 		},
 		"Doctor": {
 			"OnEntry": {
-				"$res": "com.a2v10.procs:WaitResumeActivity",
-				"Tag": "WaitDoctor"
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Tag": "WaitDoctor"
+					}
+				]
 			},
 			"NextState": "WaitDonation"
 		},
 		"WaitDonation": {
 			"OnEntry": {
-				"$res": "com.a2v10.procs:WaitResumeActivity",
-				"Tag": "WaitDonation"
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Tag": "WaitDonation"
+					}
+				]
 			},
 			"NextState": "Donation"
 		},
 		"Donation": {
 			"OnEntry": {
-				"$res": "com.a2v10.procs:WaitResumeActivity",
-				"Tag": "Donation"
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Tag": "Donation"
+					}
+				]
 			},
 			"NextState": "End"
 		},
