@@ -52,6 +52,14 @@ namespace A2v10.ProcS
 			return (T) Convert.ChangeType(vo, typeof(T));
 		}
 
+		public IDynamicObject EvalObject(String expression)
+		{
+			if (expression == null)
+				return null;
+			var val = _engine.Execute(expression).GetCompletionValue();
+			var vo = val.ToObject();
+			return DynamicObjectConverters.From(vo);
+		}
 		public void Execute(String code)
 		{
 			if (code == null)

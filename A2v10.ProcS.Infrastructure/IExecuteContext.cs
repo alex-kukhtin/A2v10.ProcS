@@ -37,6 +37,7 @@ namespace A2v10.ProcS.Infrastructure
 
 		String Resolve(String source);
 		T EvaluateScript<T>(String expression);
+		IDynamicObject EvaluateScriptObject(String expression);
 		void ExecuteScript(String code);
 
 		void ProcessComplete(String bookmark);

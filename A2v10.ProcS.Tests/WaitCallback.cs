@@ -34,5 +34,23 @@ namespace A2v10.ProcS.Tests
 			instance = await repository.Get(id);
 			Assert.AreEqual(null, instance.CurrentState);
 		}
+
+		[TestMethod]
+		public async Task RespWait()
+		{
+			var (engine, repository, bus) = ProcessEngine.CreateEngine();
+
+			var data = engine.CreateDynamicObject();
+			var instance = await engine.StartWorkflow(new Identity("callback_wait.json"), data);
+			var id = instance.Id;
+
+			var prms = DynamicObjectConverters.FromJson("{ \"cb\": { \"id\": 555 } }");
+			var instance2 = await engine.StartWorkflow(new Identity("callback_send.json"), prms);
+
+			await bus.Process();
+
+			instance = await repository.Get(id);
+			Assert.AreEqual(null, instance.CurrentState);
+		}
 	}
 }

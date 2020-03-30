@@ -62,7 +62,8 @@ namespace A2v10.ProcS
 			resourceManager.RegisterResource<ParallelActivity>();
 			resourceManager.RegisterResource<StartProcessActivity>();
 			resourceManager.RegisterResource<SetBookmarkActivity>();
-			resourceManager.RegisterResource<WaitApiCallbackActivity>();
+			resourceManager.RegisterResource<WaitCallbackActivity>();
+			resourceManager.RegisterResource<SendCallbackActivity>();
 		}
 	}
 }

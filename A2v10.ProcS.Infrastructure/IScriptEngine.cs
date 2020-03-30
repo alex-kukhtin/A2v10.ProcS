@@ -14,6 +14,7 @@ namespace A2v10.ProcS.Infrastructure
 		IScriptContext NewContext();
 
 		T Eval<T>(String expression);
+		IDynamicObject EvalObject(String expression);
 		void Execute(String code);
 		void SetValue(String name, IDynamicObject value);
 		T GetValueFromObject<T>(IDynamicObject obj, String expression);

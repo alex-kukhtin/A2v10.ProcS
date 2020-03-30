@@ -6,9 +6,9 @@
 		"S1": {
 			"OnEntry": {
 				"$res": "com.a2v10.procs:WaitCallbackActivity",
-				"Tag": "pseudopay",
-				"CorrelationValue": "123",
-				"CorrelationExpression": "reply.paymentId"
+				"Tag": "testcb",
+				"CorrelationValue": "555",
+				"CorrelationExpression": "reply.id"
 			},
 			"Transitions": {
 				"S1->End": {

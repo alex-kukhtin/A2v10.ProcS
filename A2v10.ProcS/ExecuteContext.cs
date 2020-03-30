@@ -138,6 +138,11 @@ namespace A2v10.ProcS
 			return _scriptContext.Eval<T>($"({expression})");
 		}
 
+		public IDynamicObject EvaluateScriptObject(String expression)
+		{
+			return _scriptContext.EvalObject($"({expression})");
+		}
+
 		public void ExecuteScript(String code)
 		{
 			_scriptContext.Execute(code);
