@@ -47,6 +47,8 @@ namespace A2v10.ProcS.WebApi.Host
 					source = "Default";
 				return _config.GetConnectionString(source);
 			}
+
+			public Int32 CommandTimeout { get; set; }
 		}
 
 		public static IHostBuilder CreateHostBuilder(String[] args) =>
