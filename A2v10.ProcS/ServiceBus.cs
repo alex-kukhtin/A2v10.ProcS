@@ -141,6 +141,7 @@ namespace A2v10.ProcS
 				}
 				catch (Exception e)
 				{
+					_logger.LogError(e, nameof(ProcessItem));
 					await _sagaKeeper.FailSaga(item, e);
 				}
 			}

@@ -43,8 +43,10 @@ namespace A2v10.ProcS
 
 		public Task ResumeBookmark(Guid instaceId, String tag, IDynamicObject result)
 		{
-			var m = new ResumeMessage(instaceId, tag);
-			m.Result = result;
+			var m = new ResumeMessage(instaceId, tag)
+			{
+				Result = result
+			};
 			_serviceBus.Send(m);
 			return Task.CompletedTask;
 		}
@@ -59,14 +61,22 @@ namespace A2v10.ProcS
 		public async Task<IInstance> Run(IIdentity identity, IDynamicObject data = null)
 		{
 			var instance = await _repository.CreateInstance(identity);
-			if (data != null)
-				instance.SetParameters(data);
-			using (var scriptContext = _scriptEngine.CreateContext())
+			try
 			{
-				var context = new ExecuteContext(_serviceBus, _repository, scriptContext, _logger, _notifyManager, instance);
-				await instance.Workflow.Run(context);
-				return instance;
+				if (data != null)
+					instance.SetParameters(data);
+				using (var scriptContext = _scriptEngine.CreateContext())
+				{
+					var context = new ExecuteContext(_serviceBus, _repository, scriptContext, _logger, _notifyManager, instance);
+					await instance.Workflow.Run(context);
+					return instance;
+				}
 			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "WorkflowEngine.Run");
+			}
+			return null;
 		}
 	}
 }

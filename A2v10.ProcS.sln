@@ -81,6 +81,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bioprocs", "bioprocs", "{62
 		Workflows\bioprocs\donorpaid.json = Workflows\bioprocs\donorpaid.json
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "executesql", "executesql", "{B57330C7-B9F8-41D2-8644-4CFAC95FFFBA}"
+	ProjectSection(SolutionItems) = preProject
+		Workflows\executesql\simple.json = Workflows\executesql\simple.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -141,6 +146,7 @@ Global
 		{3B72AB27-CE1C-4EB4-B8C4-42E3E553A39D} = {A4070505-3763-497F-900E-E280F3ECA84F}
 		{179ECA77-043A-42E4-89FD-D88CDB5C1E15} = {A4070505-3763-497F-900E-E280F3ECA84F}
 		{62C39BB1-0B2C-436B-A42E-E59876A68C7C} = {DC046347-1F11-47B5-817F-0627AFD7E5B5}
+		{B57330C7-B9F8-41D2-8644-4CFAC95FFFBA} = {DC046347-1F11-47B5-817F-0627AFD7E5B5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B5EA97A5-CA19-4BCC-BC05-3B5A09F89A62}

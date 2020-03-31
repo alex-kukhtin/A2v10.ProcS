@@ -217,6 +217,14 @@ namespace A2v10.ProcS.Infrastructure
 			_dictionary.Add(key, value);
 		}
 
+		public void Merge(IDynamicObject other)
+		{
+			foreach (var m in other)
+			{
+				Add(m.Key, m.Value);
+			}
+		}
+
 		public Boolean ContainsKey(String key)
 		{
 			return _dictionary.ContainsKey(key);

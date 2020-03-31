@@ -52,6 +52,8 @@ namespace A2v10.ProcS.Tests.SqlStorage
 
 			ProcS.RegisterActivities(rm);
 			ProcS.RegisterSagas(rm, mgr, scriptEngine, repository);
+			SqlServerProcS.RegisterActivities(rm);
+			SqlServerProcS.RegisterSagas(rm, mgr, dbContext);
 
 			var keeper = new SqlServerSagaKeeper(mgr.Resolver, dbContext, rm);
 
