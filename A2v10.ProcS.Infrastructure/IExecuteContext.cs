@@ -8,22 +8,12 @@ namespace A2v10.ProcS.Infrastructure
 {
 	public interface IHandleContext 
 	{
-		Task<IInstance> LoadInstance(Guid id);
-
+		IServiceBus Bus { get; }
 		void SendMessage(IMessage message);
 		void SendMessageAfter(DateTime after, IMessage message);
 		void SendMessagesSequence(params IMessage[] messages);
-
-		IScriptContext ScriptContext { get; }
 		ILogger Logger { get; }
-
-		IExecuteContext CreateExecuteContext(IInstance instance, String bookmark = null, IDynamicObject result = null);
-		Task<IInstance> StartProcess(String processId, Guid parentId, IDynamicObject data = null);
-
-		void ContinueProcess(Guid id, String bookmark, IDynamicObject result);
-		void ContinueProcess(Guid id, String bookmark, String json);
-
-		void ResumeBookmark(Guid id, IDynamicObject result);
+		INotifyManager NotifyManager { get; }
 	}
 
 	public interface IExecuteContext : IHandleContext
@@ -33,6 +23,7 @@ namespace A2v10.ProcS.Infrastructure
 		String Bookmark { get; set; }
 		IDynamicObject Result { get; set; }
 
+		Task<IInstance> LoadInstance(Guid id);
 		Task SaveInstance();
 
 		String Resolve(String source);
@@ -43,5 +34,12 @@ namespace A2v10.ProcS.Infrastructure
 		void ProcessComplete(String bookmark);
 
 		Guid SetBookmark();
+		void ResumeBookmark(Guid id, IDynamicObject result);
+
+		IExecuteContext CreateExecuteContext(IInstance instance, String bookmark = null, IDynamicObject result = null);
+		Task<IInstance> StartProcess(String processId, Guid parentId, IDynamicObject data = null);
+
+		void ContinueProcess(Guid id, String bookmark, IDynamicObject result);
+		void ContinueProcess(Guid id, String bookmark, String json);
 	}
 }

@@ -13,7 +13,7 @@ namespace A2v10.ProcS
 	{
 		public const String ResName = "com.a2v10.procs";
 		
-		public static void RegisterSagas(IResourceManager resourceManager, ISagaManager sagaManager)
+		public static void RegisterSagas(IResourceManager resourceManager, ISagaManager sagaManager, IScriptEngine scriptEngine, IRepository repository)
 		{
 			{
 				var fact = new ConstructSagaFactory<BookmarkSaga>(BookmarkSaga.ukey);
@@ -22,7 +22,7 @@ namespace A2v10.ProcS
 				resourceManager.RegisterResources(typeof(SetBookmarkMessage), typeof(ResumeBookmarkMessage));
 			}
 			{
-				var fact = new ConstructSagaFactory<ProcessSaga>(ProcessSaga.ukey);
+				var fact = new DelegateSagaFactory(ProcessSaga.ukey, () => new ProcessSaga(repository, scriptEngine));
 				resourceManager.RegisterResourceFactory(fact.SagaKind, new SagaResourceFactory(fact));
 				sagaManager.RegisterSagaFactory<StartProcessMessage, ContinueActivityMessage>(fact);
 				resourceManager.RegisterResources(typeof(StartProcessMessage), typeof(ContinueActivityMessage));
@@ -40,7 +40,7 @@ namespace A2v10.ProcS
 				resourceManager.RegisterResources(typeof(CallApiRequestMessage), typeof(CallApiResponseMessage));
 			}
 			{
-				var fact = new ConstructSagaFactory<RegisterCallbackSaga>(RegisterCallbackSaga.ukey);
+				var fact = new DelegateSagaFactory(RegisterCallbackSaga.ukey, () => new RegisterCallbackSaga(scriptEngine));
 				resourceManager.RegisterResourceFactory(fact.SagaKind, new SagaResourceFactory(fact));
 				sagaManager.RegisterSagaFactory<RegisterCallbackMessage, CallbackMessage>(fact);
 				resourceManager.RegisterResources(typeof(RegisterCallbackMessage), typeof(CallbackMessage));

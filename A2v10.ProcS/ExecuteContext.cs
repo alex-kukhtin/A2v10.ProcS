@@ -13,28 +13,20 @@ namespace A2v10.ProcS
 	public class HandleContext : IHandleContext
 	{
 		protected readonly IServiceBus _serviceBus;
-		protected readonly IRepository _repository;
-		protected readonly IScriptContext _scriptContext;
 		protected readonly ILogger _logger;
 		protected readonly INotifyManager _notifyManager;
 
 
-		public HandleContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext, ILogger logger, INotifyManager notifyManager)
+		public HandleContext(IServiceBus bus, ILogger logger, INotifyManager notifyManager)
 		{
 			_serviceBus = bus ?? throw new ArgumentNullException(nameof(bus));
-			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
-			_scriptContext = scriptContext ?? throw new ArgumentNullException(nameof(scriptContext));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_notifyManager = notifyManager ?? throw new ArgumentNullException(nameof(notifyManager));
 		}
 
-		public IScriptContext ScriptContext => _scriptContext;
 		public ILogger Logger => _logger;
-
-		public Task<IInstance> LoadInstance(Guid id)
-		{
-			return _repository.Get(id);
-		}
+		public IServiceBus Bus => _serviceBus;
+		public INotifyManager NotifyManager => _notifyManager;
 
 		public void SendMessage(IMessage message)
 		{
@@ -50,51 +42,13 @@ namespace A2v10.ProcS
 		{
 			_serviceBus.SendSequence(messages);
 		}
-
-		public IExecuteContext CreateExecuteContext(IInstance instance, String bookmark = null, IDynamicObject result = null)
-		{
-			return new ExecuteContext(_serviceBus, _repository, _scriptContext, _logger, _notifyManager, instance)
-			{
-				Bookmark = bookmark,
-				Result = result
-			};
-		}
-
-		public void ContinueProcess(Guid id, String bookmark, String json)
-		{
-			ContinueProcess(id, bookmark, DynamicObjectConverters.FromJson(json));
-		}
-
-		public void ContinueProcess(Guid id, String bookmark, IDynamicObject result)
-		{
-			var msg = new ContinueActivityMessage(id, bookmark, result);
-			SendMessage(msg);
-		}
-
-		public async Task<IInstance> StartProcess(String processId, Guid parentId, IDynamicObject data = null)
-		{
-			var instance = await _repository.CreateInstance(new Identity(processId), parentId);
-			if (data != null)
-				instance.SetParameters(data);
-			using (var newScriptContext = _scriptContext.NewContext())
-			{
-				var context = new ExecuteContext(_serviceBus, _repository, newScriptContext, _logger, _notifyManager, instance);
-				await instance.Workflow.Run(context);
-				return instance;
-			}
-		}
-
-		public void ResumeBookmark(Guid id, IDynamicObject result)
-		{
-			if (id == Guid.Empty)
-				throw new ArgumentOutOfRangeException("ExecuteContext.ResumeBookmark. Bookmark is empty");
-			var msg = new ResumeBookmarkMessage(id, result);
-			_serviceBus.Send(msg);
-		}
 	}
 
 	public class ExecuteContext : HandleContext, IExecuteContext
 	{
+		protected readonly IRepository _repository;
+		protected readonly IScriptContext _scriptContext;
+
 		public IInstance Instance { get; }
 		public Boolean IsContinue { get; set; }
 
@@ -102,12 +56,19 @@ namespace A2v10.ProcS
 		public IDynamicObject Result { get; set; }
 
 		public ExecuteContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext, ILogger logger, INotifyManager notify, IInstance instance)
-			: base(bus, repository, scriptContext, logger, notify)
+			: base (bus, logger, notify)
 		{
 			Instance = instance;
+			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
+			_scriptContext = scriptContext ?? throw new ArgumentNullException(nameof(scriptContext));
 			_scriptContext.SetValue("params", Instance.GetParameters());
 			_scriptContext.SetValue("data", Instance.GetData());
 			_scriptContext.SetValue("result", Instance.GetResult());
+		}
+
+		public Task<IInstance> LoadInstance(Guid id)
+		{
+			return _repository.Get(id);
 		}
 
 		public async Task SaveInstance()
@@ -166,6 +127,47 @@ namespace A2v10.ProcS
 			var msg = new SetBookmarkMessage(id, new ContinueActivityMessage(Instance.Id, String.Empty));
 			_serviceBus.Send(msg);
 			return id;
+		}
+
+		public void ResumeBookmark(Guid id, IDynamicObject result)
+		{
+			if (id == Guid.Empty)
+				throw new ArgumentOutOfRangeException("ExecuteContext.ResumeBookmark. Bookmark is empty");
+			var msg = new ResumeBookmarkMessage(id, result);
+			_serviceBus.Send(msg);
+		}
+
+		public IExecuteContext CreateExecuteContext(IInstance instance, String bookmark = null, IDynamicObject result = null)
+		{
+			return new ExecuteContext(_serviceBus, _repository, _scriptContext, _logger, _notifyManager, instance)
+			{
+				Bookmark = bookmark,
+				Result = result
+			};
+		}
+
+		public void ContinueProcess(Guid id, String bookmark, String json)
+		{
+			ContinueProcess(id, bookmark, DynamicObjectConverters.FromJson(json));
+		}
+
+		public void ContinueProcess(Guid id, String bookmark, IDynamicObject result)
+		{
+			var msg = new ContinueActivityMessage(id, bookmark, result);
+			SendMessage(msg);
+		}
+
+		public async Task<IInstance> StartProcess(String processId, Guid parentId, IDynamicObject data = null)
+		{
+			var instance = await _repository.CreateInstance(new Identity(processId), parentId);
+			if (data != null)
+				instance.SetParameters(data);
+			using (var newScriptContext = _scriptContext.NewContext())
+			{
+				var context = new ExecuteContext(_serviceBus, _repository, newScriptContext, _logger, _notifyManager, instance);
+				await instance.Workflow.Run(context);
+				return instance;
+			}
 		}
 	}
 }

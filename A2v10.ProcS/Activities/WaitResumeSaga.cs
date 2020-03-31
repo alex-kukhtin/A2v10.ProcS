@@ -88,7 +88,8 @@ namespace A2v10.ProcS
 
 		protected override Task Handle(IHandleContext context, ResumeMessage message)
 		{
-			context.ResumeBookmark(bookmark, message.Result);
+			var msg = new ResumeBookmarkMessage(bookmark, message.Result);
+			context.SendMessage(msg);
 			return Task.CompletedTask;
 		}
 

@@ -37,6 +37,7 @@ namespace A2v10.ProcS.Tests.SqlStorage
 			var mgr = new SagaManager(null);
 
 
+			var scriptEngine = new ScriptEngine();
 			var profiler = new NullDataProfiler();
 			var localizer = new NullDataLocalizer();
 			var dbConfig = new DatabaseConfig(configuration);
@@ -50,14 +51,14 @@ namespace A2v10.ProcS.Tests.SqlStorage
 			var repository = new Repository(workflowStorage, instanceStorage);
 
 			ProcS.RegisterActivities(rm);
-			ProcS.RegisterSagas(rm, mgr);
+			ProcS.RegisterSagas(rm, mgr, scriptEngine, repository);
 
 			var keeper = new SqlServerSagaKeeper(mgr.Resolver, dbContext, rm);
 
-			var scriptEngine = new ScriptEngine();
+			
 			var notifyManager = new NotifyManager();
 
-			var bus = new ServiceBus(taskManager, keeper, repository, scriptEngine, logger, notifyManager); 
+			var bus = new ServiceBus(taskManager, keeper, logger, notifyManager); 
 
 			var engine = new WorkflowEngine(repository, bus, scriptEngine, new NullLogger<IWorkflowEngine>(), notifyManager);
 			return (engine, repository, bus);

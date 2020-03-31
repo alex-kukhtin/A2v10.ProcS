@@ -130,9 +130,11 @@ namespace A2v10.ProcS
 	{
 		public const String ukey = ProcS.ResName + ":" + nameof(RegisterCallbackSaga);
 
-		public RegisterCallbackSaga() : base(ukey)
-		{
+		protected readonly IScriptEngine _scriptEngine;
 
+		public RegisterCallbackSaga(IScriptEngine scriptEngine) : base(ukey)
+		{
+			_scriptEngine = scriptEngine;
 		}
 
 		// serializable
@@ -149,7 +151,11 @@ namespace A2v10.ProcS
 
 		protected override Task Handle(IHandleContext context, CallbackMessage message)
 		{
-			var cval = context.ScriptContext.GetValueFromObject<String>(message.Result, correlationExpression);
+			string cval;
+			using (var sc = _scriptEngine.CreateContext())
+			{
+				cval = sc.GetValueFromObject<String>(message.Result, correlationExpression);
+			}
 
 			context.SendMessage(new CorrelatedCallbackMessage(tag, cval)
 			{
@@ -205,7 +211,8 @@ namespace A2v10.ProcS
 
 		protected override Task Handle(IHandleContext context, CorrelatedCallbackMessage message)
 		{
-			context.ResumeBookmark(bookmark, message.Result);
+			var msg = new ResumeBookmarkMessage(bookmark, message.Result);
+			context.SendMessage(msg);
 			IsComplete = true;
 			return Task.CompletedTask;
 		}

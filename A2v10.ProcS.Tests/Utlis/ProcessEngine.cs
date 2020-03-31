@@ -27,6 +27,9 @@ namespace A2v10.ProcS.Tests
 			var pmr = new PluginManager(null);
 			var logger = CreateLogger();
 
+			var scriptEngine = new ScriptEngine();
+			var repository = new Repository(storage, storage);
+
 			ProcS.RegisterActivities(rm);
 
 			String pluginPath = GetPluginPath();
@@ -34,16 +37,15 @@ namespace A2v10.ProcS.Tests
 			pmr.LoadPlugins(pluginPath, configuration);
 			
 			var mgr = new SagaManager(null);
-			ProcS.RegisterSagas(rm, mgr);
+			ProcS.RegisterSagas(rm, mgr, scriptEngine, repository);
 			pmr.RegisterResources(rm, mgr);
 
 			var taskManager = new SyncTaskManager();
 			var keeper = new InMemorySagaKeeper(mgr.Resolver);
-			var scriptEngine = new ScriptEngine();
+			
 			var notifyManager = new NotifyManager();
-			var repository = new Repository(storage, storage);
 
-			var bus = new ServiceBus(taskManager, keeper, repository, scriptEngine, logger, notifyManager);
+			var bus = new ServiceBus(taskManager, keeper, logger, notifyManager);
 
 			var engine = new WorkflowEngine(repository, bus, scriptEngine, logger, notifyManager);
 			return (engine, repository, bus);

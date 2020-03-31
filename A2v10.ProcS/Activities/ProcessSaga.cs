@@ -183,24 +183,41 @@ namespace A2v10.ProcS
 	{
 		public const String ukey = ProcS.ResName + ":" + nameof(ProcessSaga);
 
-		//private readonly IRepository _repository;
-		public ProcessSaga() : base(ukey)
+		protected readonly IRepository _repository;
+		protected readonly IScriptEngine _scriptEngine;
+
+		public ProcessSaga(IRepository repository, IScriptEngine scriptEngine) : base(ukey)
 		{
-			//_repository = repository;
+			_repository = repository;
+			_scriptEngine = scriptEngine;
 		}
 
-		protected override Task Handle(IHandleContext context, StartProcessMessage message)
+		protected override async Task Handle(IHandleContext context, StartProcessMessage message)
 		{
-			return context.StartProcess(message.ProcessId, message.ParentId, message.Parameters);
+			var instance = await _repository.CreateInstance(new Identity(message.ProcessId), message.ParentId);
+			if (message.Parameters != null)
+				instance.SetParameters(message.Parameters);
+			using (var scriptContext = _scriptEngine.CreateContext())
+			{
+				var executeContext = new ExecuteContext(context.Bus, _repository, scriptContext, context.Logger, context.NotifyManager, instance);
+				await instance.Workflow.Run(executeContext);
+			}
 		}
 
 		protected async override Task Handle(IHandleContext context, ContinueActivityMessage message)
 		{
-			var instance = await context.LoadInstance(message.InstanceId);
-			var continueContext = context.CreateExecuteContext(instance, message.Bookmark, message.Result);
-			continueContext.ScriptContext.SetValue("reply", message?.Result ?? new DynamicObject());
-			continueContext.IsContinue = true;
-			await instance.Workflow.Continue(continueContext);
+			var instance = await _repository.Get(message.InstanceId);
+			using (var scriptContext = _scriptEngine.CreateContext())
+			{
+				var continueContext = new ExecuteContext(context.Bus, _repository, scriptContext, context.Logger, context.NotifyManager, instance)
+				{
+					Bookmark = message.Bookmark,
+					Result = message.Result
+				};
+				scriptContext.SetValue("reply", message?.Result ?? new DynamicObject());
+				continueContext.IsContinue = true;
+				await instance.Workflow.Continue(continueContext);
+			}
 		}
 	}
 }
