@@ -21,8 +21,8 @@ begin
 	create table A2v10_ProcS.SagaMap
 	(
 		Host uniqueidentifier not null,
-		[MessageKind] nvarchar(255) not null,
-		[SagaKind] nvarchar(255) not null,
+		[MessageKind] nvarchar(128) not null,
+		[SagaKind] nvarchar(128) not null,
 		constraint PK_SagaMap primary key(Host, [MessageKind], [SagaKind])
 	);
 end
@@ -43,6 +43,12 @@ begin
 		InstanceState nvarchar(max) null,
 		DateCreated datetime2 not null constraint DF_Instances_DateCreated default(sysutcdatetime())
 	);
+end
+go
+------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'Instances' and COLUMN_NAME=N'CurrentState')
+begin
+	alter table A2v10_ProcS.Instances add CurrentState nvarchar(255) null;
 end
 go
 ------------------------------------------------
@@ -113,6 +119,7 @@ create procedure A2v10_ProcS.[Instance.Save]
 @Workflow nvarchar(255),
 @Version int,
 @IsComplete bit,
+@CurrentState nvarchar(255),
 @WorkflowState nvarchar(max),
 @InstanceState nvarchar(max)
 as
@@ -126,11 +133,12 @@ begin
 	on target.Id = source.Id
 	when matched then update set
 		target.IsComplete = @IsComplete,
+		target.CurrentState = @CurrentState,
 		target.WorkflowState = @WorkflowState,
 		target.InstanceState = @InstanceState
 	when not matched by target then 
-		insert(Id, Parent, Workflow, [Version], IsComplete, WorkflowState, InstanceState)
-		values (@Id, @Parent, @Workflow, @Version, @IsComplete, @WorkflowState, @InstanceState);
+		insert(Id, Parent, Workflow, [Version], IsComplete, CurrentState, WorkflowState, InstanceState)
+		values (@Id, @Parent, @Workflow, @Version, @IsComplete, @CurrentState, @WorkflowState, @InstanceState);
 end
 go
 ------------------------------------------------
