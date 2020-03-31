@@ -4,6 +4,7 @@ using System;
 using System.Threading.Tasks;
 using A2v10.Data.Interfaces;
 using A2v10.ProcS.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace A2v10.ProcS.SqlServer
 {
@@ -50,6 +51,7 @@ namespace A2v10.ProcS.SqlServer
 
 		protected async override Task Handle(IHandleContext context, ExecuteSqlMessage message)
 		{
+			context.Logger.LogInformation($"ExecuteSqlSaga.Handle(ExecuteSqlMessage). Procedure ='{message.Procedure}'");
 			await _dbContext.ExecuteExpandoAsync(message.DataSource, message.Procedure, message.Parameters.Root);
 			IsComplete = true;
 		}
