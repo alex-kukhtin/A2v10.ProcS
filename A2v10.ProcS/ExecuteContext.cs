@@ -14,15 +14,19 @@ namespace A2v10.ProcS
 	{
 		protected readonly IServiceBus _serviceBus;
 		protected readonly ILogger _logger;
+		protected readonly INotifyManager _notifyManager;
 
-		public HandleContext(IServiceBus bus, ILogger logger)
+
+		public HandleContext(IServiceBus bus, ILogger logger, INotifyManager notifyManager)
 		{
 			_serviceBus = bus ?? throw new ArgumentNullException(nameof(bus));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_notifyManager = notifyManager ?? throw new ArgumentNullException(nameof(notifyManager));
 		}
 
 		public ILogger Logger => _logger;
 		public IServiceBus Bus => _serviceBus;
+		public INotifyManager NotifyManager => _notifyManager;
 
 		public void SendMessage(IMessage message)
 		{
@@ -51,8 +55,8 @@ namespace A2v10.ProcS
 		public String Bookmark { get; set; }
 		public IDynamicObject Result { get; set; }
 
-		public ExecuteContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext, ILogger logger, IInstance instance)
-			: base (bus, logger)
+		public ExecuteContext(IServiceBus bus, IRepository repository, IScriptContext scriptContext, ILogger logger, INotifyManager notify, IInstance instance)
+			: base (bus, logger, notify)
 		{
 			Instance = instance;
 			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
@@ -70,6 +74,7 @@ namespace A2v10.ProcS
 		public async Task SaveInstance()
 		{
 			await _repository.Save(Instance);
+			_notifyManager.GetAndRemove(Instance.Id)?.SignalDone(Instance.CurrentState);
 		}
 
 		private Regex _regex = null;
@@ -134,7 +139,7 @@ namespace A2v10.ProcS
 
 		public IExecuteContext CreateExecuteContext(IInstance instance, String bookmark = null, IDynamicObject result = null)
 		{
-			return new ExecuteContext(_serviceBus, _repository, _scriptContext, _logger, instance)
+			return new ExecuteContext(_serviceBus, _repository, _scriptContext, _logger, _notifyManager, instance)
 			{
 				Bookmark = bookmark,
 				Result = result
@@ -159,7 +164,7 @@ namespace A2v10.ProcS
 				instance.SetParameters(data);
 			using (var newScriptContext = _scriptContext.NewContext())
 			{
-				var context = new ExecuteContext(_serviceBus, _repository, newScriptContext, _logger, instance);
+				var context = new ExecuteContext(_serviceBus, _repository, newScriptContext, _logger, _notifyManager, instance);
 				await instance.Workflow.Run(context);
 				return instance;
 			}

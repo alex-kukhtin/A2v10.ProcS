@@ -43,9 +43,11 @@ namespace A2v10.ProcS.Tests
 			var taskManager = new SyncTaskManager();
 			var keeper = new InMemorySagaKeeper(mgr.Resolver);
 			
-			var bus = new ServiceBus(taskManager, keeper, logger);
+			var notifyManager = new NotifyManager();
 
-			var engine = new WorkflowEngine(repository, bus, scriptEngine, logger);
+			var bus = new ServiceBus(taskManager, keeper, logger, notifyManager);
+
+			var engine = new WorkflowEngine(repository, bus, scriptEngine, logger, notifyManager);
 			return (engine, repository, bus);
 		}
 

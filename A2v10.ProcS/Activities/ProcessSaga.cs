@@ -199,7 +199,7 @@ namespace A2v10.ProcS
 				instance.SetParameters(message.Parameters);
 			using (var scriptContext = _scriptEngine.CreateContext())
 			{
-				var executeContext = new ExecuteContext(context.Bus, _repository, scriptContext, context.Logger, instance);
+				var executeContext = new ExecuteContext(context.Bus, _repository, scriptContext, context.Logger, context.NotifyManager, instance);
 				await instance.Workflow.Run(executeContext);
 			}
 		}
@@ -209,7 +209,7 @@ namespace A2v10.ProcS
 			var instance = await _repository.Get(message.InstanceId);
 			using (var scriptContext = _scriptEngine.CreateContext())
 			{
-				var continueContext = new ExecuteContext(context.Bus, _repository, scriptContext, context.Logger, instance)
+				var continueContext = new ExecuteContext(context.Bus, _repository, scriptContext, context.Logger, context.NotifyManager, instance)
 				{
 					Bookmark = message.Bookmark,
 					Result = message.Result

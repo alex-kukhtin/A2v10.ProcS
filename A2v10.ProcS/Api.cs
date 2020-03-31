@@ -19,13 +19,29 @@ namespace A2v10.ProcS.Api
 		IDynamicObject Result { get; }
 	}
 
+	public enum Status
+	{
+		ok,
+		error,
+		timeout
+	}
+
+	public class ResumeResponse
+	{
+		public String Result { get; set; }
+		public Status Status { get; set; }
+		public String Message { get; set; }
+	}
+
 	public class ProcessApi
 	{
 		private readonly IWorkflowEngine _engine;
+		private readonly INotifyManager _notifyManager;
 
-		public ProcessApi(IWorkflowEngine engine)
+		public ProcessApi(IWorkflowEngine engine, INotifyManager notifyManager)
 		{
 			_engine = engine;
+			_notifyManager = notifyManager;
 		}
 
 		public Task<IInstance> StartProcess(IStartProcessRequest prm)
@@ -33,9 +49,34 @@ namespace A2v10.ProcS.Api
 			return _engine.StartWorkflow(prm.ProcessId, prm.Parameters);
 		}
 
-		public Task Resume(IResumeProcessRequest prm)
+		public async Task<ResumeResponse> Resume(IResumeProcessRequest prm)
 		{
-			return _engine.ResumeBookmark(prm.InstanceId, prm.Bookmark, prm.Result);
+			var result = new ResumeResponse();
+			try
+			{
+				var promise = new Promise<String>();
+				_notifyManager.Register(prm.InstanceId, promise);
+				await _engine.ResumeBookmark(prm.InstanceId, prm.Bookmark, prm.Result);
+				var t1 = promise.WaitFor<String>();
+				var t2 = Task.Delay(5000);
+				var tr = await Task.WhenAny(t1, t2);
+				if (tr == t1)
+				{
+					result.Status = Status.ok;
+					result.Result = t1.Result;
+				}
+				else if (tr == t2)
+					result.Status = Status.timeout;
+			} 
+			catch (Exception ex)
+			{
+				if (ex.InnerException != null)
+					ex = ex.InnerException;
+				result.Status = Status.error;
+				result.Message = ex.Message;
+			}
+			return result;
+
 		}
 	}
 }

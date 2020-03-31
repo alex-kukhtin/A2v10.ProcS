@@ -1,9 +1,8 @@
 ﻿/* Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved. 
 
-LastModified: 03 Mar 2020
+LastModified: 30 Mar 2020
 
 */
-
 ------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.SCHEMATA where SCHEMA_NAME=N'A2v10_ProcS')
 begin
@@ -22,8 +21,8 @@ begin
 	create table A2v10_ProcS.SagaMap
 	(
 		Host uniqueidentifier not null,
-		[MessageKind] nvarchar(255) not null,
-		[SagaKind] nvarchar(255) not null,
+		[MessageKind] nvarchar(128) not null,
+		[SagaKind] nvarchar(128) not null,
 		constraint PK_SagaMap primary key(Host, [MessageKind], [SagaKind])
 	);
 end
@@ -39,10 +38,17 @@ begin
 		Workflow nvarchar(255) not null,
 		[Version] int not null,
 		IsComplete bit not null constraint DF_Instances_IsCompelte default(0),
+		CurrentState nvarchar(255) null,
 		WorkflowState nvarchar(max) null,
 		InstanceState nvarchar(max) null,
 		DateCreated datetime2 not null constraint DF_Instances_DateCreated default(sysutcdatetime())
 	);
+end
+go
+------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'Instances' and COLUMN_NAME=N'CurrentState')
+begin
+	alter table A2v10_ProcS.Instances add CurrentState nvarchar(255) null;
 end
 go
 ------------------------------------------------
@@ -113,6 +119,7 @@ create procedure A2v10_ProcS.[Instance.Save]
 @Workflow nvarchar(255),
 @Version int,
 @IsComplete bit,
+@CurrentState nvarchar(255),
 @WorkflowState nvarchar(max),
 @InstanceState nvarchar(max)
 as
@@ -126,11 +133,12 @@ begin
 	on target.Id = source.Id
 	when matched then update set
 		target.IsComplete = @IsComplete,
+		target.CurrentState = @CurrentState,
 		target.WorkflowState = @WorkflowState,
 		target.InstanceState = @InstanceState
 	when not matched by target then 
-		insert(Id, Parent, Workflow, [Version], IsComplete, WorkflowState, InstanceState)
-		values (@Id, @Parent, @Workflow, @Version, @IsComplete, @WorkflowState, @InstanceState);
+		insert(Id, Parent, Workflow, [Version], IsComplete, CurrentState, WorkflowState, InstanceState)
+		values (@Id, @Parent, @Workflow, @Version, @IsComplete, @CurrentState, @WorkflowState, @InstanceState);
 end
 go
 ------------------------------------------------
@@ -339,35 +347,7 @@ begin
 	commit tran;
 end
 go
-
-
-/*
-select * from A2v10_ProcS.[MessageQueue] order by Id desc;
-select * from A2v10_ProcS.Instances order by DateCreated desc
-select * from A2v10_ProcS.[Sagas] order by DateCreated desc;
-select * from A2v10_ProcS.[Log] order by Id desc;
---select * from A2v10_ProcS.[SagaMap]
-*/
-
-
-
-/* 
-	delete from A2v10_ProcS.[MessageQueue];
-	delete from A2v10_ProcS.Instances;
-	delete from A2v10_ProcS.[Sagas];
-	delete from A2v10_ProcS.[SagaMap];
-*/
-
-/*
-drop table A2v10_ProcS.[MessageQueue];
-drop table A2v10_ProcS.Instances;
-drop table A2v10_ProcS.[Sagas];
---drop table A2v10_ProcS.[SagaMap];
-
-delete from A2v10_ProcS.Workflows;
-*/
-
-
+------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'Workflows')
 begin
 	create table A2v10_ProcS.Workflows
@@ -391,11 +371,11 @@ create procedure A2v10_ProcS.[Workflows.Load]
 as
 begin
 	set nocount on;
+	set transaction isolation level read uncommitted;
 
 	select Id, [Version], [Hash], [Body]
 	from A2v10_ProcS.Workflows
 	where Id=@Id and [Version]=@Version;
-
 end
 go
 ------------------------------------------------
@@ -444,3 +424,29 @@ begin
 	commit tran;
 end
 go
+
+/*
+select * from A2v10_ProcS.[MessageQueue] order by Id desc;
+select * from A2v10_ProcS.Instances order by DateCreated desc
+select * from A2v10_ProcS.[Sagas] order by DateCreated desc;
+select * from A2v10_ProcS.[Log] order by Id desc;
+--select * from A2v10_ProcS.[SagaMap]
+*/
+
+
+
+/* 
+	delete from A2v10_ProcS.[MessageQueue];
+	delete from A2v10_ProcS.Instances;
+	delete from A2v10_ProcS.[Sagas];
+	delete from A2v10_ProcS.[SagaMap];
+*/
+
+/*
+drop table A2v10_ProcS.[MessageQueue];
+drop table A2v10_ProcS.Instances;
+drop table A2v10_ProcS.[Sagas];
+--drop table A2v10_ProcS.[SagaMap];
+
+delete from A2v10_ProcS.Workflows;
+*/

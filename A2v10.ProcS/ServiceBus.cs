@@ -44,10 +44,12 @@ namespace A2v10.ProcS
 		private readonly ISagaKeeper _sagaKeeper;
 		private readonly ITaskManager _taskManager;
 		private readonly ILogger _logger;
+		private readonly INotifyManager _notifyManager;
 
-		protected ServiceBusBase(ITaskManager taskManager, ISagaKeeper sagaKeeper, ILogger logger)
+		protected ServiceBusBase(ITaskManager taskManager, ISagaKeeper sagaKeeper, ILogger logger, INotifyManager notifyManager)
 		{
 			_taskManager = taskManager;
+			_notifyManager = notifyManager;
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_sagaKeeper = sagaKeeper;
 		}
@@ -132,7 +134,7 @@ namespace A2v10.ProcS
 				try
 				{
 					var saga = item.Saga;
-					var hc = new HandleContext(this, _logger);
+					var hc = new HandleContext(this, _logger, _notifyManager);
 					await saga.Handle(hc, item.ServiceBusItem.Message);
 					Send(item.ServiceBusItem.Next);
 					await _sagaKeeper.ReleaseSaga(item);
@@ -148,8 +150,8 @@ namespace A2v10.ProcS
 
 	public class ServiceBus : ServiceBusBase
 	{
-		public ServiceBus(ITaskManager taskManager, ISagaKeeper sagaKeeper, ILogger logger)
-			: base(taskManager, sagaKeeper, logger)
+		public ServiceBus(ITaskManager taskManager, ISagaKeeper sagaKeeper, ILogger logger, INotifyManager notifyManager)
+			: base(taskManager, sagaKeeper, logger, notifyManager)
 		{
 			
 		}
@@ -200,8 +202,8 @@ namespace A2v10.ProcS
 
 	public class ServiceBusAsync : ServiceBusBase
 	{
-		public ServiceBusAsync(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine, ILogger logger)
-			: base(taskManager, sagaKeeper, logger)
+		public ServiceBusAsync(ITaskManager taskManager, ISagaKeeper sagaKeeper, ILogger logger, INotifyManager notifyManager)
+			: base(taskManager, sagaKeeper, logger, notifyManager)
 		{
 
 		}

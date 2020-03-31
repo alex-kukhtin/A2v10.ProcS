@@ -13,6 +13,7 @@ namespace A2v10.ProcS.Infrastructure
 		void SendMessageAfter(DateTime after, IMessage message);
 		void SendMessagesSequence(params IMessage[] messages);
 		ILogger Logger { get; }
+		INotifyManager NotifyManager { get; }
 	}
 
 	public interface IExecuteContext : IHandleContext
