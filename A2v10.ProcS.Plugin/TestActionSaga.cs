@@ -32,7 +32,8 @@ namespace A2v10.ProcS.Plugin
 		{
 			Int32 result = message.CorrelationId.Value.Value;
 			var reply = $"{{result:{result}}}";
-			context.ContinueProcess(message.Id, null, reply);
+			var msg = new ContinueActivityMessage(message.Id, null, DynamicObjectConverters.FromJson(reply));
+			context.SendMessage(msg);
 			return Task.CompletedTask;
 		}
 	}

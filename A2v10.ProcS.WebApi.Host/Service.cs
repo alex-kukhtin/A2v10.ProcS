@@ -27,11 +27,12 @@ namespace A2v10.ProcS.WebApi.Host
 		public ISagaManager SagaManager { get; }
 		public IPluginManager PluginManager { get; }
 		public IServiceBus ServiceBus => bus;
+		public IRepository Repository { get; }
 
-		public Service(IResourceManager rm, ISagaManager sm, PluginManager pm, ServiceBusAsync sb, IConfiguration conf)
+		public Service(IScriptEngine se, IRepository rp, IResourceManager rm, ISagaManager sm, PluginManager pm, ServiceBusAsync sb, IConfiguration conf)
 		{
 			ProcS.RegisterActivities(rm);
-			ProcS.RegisterSagas(rm, sm);
+			ProcS.RegisterSagas(rm, sm, se, rp);
 
 			foreach (var path in GetPluginPathes(conf))
 			{
@@ -40,6 +41,7 @@ namespace A2v10.ProcS.WebApi.Host
 
 			pm.RegisterResources(rm, sm);
 
+			Repository = rp;
 			ResourceManager = rm;
 			SagaManager = sm;
 			PluginManager = pm;

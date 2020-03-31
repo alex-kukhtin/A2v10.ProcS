@@ -388,14 +388,18 @@ namespace A2v10.ProcS.Tests.StoreRestore
 			var mgr = new SagaManager(null);
 			//var pmr = new PluginManager(null);
 
+			var storage = new FakeStorage(rm);
+			var scriptEngine = new ScriptEngine();
+			var repository = new Repository(storage, storage);
+
 			//String pluginPath = GetPluginPath();
 
 			//var configuration = new ConfigurationBuilder().Build();
 
-			ProcS.RegisterSagas(rm, mgr);
+			ProcS.RegisterSagas(rm, mgr, scriptEngine, repository);
 			//ProcS.RegisterActivities(rm);
 
-			ProcS.RegisterSagas(frm, mgr2);
+			ProcS.RegisterSagas(frm, mgr2, scriptEngine, repository);
 			//ProcS.RegisterActivities(frm);
 
 			//pmr.LoadPlugins(pluginPath, configuration);

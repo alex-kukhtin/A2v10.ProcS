@@ -42,17 +42,12 @@ namespace A2v10.ProcS
 	public abstract class ServiceBusBase : IServiceBus
 	{
 		private readonly ISagaKeeper _sagaKeeper;
-		private readonly IScriptEngine _scriptEngine;
 		private readonly ITaskManager _taskManager;
-
-		private readonly IRepository _repository;
 		private readonly ILogger _logger;
 
-		protected ServiceBusBase(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine, ILogger logger)
+		protected ServiceBusBase(ITaskManager taskManager, ISagaKeeper sagaKeeper, ILogger logger)
 		{
 			_taskManager = taskManager;
-			_repository = repository ?? throw new ArgumentNullException(nameof(_repository));
-			_scriptEngine = scriptEngine ?? throw new ArgumentNullException(nameof(scriptEngine));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_sagaKeeper = sagaKeeper;
 		}
@@ -137,11 +132,8 @@ namespace A2v10.ProcS
 				try
 				{
 					var saga = item.Saga;
-					using (var scriptContext = _scriptEngine.CreateContext())
-					{
-						var hc = new HandleContext(this, _repository, scriptContext, _logger);
-						await saga.Handle(hc, item.ServiceBusItem.Message);
-					}
+					var hc = new HandleContext(this, _logger);
+					await saga.Handle(hc, item.ServiceBusItem.Message);
 					Send(item.ServiceBusItem.Next);
 					await _sagaKeeper.ReleaseSaga(item);
 				}
@@ -156,8 +148,8 @@ namespace A2v10.ProcS
 
 	public class ServiceBus : ServiceBusBase
 	{
-		public ServiceBus(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine, ILogger logger)
-			: base(taskManager, sagaKeeper, repository, scriptEngine, logger)
+		public ServiceBus(ITaskManager taskManager, ISagaKeeper sagaKeeper, ILogger logger)
+			: base(taskManager, sagaKeeper, logger)
 		{
 			
 		}
@@ -209,7 +201,7 @@ namespace A2v10.ProcS
 	public class ServiceBusAsync : ServiceBusBase
 	{
 		public ServiceBusAsync(ITaskManager taskManager, ISagaKeeper sagaKeeper, IRepository repository, IScriptEngine scriptEngine, ILogger logger)
-			: base(taskManager, sagaKeeper, repository, scriptEngine, logger)
+			: base(taskManager, sagaKeeper, logger)
 		{
 
 		}
