@@ -48,9 +48,10 @@ namespace A2v10.ProcS.SqlServer
 			_dbContext = dbContext;
 		}
 
-		protected override Task Handle(IHandleContext context, ExecuteSqlMessage message)
+		protected async override Task Handle(IHandleContext context, ExecuteSqlMessage message)
 		{
-			return _dbContext.ExecuteExpandoAsync(message.DataSource, message.Procedure, message.Parameters.Root);
+			await _dbContext.ExecuteExpandoAsync(message.DataSource, message.Procedure, message.Parameters.Root);
+			IsComplete = true;
 		}
 	}
 }

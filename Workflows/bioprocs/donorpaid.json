@@ -8,6 +8,14 @@
 				"$res": "com.a2v10.procs:SequenceActivity",
 				"Activities": [
 					{
+						"$res": "com.a2v10.procs.sqlserver:ExecuteSqlActivity",
+						"Procedure": "a2bioprocs.[Visit.Start]",
+						"Parameters": {
+							"Instance": "{{instance.Id}}",
+							"Visit": "{{params.visitId}}"
+						}
+					},
+					{
 						"$res": "com.a2v10.procs:WaitResumeActivity",
 						"Bookmark": "WaitSurvey"
 					}
