@@ -109,13 +109,17 @@ namespace A2v10.ProcS
 
 
 
-	public T EvaluateScript<T>(String expression)
+		public T EvaluateScript<T>(String expression)
 		{
+			if (expression == null)
+				return default;
 			return _scriptContext.Eval<T>($"({expression})");
 		}
 
 		public IDynamicObject EvaluateScriptObject(String expression)
 		{
+			if (expression == null)
+				return null;
 			return _scriptContext.EvalObject($"({expression})");
 		}
 

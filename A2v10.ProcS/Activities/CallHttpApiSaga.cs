@@ -2,6 +2,7 @@
 
 using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 
@@ -19,17 +20,23 @@ namespace A2v10.ProcS
 
 		public String Method { get; set; }
 		public String Url { get; set; }
+		public ErrorMode HandleError { get; set; }
+		public String Body { get; set; }
 
 		public override void Store(IDynamicObject storage, IResourceWrapper _)
 		{
 			storage.Set(nameof(Method), Method);
 			storage.Set(nameof(Url), Url);
+			storage.Set(nameof(HandleError), HandleError);
+			storage.Set(nameof(Body), Body);
 		}
 
 		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			Method = store.Get<String>(nameof(Method));
 			Url = store.Get<String>(nameof(Url));
+			HandleError = store.Get<ErrorMode>(nameof(HandleError));
+			Body = store.Get<String>(nameof(Body));
 		}
 	}
 
@@ -87,43 +94,65 @@ namespace A2v10.ProcS
 			}
 		}
 
+		async Task ProcessResponse(IHandleContext context, Guid correlationId, HttpResponseMessage response)
+		{
+			var headers = response.Content.Headers;
+			var contentType = headers.ContentType.MediaType;
+			//var charset = headers.ContentType.CharSet;
+
+			var json = await response.Content.ReadAsStringAsync();
+			IDynamicObject result;
+			if (contentType == "application/json")
+				result = DynamicObjectConverters.FromJson(json);
+			else
+				throw new NotSupportedException($"'{contentType}' yet not supported");
+
+			var responseMessage = new CallApiResponseMessage(correlationId)
+			{
+				Result = result
+			};
+			context.SendMessage(responseMessage);
+		}
+
 		async Task<Guid> ExecuteGet(IHandleContext context, CallApiRequestMessage message)
 		{
 			using (var response = await _httpClient.GetAsync(message.Url))
 			{
 				if (response.IsSuccessStatusCode)
-				{
-					var headers = response.Content.Headers;
-					var contentType = headers.ContentType.MediaType;
-					//var charset = headers.ContentType.CharSet;
-
-					var json = await response.Content.ReadAsStringAsync();
-					IDynamicObject result;
-					if (contentType == "application/json")
-					{
-						result = DynamicObjectConverters.FromJson(json);
-					} 
-					else
-					{
-						throw new NotSupportedException($"'{contentType}' yet not supported");
-					}
-
-					var responseMessage = new CallApiResponseMessage(message.CorrelationId.Value) {
-						Result = result
-					};
-					context.SendMessage(responseMessage);
-				} 
+					await ProcessResponse(context, message.CorrelationId.Value, response);
 				else
 				{
+					if (message.HandleError == ErrorMode.Ignore)
+						return message.CorrelationId.Value;
 					// FAIL?
 				}
 			}
 			return message.CorrelationId.Value;
 		}
 
-		Task<Guid> ExecutePost(IHandleContext context, CallApiRequestMessage message)
+		async Task<Guid> ExecutePost(IHandleContext context, CallApiRequestMessage message)
 		{
-			throw new NotImplementedException(nameof(ExecutePost));
+			var msg = new HttpRequestMessage()
+			{
+				Method = HttpMethod.Post,
+				RequestUri = new Uri(message.Url)
+			};
+			
+			if (!String.IsNullOrEmpty(message.Body))
+				msg.Content = new StringContent(message.Body, Encoding.UTF8, "application/json");
+
+			using (var response = await _httpClient.SendAsync(msg))
+			{
+				if (response.IsSuccessStatusCode)
+					await ProcessResponse(context, message.CorrelationId.Value, response);
+				else
+				{
+					if (message.HandleError == ErrorMode.Ignore)
+						return message.CorrelationId.Value;
+					// FAIL?
+				}
+			}
+			return message.CorrelationId.Value;
 		}
 
 		protected override Task Handle(IHandleContext context, CallApiResponseMessage message)
