@@ -27,13 +27,14 @@ namespace A2v10.ProcS.Tests
 			var pmr = new PluginManager(null);
 			var logger = CreateLogger();
 
+			var configuration = new ConfigurationBuilder().Build();
+
 			var scriptEngine = new ScriptEngine();
-			var repository = new Repository(storage, storage);
+			var repository = new Repository(storage, storage, configuration);
 
 			ProcS.RegisterActivities(rm);
 
 			String pluginPath = GetPluginPath();
-			var configuration = new ConfigurationBuilder().Build();
 			pmr.LoadPlugins(pluginPath, configuration);
 			
 			var mgr = new SagaManager(null);

@@ -12,6 +12,7 @@ using System.Linq;
 
 using DynamicObject = A2v10.ProcS.Infrastructure.DynamicObject;
 using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Configuration;
 
 namespace A2v10.ProcS.Tests.StoreRestore
 {
@@ -19,7 +20,7 @@ namespace A2v10.ProcS.Tests.StoreRestore
 	{
 		public Dictionary<String, KeyValuePair<String, Type>[]> TheList { get; } = new Dictionary<String, KeyValuePair<String, Type>[]>();
 
-		private readonly KeyValuePair<String, Type>[] empty = new KeyValuePair<String, Type>[0];
+		private readonly KeyValuePair<String, Type>[] empty = Array.Empty<KeyValuePair<String, Type>>();
 
 		public static String GetKey(Type type)
 		{
@@ -388,9 +389,11 @@ namespace A2v10.ProcS.Tests.StoreRestore
 			var mgr = new SagaManager(null);
 			//var pmr = new PluginManager(null);
 
+			var configuration = new ConfigurationBuilder().Build();
+
 			var storage = new FakeStorage(rm);
 			var scriptEngine = new ScriptEngine();
-			var repository = new Repository(storage, storage);
+			var repository = new Repository(storage, storage, configuration);
 
 			//String pluginPath = GetPluginPath();
 

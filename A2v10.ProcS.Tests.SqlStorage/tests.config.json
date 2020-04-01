@@ -6,5 +6,12 @@
 		"Data": {
 			"CommandTimeout": "00:00:02"
 		}
+	},
+	"ProcS": {
+		"Environment": {
+			"OpenWeatherApi": {
+				"Url": "http://localhost:5080"
+			}
+		}
 	}
 }

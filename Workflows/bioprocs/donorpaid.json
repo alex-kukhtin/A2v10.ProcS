@@ -16,6 +16,13 @@
 						}
 					},
 					{
+						"$res": "com.a2v10.procs:CallHttpApiActivity",
+						"Url": "((Scoreboard.Url))/api/send",
+						"Method": "Post",
+						"Body": "{Instance: instance.Id, Visit:params.visitId, Donor: params.donorId}",
+						"HandleError": "Ignore"
+					},
+					{
 						"$res": "com.a2v10.procs:WaitResumeActivity",
 						"Bookmark": "WaitSurvey"
 					}

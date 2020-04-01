@@ -48,7 +48,7 @@ namespace A2v10.ProcS.Tests.SqlStorage
 
 			
 			var instanceStorage = new SqlServerInstanceStorage(workflowStorage, dbContext, rm, logger);
-			var repository = new Repository(workflowStorage, instanceStorage);
+			var repository = new Repository(workflowStorage, instanceStorage, configuration);
 
 			ProcS.RegisterActivities(rm);
 			ProcS.RegisterSagas(rm, mgr, scriptEngine, repository);

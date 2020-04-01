@@ -14,8 +14,8 @@ namespace A2v10.ProcS.SqlServer
 	{
 		public void Track(String text)
 		{
-			//using var tw = new StreamWriter("d:\\temp\\log.txt", true);
-			//tw.WriteLine(text);
+			using var tw = new StreamWriter("d:\\temp\\log.txt", true);
+			tw.WriteLine(text);
 		}
 	}
 
