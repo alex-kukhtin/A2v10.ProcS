@@ -4,7 +4,7 @@
 	"States": {
 		"S1": {
 			"OnEntry": {
-				"$res": "com.a2.procs.test:TestPluginActivity"
+				"$res": "com.a2v10.procs.test:TestPluginActivity"
 			},
 			"Transitions": {
 				"S1->End": {
