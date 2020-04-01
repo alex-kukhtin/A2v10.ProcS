@@ -6,7 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using A2v10.Data.Interfaces;
 using A2v10.ProcS.Infrastructure;
+using A2v10.ProcS.SqlServer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -29,10 +31,12 @@ namespace A2v10.ProcS.WebApi.Host
 		public IServiceBus ServiceBus => bus;
 		public IRepository Repository { get; }
 
-		public Service(IScriptEngine se, IRepository rp, IResourceManager rm, ISagaManager sm, PluginManager pm, ServiceBusAsync sb, IConfiguration conf)
+		public Service(IScriptEngine se, IRepository rp, IResourceManager rm, ISagaManager sm, PluginManager pm, ServiceBusAsync sb, IConfiguration conf, IDbContext dbContext)
 		{
 			ProcS.RegisterActivities(rm);
 			ProcS.RegisterSagas(rm, sm, se, rp);
+			SqlServerProcS.RegisterActivities(rm);
+			SqlServerProcS.RegisterSagas(rm, sm, dbContext);
 
 			foreach (var path in GetPluginPathes(conf))
 			{

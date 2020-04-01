@@ -64,11 +64,7 @@ namespace A2v10.ProcS
 			_scriptContext.SetValue("params", Instance.GetParameters());
 			_scriptContext.SetValue("data", Instance.GetData());
 			_scriptContext.SetValue("result", Instance.GetResult());
-		}
-
-		public Task<IInstance> LoadInstance(Guid id)
-		{
-			return _repository.Get(id);
+			_scriptContext.SetValue("instance", Instance.GetSelf());
 		}
 
 		public async Task SaveInstance()
@@ -92,13 +88,28 @@ namespace A2v10.ProcS
 			foreach (Match m in ms)
 			{
 				String key = m.Groups[1].Value;
-				String val = _scriptContext.Eval<String>(key);
-				sb.Replace(m.Value, val);
+				Object val = _scriptContext.Eval(key);
+				sb.Replace(m.Value, val?.ToString());
 			}
 			return sb.ToString();
 		}
 
-		public T EvaluateScript<T>(String expression)
+		public DynamicObject Resolve(IDynamicObject source)
+		{
+			var result = new DynamicObject();
+			foreach (var p in source)
+			{
+				if (p.Value is String strVal)
+					result.Add(p.Key, Resolve(strVal));
+				else
+					result.Add(p.Key, p.Value);
+			}
+			return result;
+		}
+
+
+
+	public T EvaluateScript<T>(String expression)
 		{
 			return _scriptContext.Eval<T>($"({expression})");
 		}

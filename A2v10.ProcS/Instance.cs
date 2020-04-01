@@ -48,6 +48,16 @@ namespace A2v10.ProcS
 			return Result;
 		}
 
+		public IDynamicObject GetSelf()
+		{
+			var d = new DynamicObject
+			{
+				{ "Id", Id },
+				{ "ParentId", ParentInstanceId }
+			};
+			return d;
+		}
+
 		#endregion
 
 		#region IStorable

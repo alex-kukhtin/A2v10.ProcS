@@ -22,5 +22,6 @@ namespace A2v10.ProcS.Infrastructure
 
 		IDynamicObject GetData();
 		IDynamicObject GetResult();
+		IDynamicObject GetSelf();
 	}
 }

@@ -23,10 +23,10 @@ namespace A2v10.ProcS.Infrastructure
 		String Bookmark { get; set; }
 		IDynamicObject Result { get; set; }
 
-		Task<IInstance> LoadInstance(Guid id);
 		Task SaveInstance();
 
 		String Resolve(String source);
+		DynamicObject Resolve(IDynamicObject source);
 		T EvaluateScript<T>(String expression);
 		IDynamicObject EvaluateScriptObject(String expression);
 		void ExecuteScript(String code);

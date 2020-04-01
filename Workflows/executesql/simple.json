@@ -1,0 +1,23 @@
+{
+	"$schema": "../@schemas/statemachine-schema.json#",
+	"Description": "ExecuteSql Simple",
+	"InitialState": "S1",
+	"States": {
+		"S1": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs.sqlserver:ExecuteSqlActivity",
+				"Procedure": "A2v10_ProcS.[Test.Simple]",
+				"Parameters": {
+					"Instance": "{{instance.Id}}",
+					"X": "{{params.value}}",
+					"Y": "{{params.value + 5}}"
+				}
+			},
+			"Description": "Execute Sql Procedure",
+			"NextState": "End"
+		},
+		"End": {
+			"Description": "State End"
+		}
+	}
+}
