@@ -26,7 +26,9 @@ namespace A2v10.ProcS
 				CorrelationExpression = CorrelationExpression
 			};
 
-			var mess2 = new WaitCallbackMessage(book, Tag, CorrelationValue);
+			var cval = context.Resolve(CorrelationValue);
+
+			var mess2 = new WaitCallbackMessage(book, Tag, cval);
 
 			context.SendMessagesSequence(mess, mess2);
 
