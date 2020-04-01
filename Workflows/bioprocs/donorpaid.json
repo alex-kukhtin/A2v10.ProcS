@@ -17,9 +17,9 @@
 					},
 					{
 						"$res": "com.a2v10.procs:CallHttpApiActivity",
-						"Url": "((Scoreboard.Url))/api/send",
+						"Url": "((Scoreboard.Url))/api/hub/send",
 						"Method": "Post",
-						"Body": "{Instance: instance.Id, Visit:params.visitId, Donor: params.donorId}",
+						"Body": "{event: 'stateChange', visitId:params.visitId, donorId: params.donorId, state:instance.CurrentState}",
 						"HandleError": "Ignore"
 					},
 					{

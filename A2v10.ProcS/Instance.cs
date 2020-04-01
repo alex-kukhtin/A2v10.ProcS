@@ -21,6 +21,7 @@ namespace A2v10.ProcS
 		{
 			CurrentState = state;
 		}
+
 		public void SetParameters(IDynamicObject data)
 		{
 			if (data != null)
@@ -53,7 +54,8 @@ namespace A2v10.ProcS
 			var d = new DynamicObject
 			{
 				{ "Id", Id },
-				{ "ParentId", ParentInstanceId }
+				{ "ParentId", ParentInstanceId },
+				{ "CurrentState", CurrentState }
 			};
 			return d;
 		}
