@@ -135,9 +135,11 @@ namespace A2v10.ProcS
 		public RegisterCallbackSaga(IScriptEngine scriptEngine) : base(ukey)
 		{
 			_scriptEngine = scriptEngine;
+			isWaiting = false;
 		}
 
 		// serializable
+		private Boolean isWaiting;
 		private String tag;
 		private String correlationExpression;
 
@@ -145,12 +147,16 @@ namespace A2v10.ProcS
 		{
 			correlationExpression = message.CorrelationExpression;
 			tag = message.Tag;
+			isWaiting = true;
 			SetCorrelation(message);
 			return Task.CompletedTask;
 		}
 
 		protected override Task Handle(IHandleContext context, CallbackMessage message)
 		{
+			if (!isWaiting)
+				return Task.CompletedTask;
+
 			string cval;
 			using (var sc = _scriptEngine.CreateContext())
 			{
@@ -167,6 +173,7 @@ namespace A2v10.ProcS
 		public override IDynamicObject Store(IResourceWrapper _)
 		{
 			var d = new DynamicObject();
+			d.Set(nameof(isWaiting), isWaiting);
 			d.Set(nameof(tag), tag);
 			d.Set(nameof(correlationExpression), correlationExpression);
 			return d;
@@ -174,6 +181,7 @@ namespace A2v10.ProcS
 
 		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
+			isWaiting = store.Get<Boolean>(nameof(isWaiting));
 			tag = store.Get<String>(nameof(tag));
 			correlationExpression = store.Get<String>(nameof(correlationExpression));
 		}
