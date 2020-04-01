@@ -49,6 +49,11 @@ namespace A2v10.ProcS
 			return Result;
 		}
 
+		public IDynamicObject GetEnvironment()
+		{
+			return Environment;
+		}
+
 		public IDynamicObject GetSelf()
 		{
 			var d = new DynamicObject

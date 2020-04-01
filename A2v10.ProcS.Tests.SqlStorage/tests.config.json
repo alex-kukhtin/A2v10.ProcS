@@ -9,8 +9,8 @@
 	},
 	"ProcS": {
 		"Environment": {
-			"OpenWeatherApi": {
-				"Url": "http://localhost:5080"
+			"openweathermap": {
+				"url": "https://samples.openweathermap.org/data/2.5/weather"
 			}
 		}
 	}

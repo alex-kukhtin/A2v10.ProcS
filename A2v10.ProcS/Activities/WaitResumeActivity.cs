@@ -3,6 +3,7 @@
 using System;
 
 using A2v10.ProcS.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace A2v10.ProcS
 {
@@ -20,6 +21,7 @@ namespace A2v10.ProcS
 
 			var mess = new WaitResumeMessage(book, context.Instance.Id, Bookmark);
 
+			context.Logger.LogInformation($"WaitResumeActivity.Execute. Send 'WaitResumeMessage'. Bookmark='{Bookmark}'");
 			context.SendMessage(mess);
 
 			return ActivityExecutionResult.Idle;

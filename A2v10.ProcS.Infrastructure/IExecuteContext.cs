@@ -28,6 +28,8 @@ namespace A2v10.ProcS.Infrastructure
 		String Resolve(String source);
 		DynamicObject Resolve(IDynamicObject source);
 		T EvaluateScript<T>(String expression);
+		Object EvaluateScript(String expression);
+
 		IDynamicObject EvaluateScriptObject(String expression);
 		void ExecuteScript(String code);
 

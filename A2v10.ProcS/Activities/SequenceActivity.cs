@@ -25,6 +25,7 @@ namespace A2v10.ProcS
 				if (result == ActivityExecutionResult.Idle)
 					return ActivityExecutionResult.Idle;
 				_currentAction += 1;
+				context.IsContinue = false;
 			}
 		}
 

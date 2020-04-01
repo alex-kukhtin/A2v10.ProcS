@@ -17,9 +17,9 @@
 					},
 					{
 						"$res": "com.a2v10.procs:CallHttpApiActivity",
-						"Url": "((Scoreboard.Url))/api/hub/send",
+						"Url": "{{env.Scoreboard.Url}}/api/hub/send",
 						"Method": "Post",
-						"Body": "{event: 'stateChange', visitId:params.visitId, donorId: params.donorId, state:instance.CurrentState}",
+						"Body": "{event: 'stateChange', visitId: params.visitId, donorId: params.donorId, state:instance.CurrentState}",
 						"HandleError": "Ignore"
 					},
 					{
@@ -27,6 +27,8 @@
 						"Bookmark": "WaitSurvey"
 					}
 				]
+			},
+			"OnExit": {
 			},
 			"NextState": "Survey"
 		},

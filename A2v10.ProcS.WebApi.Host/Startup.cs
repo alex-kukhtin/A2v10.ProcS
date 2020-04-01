@@ -54,6 +54,7 @@ namespace A2v10.ProcS.WebApi.Host
 			opt.SerializerSettings.Converters.Add(new StringEnumConverter());
 			opt.SerializerSettings.Converters.Add(new ExpandoObjectConverter());
 			opt.SerializerSettings.Converters.Add(new DynamicObjectConverter());
+			opt.SerializerSettings.Converters.Add(new DoubleConverter());
 		}
 
 		public static void SetControllerOptions(MvcOptions options)

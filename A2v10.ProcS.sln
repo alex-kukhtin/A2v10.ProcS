@@ -33,6 +33,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "callapi", "callapi", "{D29E70D9-663E-448A-BFE9-5B352F9A1848}"
 	ProjectSection(SolutionItems) = preProject
 		Workflows\callapi\openweather.json = Workflows\callapi\openweather.json
+		Workflows\callapi\openweatherenv.json = Workflows\callapi\openweatherenv.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{2BE122E4-347D-4BB3-B0C1-0AFB56747B42}"
@@ -80,6 +81,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "A2v10.ProcS.Tests.SqlStorag
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bioprocs", "bioprocs", "{62C39BB1-0B2C-436B-A42E-E59876A68C7C}"
 	ProjectSection(SolutionItems) = preProject
+		Workflows\bioprocs\donorbot-master.json = Workflows\bioprocs\donorbot-master.json
+		Workflows\bioprocs\donorbot.json = Workflows\bioprocs\donorbot.json
 		Workflows\bioprocs\donorpaid.json = Workflows\bioprocs\donorpaid.json
 	EndProjectSection
 EndProject

@@ -17,7 +17,7 @@ namespace A2v10.ProcS.Tests.SqlStorage
 
 			var prms = new DynamicObject();
 			prms.Set("city", "London");
-			var instance = await engine.StartWorkflow(new Identity("callapi/openweather.json"), prms);
+			var instance = await engine.StartWorkflow(new Identity("callapi/openweatherenv.json"), prms);
 			var id = instance.Id;
 
 			await bus.Process();

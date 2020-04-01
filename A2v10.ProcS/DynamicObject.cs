@@ -2,16 +2,19 @@
 
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using A2v10.ProcS.Infrastructure;
-using Newtonsoft.Json.Serialization;
 using System.Reflection;
 using System.Dynamic;
+using Newtonsoft.Json;
+//using System.IO;
+//using System.Text;
+
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+//using Newtonsoft.Json.Linq;
+
+using A2v10.ProcS.Infrastructure;
+
 using DynamicObject = A2v10.ProcS.Infrastructure.DynamicObject;
-using Newtonsoft.Json.Linq;
-using System.IO;
-using System.Text;
 
 namespace A2v10.ProcS
 {
@@ -113,6 +116,22 @@ namespace A2v10.ProcS
 		{
 			var e = serializer.Deserialize<ExpandoObject>(reader);
 			return new DynamicObject(e);
+		}
+	}
+
+	public class DoubleConverter : JsonConverter<Double>
+	{
+		public override void WriteJson(JsonWriter writer, Double value, JsonSerializer serializer)
+		{
+			if (Math.Truncate(value) == value)
+				serializer.Serialize(writer, Convert.ToInt64(value));
+			else
+				serializer.Serialize(writer, value);
+		}
+
+		public override Double ReadJson(JsonReader reader, Type objectType, Double existingValue, Boolean hasExistingValue, JsonSerializer serializer)
+		{
+			return serializer.Deserialize<Double>(reader);
 		}
 	}
 }

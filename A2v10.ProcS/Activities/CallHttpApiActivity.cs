@@ -1,8 +1,10 @@
 ﻿// Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved.
 
 using System;
+using System.Dynamic;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
+using Newtonsoft.Json;
 
 namespace A2v10.ProcS
 {
@@ -36,13 +38,22 @@ namespace A2v10.ProcS
 			}
 
 			context.ExecuteScript(CodeBefore);
+
 			var request = new CallApiRequestMessage(context.Instance.Id)
 			{
 				Url = context.Resolve(Url),
 				Method = context.Resolve(Method),
 				HandleError = HandleError,
-				Body = context.EvaluateScript<String>(Body)
 			};
+
+			var body = context.EvaluateScript(Body);
+			if (body != null)
+			{
+				if (body is ExpandoObject bodyEO)
+					request.Body = JsonConvert.SerializeObject(bodyEO, new DoubleConverter());
+				else
+					request.Body = body.ToString();
+			}
 			context.SendMessage(request);
 			return ActivityExecutionResult.Idle;
 		}

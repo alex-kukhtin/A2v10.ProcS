@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace A2v10.ProcS
 {
@@ -107,6 +108,9 @@ namespace A2v10.ProcS
 			else
 				throw new NotSupportedException($"'{contentType}' yet not supported");
 
+			context.Logger.LogInformation($"CallHttpApiSaga. Success, Content={json}");
+			context.Logger.LogInformation($"CallHttpApiSaga. SendMessage 'CallApiResponseMessage' correlationId='{correlationId}'");
+
 			var responseMessage = new CallApiResponseMessage(correlationId)
 			{
 				Result = result
@@ -141,14 +145,21 @@ namespace A2v10.ProcS
 			if (!String.IsNullOrEmpty(message.Body))
 				msg.Content = new StringContent(message.Body, Encoding.UTF8, "application/json");
 
+			context.Logger.LogInformation($"CallHttpApiSaga.Handle(CallApiRequestMessage). Url='{message.Url}', Method='Post', Content={message.Body}");
+
 			using (var response = await _httpClient.SendAsync(msg))
 			{
 				if (response.IsSuccessStatusCode)
 					await ProcessResponse(context, message.CorrelationId.Value, response);
 				else
 				{
+					context.Logger.LogInformation($"CallHttpApiSaga.Error. HandleError='{message.HandleError}' status='{response.StatusCode}', Content={await response.Content.ReadAsStringAsync()}");
 					if (message.HandleError == ErrorMode.Ignore)
+					{
+						var responseMessage = new CallApiResponseMessage(message.CorrelationId.Value);
+						context.SendMessage(responseMessage);
 						return message.CorrelationId.Value;
+					}
 					// FAIL?
 				}
 			}

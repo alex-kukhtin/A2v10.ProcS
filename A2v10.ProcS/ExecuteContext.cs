@@ -65,6 +65,7 @@ namespace A2v10.ProcS
 			_scriptContext.SetValue("data", Instance.GetData());
 			_scriptContext.SetValue("result", Instance.GetResult());
 			_scriptContext.SetValue("instance", Instance.GetSelf());
+			_scriptContext.SetValue("env", Instance.GetEnvironment());
 		}
 
 		public async Task SaveInstance()
@@ -114,6 +115,13 @@ namespace A2v10.ProcS
 			if (expression == null)
 				return default;
 			return _scriptContext.Eval<T>($"({expression})");
+		}
+
+		public Object EvaluateScript(String expression)
+		{
+			if (expression == null)
+				return null;
+			return _scriptContext.Eval($"({expression})");
 		}
 
 		public IDynamicObject EvaluateScriptObject(String expression)
