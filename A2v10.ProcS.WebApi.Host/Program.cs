@@ -54,6 +54,7 @@ namespace A2v10.ProcS.WebApi.Host
 			Host.CreateDefaultBuilder(args)
 				.ConfigureLogging(logging => {
 					logging.ClearProviders();
+					logging.AddEventLog();
 					logging.AddConsole();
 				})
 				.ConfigureServices((ctx, services) =>
