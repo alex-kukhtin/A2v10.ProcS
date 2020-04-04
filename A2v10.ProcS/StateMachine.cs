@@ -16,6 +16,9 @@ namespace A2v10.ProcS
 
 		public Dictionary<String, State> States { get; set; }
 
+
+		public Dictionary<String, IActivity> EventHandlers { get; set; }
+
 		private IIdentity _identity;
 
 		public IIdentity GetIdentity() { return _identity; }
@@ -45,6 +48,16 @@ namespace A2v10.ProcS
 			return DoContinue(instance, context);
 		}
 
+		void FireEvent(IExecuteContext context, StateMachineEvent evt)
+		{
+			if (EventHandlers == null)
+				return;
+			if (EventHandlers.TryGetValue(evt.ToString(), out IActivity activity))
+			{
+				activity.Execute(context);
+			}
+		}
+
 		private async Task<ExecuteResult> DoContinue(IInstance instance, IExecuteContext context)
 		{ 
 			while (true)
@@ -53,6 +66,7 @@ namespace A2v10.ProcS
 				{
 					context.Instance.IsComplete = true;
 					await context.SaveInstance();
+					FireEvent(context, StateMachineEvent.InstanceSaved);
 					context.ProcessComplete(context.Bookmark);
 					return ExecuteResult.Complete;
 				}
@@ -62,6 +76,7 @@ namespace A2v10.ProcS
 					if (result == ActivityExecutionResult.Idle)
 					{
 						await context.SaveInstance();
+						FireEvent(context, StateMachineEvent.InstanceSaved);
 						return ExecuteResult.Idle;
 					}
 				}

@@ -28,8 +28,6 @@
 					}
 				]
 			},
-			"OnExit": {
-			},
 			"NextState": "Survey"
 		},
 		"Survey": {

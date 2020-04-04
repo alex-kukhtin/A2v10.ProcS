@@ -32,5 +32,23 @@ namespace A2v10.ProcS.Tests
 
 			Assert.AreEqual(null, instance.CurrentState);
 		}
+
+		[TestMethod]
+		public async Task CallApiIgnoreError()
+		{
+			var (engine, repository, bus) = ProcessEngine.CreateEngine();
+
+			var prms = new DynamicObject();
+			prms.Set("city", "London");
+			var instance = await engine.StartWorkflow(new Identity("callapi/callapignoreerror.json"), prms);
+			var id = instance.Id;
+
+			await bus.Process();
+
+			instance = await repository.Get(id);
+			var result = instance.GetResult();
+
+			Assert.AreEqual(null, instance.CurrentState);
+		}
 	}
 }

@@ -7,15 +7,21 @@ using System.Threading.Tasks;
 
 using A2v10.Data.Interfaces;
 using A2v10.ProcS.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace A2v10.ProcS.SqlServer
 {
 	public class Tracker
 	{
+		readonly ILogger _logger;
+		public Tracker(ILogger logger)
+		{
+			_logger = logger;
+		}
+
 		public void Track(String text)
 		{
-			//using var tw = new StreamWriter("d:\\temp\\log.txt", true);
-			//tw.WriteLine(text);
+			//_logger.LogInformation(text);
 		}
 	}
 
@@ -36,7 +42,7 @@ namespace A2v10.ProcS.SqlServer
 		private readonly ISagaResolver _sagaResolver;
 		private readonly IDbContext _dbContext;
 		private readonly IResourceWrapper _resourceWrapper;
-		private readonly Tracker _tracker = new Tracker();
+		private readonly Tracker _tracker;
 
 		// TODO: ??????????? Config????
 		private static readonly Guid _host = Guid.Parse("BBDFE351-D6A1-4F22-9341-6FBD6628424B");
@@ -46,11 +52,12 @@ namespace A2v10.ProcS.SqlServer
 
 		private const String Schema = "[A2v10_ProcS]";
 
-		public SqlServerSagaKeeper(ISagaResolver sagaResolver, IDbContext dbContext, IResourceWrapper resourceWrapper)
+		public SqlServerSagaKeeper(ISagaResolver sagaResolver, IDbContext dbContext, IResourceWrapper resourceWrapper, ILogger logger)
 		{
 			_sagaResolver = sagaResolver ?? throw new ArgumentNullException(nameof(sagaResolver));
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 			_resourceWrapper = resourceWrapper ?? throw new ArgumentNullException(nameof(resourceWrapper));
+			_tracker = new Tracker(logger);
 		}
 
 		public async Task<PickedSaga> PickSaga()

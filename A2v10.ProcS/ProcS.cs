@@ -36,8 +36,8 @@ namespace A2v10.ProcS
 			{
 				var fact = new ConstructSagaFactory<CallHttpApiSaga>(CallHttpApiSaga.ukey);
 				resourceManager.RegisterResourceFactory(fact.SagaKind, new SagaResourceFactory(fact));
-				sagaManager.RegisterSagaFactory<CallApiRequestMessage, CallApiResponseMessage>(fact);
-				resourceManager.RegisterResources(typeof(CallApiRequestMessage), typeof(CallApiResponseMessage));
+				sagaManager.RegisterSagaFactory<CallApiRequestMessage>(fact);
+				resourceManager.RegisterResources(typeof(CallApiRequestMessage));
 			}
 			{
 				var fact = new DelegateSagaFactory(RegisterCallbackSaga.ukey, () => new RegisterCallbackSaga(scriptEngine));

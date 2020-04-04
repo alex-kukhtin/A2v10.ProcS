@@ -1,0 +1,24 @@
+{
+	"$schema": "../../@schemas/statemachine-schema.json",
+	"Description": "Open Wheahter Api",
+	"InitialState": "S1",
+	"EventHandlers": {
+		"InstanceSaved": {
+			"Code": "data.saved = 'event'"
+		}
+	},
+	"States": {
+		"S1": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:CallHttpApiActivity",
+				"Url": "https://xxx.yyy.com",
+				"Method": "Post",
+				"HandleError": "Ignore"
+			},
+			"NextState": "End"
+		},
+		"End": {
+			"Description": "State End"
+		}
+	}
+}

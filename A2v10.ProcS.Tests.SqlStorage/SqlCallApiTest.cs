@@ -29,5 +29,23 @@ namespace A2v10.ProcS.Tests.SqlStorage
 
 			Assert.AreEqual(null, instance.CurrentState);
 		}
+
+		[TestMethod]
+		public async Task CallApiIgnoreError()
+		{
+			var (engine, repository, bus) = ProcessEngine.CreateSqlEngine();
+
+			var prms = new DynamicObject();
+			var instance = await engine.StartWorkflow(new Identity("callapi/callapignoreerror.json"), prms);
+			var id = instance.Id;
+
+			await bus.Process();
+
+			instance = await repository.Get(id);
+			var result = instance.GetResult();
+
+			Assert.AreEqual(null, instance.CurrentState);
+		}
+
 	}
 }

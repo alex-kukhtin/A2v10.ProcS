@@ -64,7 +64,7 @@ namespace A2v10.ProcS
 			_scriptContext.SetValue("params", Instance.GetParameters());
 			_scriptContext.SetValue("data", Instance.GetData());
 			_scriptContext.SetValue("result", Instance.GetResult());
-			_scriptContext.SetValue("instance", Instance.GetSelf());
+			_scriptContext.SetValue("instance", new InstanceWrapper(Instance));
 			_scriptContext.SetValue("env", Instance.GetEnvironment());
 		}
 

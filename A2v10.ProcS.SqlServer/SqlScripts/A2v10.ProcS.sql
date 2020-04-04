@@ -1,6 +1,6 @@
 ﻿/* Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved. 
 
-LastModified: 30 Mar 2020
+LastModified: 04 Apr 2020
 
 */
 ------------------------------------------------
@@ -266,9 +266,9 @@ begin
 	if exists(select * from @queueTable where SagaId is null and MessageCorrelationId <> N'null')
 	begin
 		-- create new saga
-		insert into A2v10_ProcS.Sagas (Id, Kind, Hold, CorrelationId)
+		insert into A2v10_ProcS.Sagas (Id, Kind, Hold, CorrelationId, MessageId)
 		output inserted.Id into @sagaTable(Id)
-		select newid(), SagaKind, 1, MessageCorrelationId
+		select newid(), SagaKind, 1, MessageCorrelationId, QueueId
 			from @queueTable;
 		select @sagaId = Id from @sagaTable;
 		update @queueTable set SagaId = @sagaId, SagaHold = 1 where QueueId = @queueId;

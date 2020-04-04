@@ -49,6 +49,8 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 	{
 		[JsonProperty("instanceId")]
 		public Guid InstanceId { get; set; }
+		[JsonProperty("currentState")]
+		public String CurrentState { get; set; }
 	}
 
 	[JsonObject]
@@ -60,6 +62,8 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 		public String Message { get; set; }
 		[JsonProperty("result")]
 		public String Result { get; set; }
+		[JsonProperty("currentState")]
+		public String CurrentState { get; set; }
 	}
 
 	[Route("api/[controller]")]
@@ -81,7 +85,8 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 			var wf = await _api.StartProcess(prm);
 			return new InstanceResponse()
 			{
-				InstanceId = wf.Id
+				InstanceId = wf.Id,
+				CurrentState = wf.CurrentState
 			};
 		}
 
@@ -95,7 +100,8 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 			{
 				Status = r.Status,
 				Message = r.Message,
-				Result = r.Result
+				Result = r.Result,
+				CurrentState = r?.Instance.CurrentState
 			};
 		}
 	}

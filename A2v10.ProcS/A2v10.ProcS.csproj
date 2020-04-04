@@ -9,6 +9,7 @@
     <Product>A2v10</Product>
     <Copyright>Copyright © 2020 Alex Kukhtin</Copyright>
     <SignAssembly>true</SignAssembly>
+    <UserSecretsId>b34a5697-0746-4f1d-aa22-a561bbdee4e0</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
