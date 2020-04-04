@@ -101,7 +101,7 @@ namespace A2v10.ProcS.WebApi.Host.Controllers
 				Status = r.Status,
 				Message = r.Message,
 				Result = r.Result,
-				CurrentState = r?.Instance.CurrentState
+				CurrentState = r?.Instance?.CurrentState
 			};
 		}
 	}
