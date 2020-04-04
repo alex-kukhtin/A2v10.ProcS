@@ -4,6 +4,7 @@
 	"InitialState": "WaitSurvey",
 	"States": {
 		"WaitSurvey": {
+			"Description": "Очікує ЛПОД",
 			"OnEntry": {
 				"$res": "com.a2v10.procs:SequenceActivity",
 				"Activities": [
@@ -28,12 +29,40 @@
 					}
 				]
 			},
-			"NextState": "Survey"
+			"NextState": "InviteSurvey"
 		},
-		"Survey": {
+		"InviteSurvey": {
+			"Description": "Запрошено до ЛПОД",
 			"OnEntry": {
 				"$res": "com.a2v10.procs:SequenceActivity",
 				"Activities": [
+					{
+						"$res": "com.a2v10.procs:CallHttpApiActivity",
+						"Url": "{{env.Scoreboard.Url}}/api/hub/send",
+						"Method": "Post",
+						"Body": "{event: 'stateChange', visitId: params.visitId, donorId: params.donorId, state:instance.CurrentState}",
+						"HandleError": "Ignore"
+					},
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Bookmark": "InviteSurvey"
+					}
+				]
+			},
+			"NextState": "Survey"
+		},
+		"Survey": {
+			"Description": "Обстежується в ЛПОД",
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:CallHttpApiActivity",
+						"Url": "{{env.Scoreboard.Url}}/api/hub/send",
+						"Method": "Post",
+						"Body": "{event: 'stateChange', visitId: params.visitId, donorId: params.donorId, state:instance.CurrentState}",
+						"HandleError": "Ignore"
+					},
 					{
 						"$res": "com.a2v10.procs:WaitResumeActivity",
 						"Bookmark": "Survey"
@@ -52,6 +81,26 @@
 					}
 				]
 			},
+			"NextState": "InviteDoctor"
+		},
+		"InviteDoctor": {
+			"Description": "Обстежується в ЛПОД",
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:CallHttpApiActivity",
+						"Url": "{{env.Scoreboard.Url}}/api/hub/send",
+						"Method": "Post",
+						"Body": "{event: 'stateChange', visitId: params.visitId, donorId: params.donorId, state:instance.CurrentState}",
+						"HandleError": "Ignore"
+					},
+					{
+						"$res": "com.a2v10.procs:WaitResumeActivity",
+						"Bookmark": "InviteDoctor"
+					}
+				]
+			},
 			"NextState": "Doctor"
 		},
 		"Doctor": {
@@ -59,8 +108,15 @@
 				"$res": "com.a2v10.procs:SequenceActivity",
 				"Activities": [
 					{
+						"$res": "com.a2v10.procs:CallHttpApiActivity",
+						"Url": "{{env.Scoreboard.Url}}/api/hub/send",
+						"Method": "Post",
+						"Body": "{event: 'stateChange', visitId: params.visitId, donorId: params.donorId, state:instance.CurrentState}",
+						"HandleError": "Ignore"
+					},
+					{
 						"$res": "com.a2v10.procs:WaitResumeActivity",
-						"Bookmark": "WaitDoctor"
+						"Bookmark": "Doctor"
 					}
 				]
 			},
@@ -70,6 +126,13 @@
 			"OnEntry": {
 				"$res": "com.a2v10.procs:SequenceActivity",
 				"Activities": [
+					{
+						"$res": "com.a2v10.procs:CallHttpApiActivity",
+						"Url": "{{env.Scoreboard.Url}}/api/hub/send",
+						"Method": "Post",
+						"Body": "{event: 'stateChange', visitId: params.visitId, donorId: params.donorId, state:instance.CurrentState}",
+						"HandleError": "Ignore"
+					},
 					{
 						"$res": "com.a2v10.procs:WaitResumeActivity",
 						"Bookmark": "WaitDonation"
@@ -82,6 +145,13 @@
 			"OnEntry": {
 				"$res": "com.a2v10.procs:SequenceActivity",
 				"Activities": [
+					{
+						"$res": "com.a2v10.procs:CallHttpApiActivity",
+						"Url": "{{env.Scoreboard.Url}}/api/hub/send",
+						"Method": "Post",
+						"Body": "{event: 'stateChange', visitId: params.visitId, donorId: params.donorId, state:instance.CurrentState}",
+						"HandleError": "Ignore"
+					},
 					{
 						"$res": "com.a2v10.procs:WaitResumeActivity",
 						"Bookmark ": "Donation"
