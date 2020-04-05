@@ -1,0 +1,143 @@
+{
+	"$schema": "../../@schemas/statemachine-schema.json#",
+	"Description": "DonorBot",
+	"InitialState": "Init",
+	"States": {
+		"Init": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs.chatbot:SendMessageActivity",
+						"BotEngine": "Telegram",
+						"BotKey": "DonorBot",
+						"ChatId": "{{params.ChatId}}",
+						"Message": {
+							"Type": "Text",
+							"Text": "Hello, {{params.donorId}}!"
+						}
+					}
+				]
+			},
+			"NextState": "Loop"
+		},
+		"Loop": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs.chatbot:SendMessageActivity",
+						"BotEngine": "Telegram",
+						"BotKey": "DonorBot",
+						"ChatId": "{{params.ChatId}}",
+						"Message": {
+							"Type": "Keyboard",
+							"Text": "Do something:",
+							"Keyboard": {
+								"ColNum": 1,
+								"Buttons": [
+									{
+										"Text": "Записаться"
+									}
+								]
+							}
+						}
+					},
+					{
+						"$res": "com.a2v10.procs.chatbot:WaitMessageActivity",
+						"BotEngine": "Telegram",
+						"BotKey": "DonorBot",
+						"ChatId": "{{params.ChatId}}"
+					}
+				]
+			},
+			"Transitions": {
+				"Loop->Ask1": {
+					"Condition": "reply.Message.Text == '/appointment'",
+					"To": "Ask1"
+				},
+				"Loop->Loop": {
+					"To": "Loop"
+				}
+			}
+		},
+		"Ask1": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs.chatbot:SendMessageActivity",
+						"BotEngine": "Telegram",
+						"BotKey": "DonorBot",
+						"ChatId": "{{params.ChatId}}",
+						"Message": {
+							"Type": "Keyboard",
+							"Text": "Употребляли?",
+							"Keyboard": {
+								"ColNum": 2,
+								"Buttons": [
+									{
+										"Text": "Да"
+									},
+									{
+										"Text": "Нет"
+									}
+								]
+							}
+						}
+					},
+					{
+						"$res": "com.a2v10.procs.chatbot:WaitMessageActivity",
+						"BotEngine": "Telegram",
+						"BotKey": "DonorBot",
+						"ChatId": "{{params.ChatId}}"
+					}
+				]
+			},
+			"Transitions": {
+				"Ask1->Ask2": {
+					"Condition": "reply.Message.Text == 'Нет'",
+					"To": "Ask2"
+				},
+				"Ask1->Deny1": {
+					"To": "Deny1"
+				}
+			}
+		},
+		"Deny1": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs.chatbot:SendMessageActivity",
+				"BotEngine": "Telegram",
+				"BotKey": "DonorBot",
+				"ChatId": "{{params.ChatId}}",
+				"Message": {
+					"Type": "Text",
+					"Text": "Сорри, но низя"
+				}
+			},
+			"NextState": "Loop"
+		},
+		"Ask2": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs.chatbot:SendMessageActivity",
+						"BotEngine": "Telegram",
+						"BotKey": "DonorBot",
+						"ChatId": "{{params.ChatId}}",
+						"Message": {
+							"Type": "Text",
+							"Text": "Что еще спросить?"
+						}
+					}
+				]
+			},
+			"Transitions": {
+				"Ask2->Loop": {
+					"To": "Loop"
+				}
+			}
+		}
+	}
+}

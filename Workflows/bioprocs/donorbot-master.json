@@ -8,7 +8,7 @@
 				"$res": "com.a2v10.procs.chatbot:RegisterBotProcessingActivity",
 				"BotEngine": "Telegram",
 				"BotKey": "DonorBot",
-				"ChatProcessIdentity": "bioprocs/donorbot"
+				"ChatProcessIdentity": "bioprocs/donorbot-init"
 			},
 			"NextState": "Notify"
 		},

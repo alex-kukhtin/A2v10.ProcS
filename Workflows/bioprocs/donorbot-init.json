@@ -1,0 +1,52 @@
+{
+	"$schema": "../../@schemas/statemachine-schema.json#",
+	"Description": "DonorBot",
+	"InitialState": "Ident",
+	"States": {
+		"Ident": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs.chatbot:WaitMessageActivity",
+						"BotEngine": "Telegram",
+						"BotKey": "DonorBot",
+						"ChatId": "{{params.ChatId}}"
+					},
+					{
+						"$res": "com.a2v10.procs:CodeActivity",
+						"Code": "var m = reply.Message.Text.match(/^\\/start ([0-9]+)$/); if (m) data.donorId = m[1];"
+					}
+				]
+			},
+			"Transitions": {
+				"Ident->Listening": {
+					"Description": "User is subscribed",
+					"To": "Welcome",
+					"Condition": "!!data.donorId"
+				},
+				"Ident->Ident": {
+					"Description": "Loop waiting subscribtion",
+					"To": "Ident"
+				}
+			}
+		},
+		"Welcome": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:ParallelActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs:StartProcessActivity",
+						"Process": "bioprocs/donorbot-notify",
+						"ParameterExpression": "{ ChatId: params.ChatId, donorId: data.donorId }"
+					},
+					{
+						"$res": "com.a2v10.procs:StartProcessActivity",
+						"Process": "bioprocs/donorbot-appointment",
+						"ParameterExpression": "{ ChatId: params.ChatId, donorId: data.donorId }"
+					}
+				]
+			}
+		}
+	}
+}
