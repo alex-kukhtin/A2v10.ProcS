@@ -104,8 +104,8 @@ begin
 end
 go
 ------------------------------------------------
-if not exists (select * from sys.indexes where object_id = object_id(N'A2v10_ProcS.Sagas') and name = N'IX_Sagas_Hold_CorrelationId')
-	create index IX_Sagas_Hold_CorrelationId on A2v10_ProcS.Sagas (Hold, CorrelationId) include ([Id], Kind);
+if not exists (select * from sys.indexes where object_id = object_id(N'A2v10_ProcS.Sagas') and name = N'IX_Sagas_Kind_CorrelationId')
+	create index IX_Sagas_Kind_CorrelationId on A2v10_ProcS.Sagas (Kind, CorrelationId) include ([Id], Hold);
 go
 ------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'Log')
