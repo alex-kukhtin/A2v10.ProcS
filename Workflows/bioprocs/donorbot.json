@@ -22,14 +22,35 @@
 			"Transitions": {
 				"Ident->Listening": {
 					"Description": "User is subscribed",
-					"To": "Listening",
-					"Condition":  "!!data.donorId"
+					"To": "Welcome",
+					"Condition": "!!data.donorId"
 				},
 				"Ident->Ident": {
 					"Description": "Loop waiting subscribtion",
 					"To": "Ident"
 				}
 			}
+		},
+		"Welcome": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs.chatbot:SendMessageActivity",
+				"BotEngine": "Telegram",
+				"BotKey": "DonorBot",
+				"ChatId": "{{params.ChatId}}",
+				"Message": {
+					"Type": "Keyboard",
+					"Text": "Hello!",
+					"Keyboard": {
+						"ColNum": 1,
+						"Buttons": [
+							{
+								"Text": "Записаться"
+							}
+						]
+					}
+				}
+			},
+			"NextState": "Listening"
 		},
 		"Listening": {
 			"OnEntry": {

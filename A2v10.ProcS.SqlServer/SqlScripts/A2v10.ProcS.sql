@@ -93,6 +93,7 @@ begin
 		[Body] nvarchar(max) null,
 		[Hold] bit not null constraint DF_Sagas_Hold default(0),
 		[Fault] bit not null constraint DF_Sagas_Fault default(0),
+		[Completed] bit not null constraint DF_Sagas_Completed default(0),
 		MessageId bigint null,
 		DateCreated datetime2 not null constraint DF_Sagas_DateCreated default(sysutcdatetime())
 	);
@@ -181,14 +182,18 @@ create procedure A2v10_ProcS.[Message.Send]
 as
 begin
 	set nocount on;
-	set transaction isolation level serializable;
+	set transaction isolation level read committed;
 	set xact_abort on;
 	declare @rtable table(Id bigint);
 
 	insert into A2v10_ProcS.MessageQueue ([Kind], CorrelationId, [Body], Parent, [After], [State]) 
 	output inserted.Id into @rtable(id)
-	values (@Kind, @CorrelationId, @Body, @Parent, @After,
-		case when @Parent is not null then N'Wait' else N'Init' end);
+	select v.[Kind], v.CorrelationId, v.[Body], p.Id, v.[After],
+		iif(p.Id is null or p.[State]=N'Done', N'Init', N'Wait')
+	from (values
+		(@Kind, @CorrelationId, @Body, @Parent, @After)
+	) v ([Kind], CorrelationId, Body, Parent, [After])
+	left join A2v10_ProcS.MessageQueue p on p.Id=v.Parent;
 
 	select top(1) @RetId = Id from @rtable;
 end
@@ -216,7 +221,7 @@ create procedure A2v10_ProcS.[SagaMap.Save]
 as
 begin
 	set nocount on;
-	set transaction isolation level serializable;
+	set transaction isolation level read committed;
 	set xact_abort on;
 
 	merge A2v10_ProcS.[SagaMap] as target
@@ -240,7 +245,7 @@ create procedure A2v10_ProcS.[Message.Peek]
 as
 begin
 	set nocount on;
-	set transaction isolation level serializable;
+	set transaction isolation level read committed;
 	set xact_abort on;
 
 	declare @queueTable table(QueueId bigint, MessageKind nvarchar(255), MessageBody nvarchar(max), 
@@ -272,7 +277,7 @@ begin
 
 	select top(1) @queueId = QueueId, @sagaId = SagaId from @queueTable;
 
-	if exists(select * from @queueTable where SagaId is null and MessageCorrelationId <> N'null')
+	if exists(select * from @queueTable where SagaId is null/* and MessageCorrelationId <> N'null'*/)
 	begin
 		-- create new saga
 		insert into A2v10_ProcS.Sagas (Id, Kind, Hold, CorrelationId, MessageId)
@@ -288,9 +293,6 @@ begin
 		update A2v10_ProcS.Sagas set Hold = 1, MessageId = @queueId where Id = @sagaId;
 	end
 	commit tran;
-
-	-- queue dependent messages
-	update A2v10_ProcS.MessageQueue set [State] = N'Init' where Parent = @queueId and [State] = N'Wait';
 
 	select QueueId, MessageKind, MessageBody, SagaId, SagaKind, SagaBody, SagaCorrelationId from @queueTable;
 end
@@ -308,7 +310,7 @@ create procedure A2v10_ProcS.[Saga.Update]
 as
 begin
 	set nocount on;
-	set transaction isolation level serializable;
+	set transaction isolation level read committed;
 	set xact_abort on;
 	if not exists (select * from A2v10_ProcS.Sagas where Id = @Id)
 	begin
@@ -317,19 +319,38 @@ begin
 		throw 60000, @msg, 0
 	end
 
-	if @IsComplete = 1 or @CorrelationId is null
+	begin tran;
+
+	update A2v10_ProcS.Sagas
+	set Hold = 0,
+		CorrelationId = @CorrelationId,
+		[Body] = @Body,
+		Completed = @IsComplete
+	where [Id] = @Id;
+
+	update q
+	set [State] = N'Done'
+	from A2v10_ProcS.Sagas s
+	inner join A2v10_ProcS.MessageQueue q on q.Id=s.MessageId
+	where s.Id=@Id;
+
+	commit tran;
+
+	-- queue dependent messages
+	update q
+	set [State] = N'Init'
+	from A2v10_ProcS.Sagas s
+	inner join A2v10_ProcS.MessageQueue q on q.Parent=s.MessageId
+	where s.Id=@Id and q.[State]=N'Wait';
+
+	/*if @IsComplete = 1 or @CorrelationId is null
 	begin
-		begin tran;
 		delete from A2v10_ProcS.MessageQueue 
 			from A2v10_ProcS.MessageQueue q inner join A2v10_ProcS.Sagas s on q.Id = s.MessageId
 			where s.Id = @Id;
 		delete from A2v10_ProcS.Sagas where Id=@Id;
-		commit tran;
-	end
-	else
-	begin
-		update A2v10_ProcS.Sagas set Hold = 0, CorrelationId = @CorrelationId, [Body] = @Body where [Id] = @Id;
-	end
+	end;*/
+
 end
 go
 ------------------------------------------------
@@ -346,7 +367,7 @@ create procedure A2v10_ProcS.[Saga.Fail]
 as
 begin
 	set nocount on;
-	set transaction isolation level serializable;
+	set transaction isolation level read committed;
 	set xact_abort on;
 	begin tran;
 	update A2v10_ProcS.[Sagas] set Fault = 1, Hold=1 where Id=@Id;
@@ -380,7 +401,7 @@ create procedure A2v10_ProcS.[Workflows.Load]
 as
 begin
 	set nocount on;
-	set transaction isolation level read uncommitted;
+	set transaction isolation level read committed;
 
 	select Id, [Version], [Hash], [Body]
 	from A2v10_ProcS.Workflows
@@ -399,7 +420,7 @@ create procedure A2v10_ProcS.[Workflows.Update]
 as
 begin
 	set nocount on;
-	set transaction isolation level serializable;
+	set transaction isolation level read committed;
 	set xact_abort on;
 
 	begin tran;

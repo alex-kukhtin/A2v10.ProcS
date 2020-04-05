@@ -99,6 +99,13 @@ namespace A2v10.ProcS
 			return JsonConvert.DeserializeObject<T>(obj.ToJson());
 		}
 
+		public static T To<T,IB1>(this IDynamicObject obj) where T : class
+		{
+			if (obj == null || obj.IsEmpty)
+				return null;
+			return JsonConvert.DeserializeObject<T>(obj.ToJson());
+		}
+
 		public static String Serialize(Object obj)
 		{
 			return JsonConvert.SerializeObject(obj);
@@ -132,6 +139,28 @@ namespace A2v10.ProcS
 		public override Double ReadJson(JsonReader reader, Type objectType, Double existingValue, Boolean hasExistingValue, JsonSerializer serializer)
 		{
 			return serializer.Deserialize<Double>(reader);
+		}
+	}
+
+	public class InterfaceMapConverter<T, I> : JsonConverter where T : class, I where I : class
+	{
+		public override bool CanConvert(Type objectType)
+		{
+			return objectType == typeof(I);
+		}
+
+		public override bool CanRead => true;
+
+		public override Object ReadJson(JsonReader reader, Type objectType, Object existingValue, JsonSerializer serializer)
+		{
+			return serializer.Deserialize<T>(reader);
+		}
+
+		public override bool CanWrite => false;
+
+		public override void WriteJson(JsonWriter writer, Object value, JsonSerializer serializer)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

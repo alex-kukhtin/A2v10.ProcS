@@ -36,6 +36,7 @@ namespace A2v10.ProcS
 				TypeNameHandling = TypeNameHandling.Auto,
 				ContractResolver = new WorkflowContractResolver()
 			};
+			sett.Converters.Add(new DynamicObjectConverter());
 			sett.Converters.Add(new ActivityConverter(rw));
 			return JsonConvert.DeserializeObject<StateMachine>(json, sett);
 		}
