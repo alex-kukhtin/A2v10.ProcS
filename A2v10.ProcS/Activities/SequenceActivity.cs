@@ -20,7 +20,10 @@ namespace A2v10.ProcS
 			while (true)
 			{
 				if (_currentAction >= Activities.Count)
+				{
+					_currentAction = 0;
 					return ActivityExecutionResult.Complete;
+				}
 				var result = Activities[_currentAction].Execute(context);
 				if (result == ActivityExecutionResult.Idle)
 					return ActivityExecutionResult.Idle;
