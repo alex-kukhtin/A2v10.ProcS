@@ -14,7 +14,7 @@
 						"ChatId": "{{params.ChatId}}",
 						"Message": {
 							"Type": "Text",
-							"Text": "Hello, {{params.donorId}}!"
+							"Text": "Вітаємо шановний доноре!"
 						}
 					}
 				]
@@ -37,7 +37,7 @@
 								"ColNum": 1,
 								"Buttons": [
 									{
-										"Text": "Записаться"
+										"Text": "Записатись на донацію"
 									}
 								]
 							}
@@ -53,13 +53,26 @@
 			},
 			"Transitions": {
 				"Loop->Ask1": {
-					"Condition": "reply.Message.Text == 'Записаться'",
+					"Condition": "reply.Message.Text == 'Записатись на донацію'",
 					"To": "Ask1"
 				},
 				"Loop->Loop": {
 					"To": "Loop"
 				}
 			}
+		},
+		"Deny": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs.chatbot:SendMessageActivity",
+				"BotEngine": "Telegram",
+				"BotKey": "DonorBot",
+				"ChatId": "{{params.ChatId}}",
+				"Message": {
+					"Type": "Text",
+					"Text": "Вибачте, але наразі Ви не можете здійснити донацію"
+				}
+			},
+			"NextState": "Loop"
 		},
 		"Ask1": {
 			"OnEntry": {
@@ -71,16 +84,26 @@
 						"BotKey": "DonorBot",
 						"ChatId": "{{params.ChatId}}",
 						"Message": {
+							"Type": "Text",
+							"Text": "Вам необхідно відповісти на питання анкети донора"
+						}
+					},
+					{
+						"$res": "com.a2v10.procs.chatbot:SendMessageActivity",
+						"BotEngine": "Telegram",
+						"BotKey": "DonorBot",
+						"ChatId": "{{params.ChatId}}",
+						"Message": {
 							"Type": "Keyboard",
-							"Text": "Употребляли?",
+							"Text": "Як почуваєте себе? Добре?",
 							"Keyboard": {
 								"ColNum": 2,
 								"Buttons": [
 									{
-										"Text": "Да"
+										"Text": "Так"
 									},
 									{
-										"Text": "Нет"
+										"Text": "Ні"
 									}
 								]
 							}
@@ -96,26 +119,13 @@
 			},
 			"Transitions": {
 				"Ask1->Ask2": {
-					"Condition": "reply.Message.Text == 'Нет'",
+					"Condition": "reply.Message.Text == 'Так'",
 					"To": "Ask2"
 				},
-				"Ask1->Deny1": {
-					"To": "Deny1"
+				"Ask1->Deny": {
+					"To": "Deny"
 				}
 			}
-		},
-		"Deny1": {
-			"OnEntry": {
-				"$res": "com.a2v10.procs.chatbot:SendMessageActivity",
-				"BotEngine": "Telegram",
-				"BotKey": "DonorBot",
-				"ChatId": "{{params.ChatId}}",
-				"Message": {
-					"Type": "Text",
-					"Text": "Сорри, но низя"
-				}
-			},
-			"NextState": "Loop"
 		},
 		"Ask2": {
 			"OnEntry": {
@@ -127,17 +137,72 @@
 						"BotKey": "DonorBot",
 						"ChatId": "{{params.ChatId}}",
 						"Message": {
-							"Type": "Text",
-							"Text": "Что еще спросить?"
+							"Type": "Keyboard",
+							"Text": "Чи є у Вас зараз температура, болі в горлі, простуда, респіраторні захворювання, ангіна?",
+							"Keyboard": {
+								"ColNum": 2,
+								"Buttons": [
+									{
+										"Text": "Так"
+									},
+									{
+										"Text": "Ні"
+									}
+								]
+							}
 						}
+					},
+					{
+						"$res": "com.a2v10.procs.chatbot:WaitMessageActivity",
+						"BotEngine": "Telegram",
+						"BotKey": "DonorBot",
+						"ChatId": "{{params.ChatId}}"
 					}
 				]
 			},
 			"Transitions": {
-				"Ask2->Loop": {
-					"To": "Loop"
+				"Ask2->Ask3": {
+					"Condition": "reply.Message.Text == 'Ні'",
+					"To": "Ask2"
+				},
+				"Ask1->Deny": {
+					"To": "Deny"
 				}
 			}
+		},
+		"Ask3": {
+			"OnEntry": {
+				"$res": "com.a2v10.procs:SequenceActivity",
+				"Activities": [
+					{
+						"$res": "com.a2v10.procs.chatbot:SendMessageActivity",
+						"BotEngine": "Telegram",
+						"BotKey": "DonorBot",
+						"ChatId": "{{params.ChatId}}",
+						"Message": {
+							"Type": "Text",
+							"Text": "Оберіть зручні дату та час дотації"
+						}
+					},
+					{
+						"$res": "com.a2v10.procs.chatbot:WaitMessageActivity",
+						"BotEngine": "Telegram",
+						"BotKey": "DonorBot",
+						"ChatId": "{{params.ChatId}}"
+					},
+					{
+						"$res": "com.a2v10.procs.chatbot:SendMessageActivity",
+						"BotEngine": "Telegram",
+						"BotKey": "DonorBot",
+						"ChatId": "{{params.ChatId}}",
+						"Message": {
+							"Type": "Text",
+							"Text": "Очикуємо на Вас {{reply.Message.Text}}"
+						}
+					}
+				]
+			},
+			"NextState": "Loop"
 		}
 	}
 }
