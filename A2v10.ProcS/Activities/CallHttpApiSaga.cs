@@ -41,32 +41,7 @@ namespace A2v10.ProcS
 		}
 	}
 
-	[ResourceKey(ukey)]
-	public class CallApiResponseMessage : MessageBase<Guid>
-	{
-		public const String ukey = ProcS.ResName + ":" + nameof(CallApiResponseMessage);
-
-		[RestoreWith] 
-		public CallApiResponseMessage(Guid correlationId) : base(correlationId)
-		{
-			
-		}
-
-		public IDynamicObject Result { get; set; }
-
-		public override void Store(IDynamicObject storage, IResourceWrapper _)
-		{
-			storage.Set("Result", Result);
-		}
-
-		public override void Restore(IDynamicObject store, IResourceWrapper _)
-		{
-			Result = store.GetDynamicObject("Result");
-		}
-	}
-
-
-	public class CallHttpApiSaga : SagaBaseDispatched<Guid, CallApiRequestMessage, CallApiResponseMessage>
+	public class CallHttpApiSaga : SagaBaseDispatched<Guid, CallApiRequestMessage>
 	{
 		public const String ukey = ProcS.ResName + ":" + nameof(CallHttpApiSaga);
 
@@ -79,6 +54,28 @@ namespace A2v10.ProcS
 
 		protected override async Task Handle(IHandleContext context, CallApiRequestMessage message)
 		{
+			try
+			{
+				await HandleImpl(context, message);
+			}
+			catch (Exception ex)
+			{
+				context.Logger.LogInformation($"CallHttpApiSaga.Error. HandleError='{message.HandleError}' execption={ex.ToString()}");
+				if (message.HandleError == ErrorMode.Ignore)
+				{
+					var msg = new ResumeBookmarkMessage(message.CorrelationId.Value, null);
+					context.SendMessage(msg);
+				}
+				else
+				{
+					throw new InvalidOperationException("CallApiRequest execption", ex);
+				}
+			}
+			IsComplete = true;
+		}
+
+		async Task HandleImpl(IHandleContext context, CallApiRequestMessage message)
+		{ 
 			var method = message.Method?.Trim()?.ToLowerInvariant();
 			if (String.IsNullOrEmpty(method))
 				method = "get";
@@ -111,11 +108,8 @@ namespace A2v10.ProcS
 			context.Logger.LogInformation($"CallHttpApiSaga. Success, Content={json}");
 			context.Logger.LogInformation($"CallHttpApiSaga. SendMessage 'CallApiResponseMessage' correlationId='{correlationId}'");
 
-			var responseMessage = new CallApiResponseMessage(correlationId)
-			{
-				Result = result
-			};
-			context.SendMessage(responseMessage);
+			var msg = new ResumeBookmarkMessage(correlationId, result);
+			context.SendMessage(msg);
 		}
 
 		async Task<Guid> ExecuteGet(IHandleContext context, CallApiRequestMessage message)
@@ -156,22 +150,14 @@ namespace A2v10.ProcS
 					context.Logger.LogInformation($"CallHttpApiSaga.Error. HandleError='{message.HandleError}' status='{response.StatusCode}', Content={await response.Content.ReadAsStringAsync()}");
 					if (message.HandleError == ErrorMode.Ignore)
 					{
-						var responseMessage = new CallApiResponseMessage(message.CorrelationId.Value);
-						context.SendMessage(responseMessage);
+						var respmsg = new ResumeBookmarkMessage(message.CorrelationId.Value, null);
+						context.SendMessage(respmsg);
 						return message.CorrelationId.Value;
 					}
 					// FAIL?
 				}
 			}
 			return message.CorrelationId.Value;
-		}
-
-		protected override Task Handle(IHandleContext context, CallApiResponseMessage message)
-		{
-			var continueMessage = new ContinueActivityMessage(message.CorrelationId.Value, "", message.Result);
-			context.SendMessage(continueMessage);
-			IsComplete = true;
-			return Task.CompletedTask;
 		}
 	}
 }

@@ -54,17 +54,6 @@ namespace A2v10.ProcS
 			return Environment;
 		}
 
-		public IDynamicObject GetSelf()
-		{
-			var d = new DynamicObject
-			{
-				{ "Id", Id },
-				{ "ParentId", ParentInstanceId },
-				{ "CurrentState", CurrentState }
-			};
-			return d;
-		}
-
 		#endregion
 
 		#region IStorable

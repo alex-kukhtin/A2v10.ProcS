@@ -31,17 +31,20 @@ namespace A2v10.ProcS.Api
 		public String Result { get; set; }
 		public Status Status { get; set; }
 		public String Message { get; set; }
+		public IInstance Instance { get; set; }
 	}
 
 	public class ProcessApi
 	{
 		private readonly IWorkflowEngine _engine;
 		private readonly INotifyManager _notifyManager;
+		private readonly IRepository _repository;
 
-		public ProcessApi(IWorkflowEngine engine, INotifyManager notifyManager)
+		public ProcessApi(IWorkflowEngine engine, INotifyManager notifyManager, IRepository repository)
 		{
 			_engine = engine;
 			_notifyManager = notifyManager;
+			_repository = repository;
 		}
 
 		public Task<IInstance> StartProcess(IStartProcessRequest prm)
@@ -64,6 +67,7 @@ namespace A2v10.ProcS.Api
 				{
 					result.Status = Status.ok;
 					result.Result = t1.Result;
+					result.Instance = await _repository.Get(prm.InstanceId);
 				}
 				else if (tr == t2)
 					result.Status = Status.timeout;
@@ -76,7 +80,6 @@ namespace A2v10.ProcS.Api
 				result.Message = ex.Message;
 			}
 			return result;
-
 		}
 	}
 }

@@ -1,6 +1,6 @@
 ﻿/* Copyright © 2020 Alex Kukhtin, Artur Moshkola. All rights reserved. 
 
-LastModified: 30 Mar 2020
+LastModified: 04 Apr 2020
 
 */
 ------------------------------------------------
@@ -41,7 +41,8 @@ begin
 		CurrentState nvarchar(255) null,
 		WorkflowState nvarchar(max) null,
 		InstanceState nvarchar(max) null,
-		DateCreated datetime2 not null constraint DF_Instances_DateCreated default(sysutcdatetime())
+		DateCreated datetime2 not null constraint DF_Instances_DateCreated default(sysutcdatetime()),
+		DateModified datetime2 not null constraint DF_Instances_DateModified default(sysutcdatetime())
 	);
 end
 go
@@ -49,6 +50,13 @@ go
 if not exists(select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'Instances' and COLUMN_NAME=N'CurrentState')
 begin
 	alter table A2v10_ProcS.Instances add CurrentState nvarchar(255) null;
+end
+go
+------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'Instances' and COLUMN_NAME=N'DateModified')
+begin
+	alter table A2v10_ProcS.Instances add 
+		DateModified datetime2 not null constraint DF_Instances_DateModified default(sysutcdatetime()) with values;
 end
 go
 ------------------------------------------------
@@ -135,7 +143,8 @@ begin
 		target.IsComplete = @IsComplete,
 		target.CurrentState = @CurrentState,
 		target.WorkflowState = @WorkflowState,
-		target.InstanceState = @InstanceState
+		target.InstanceState = @InstanceState,
+		target.DateModified = getutcdate()
 	when not matched by target then 
 		insert(Id, Parent, Workflow, [Version], IsComplete, CurrentState, WorkflowState, InstanceState)
 		values (@Id, @Parent, @Workflow, @Version, @IsComplete, @CurrentState, @WorkflowState, @InstanceState);
@@ -266,9 +275,9 @@ begin
 	if exists(select * from @queueTable where SagaId is null and MessageCorrelationId <> N'null')
 	begin
 		-- create new saga
-		insert into A2v10_ProcS.Sagas (Id, Kind, Hold, CorrelationId)
+		insert into A2v10_ProcS.Sagas (Id, Kind, Hold, CorrelationId, MessageId)
 		output inserted.Id into @sagaTable(Id)
-		select newid(), SagaKind, 1, MessageCorrelationId
+		select newid(), SagaKind, 1, MessageCorrelationId, QueueId
 			from @queueTable;
 		select @sagaId = Id from @sagaTable;
 		update @queueTable set SagaId = @sagaId, SagaHold = 1 where QueueId = @queueId;

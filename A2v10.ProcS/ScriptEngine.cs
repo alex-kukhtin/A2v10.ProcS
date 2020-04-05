@@ -81,6 +81,11 @@ namespace A2v10.ProcS
 			_engine.SetValue(name, val.Root);
 		}
 
+		public void SetValue(String name, Object val)
+		{
+			_engine.SetValue(name, val);
+		}
+
 		public T GetValueFromObject<T>(IDynamicObject obj, String expression)
 		{
 			if (obj == null || expression == null)

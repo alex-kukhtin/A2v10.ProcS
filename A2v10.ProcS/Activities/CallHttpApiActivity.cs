@@ -32,18 +32,19 @@ namespace A2v10.ProcS
 		{
 			if (context.IsContinue)
 			{
-
 				context.ExecuteScript(CodeAfter);
 				return ActivityExecutionResult.Complete;
 			}
 
 			context.ExecuteScript(CodeBefore);
 
-			var request = new CallApiRequestMessage(context.Instance.Id)
+			var bookmark = context.SetBookmark();
+
+			var request = new CallApiRequestMessage(bookmark)
 			{
 				Url = context.Resolve(Url),
 				Method = context.Resolve(Method),
-				HandleError = HandleError,
+				HandleError = HandleError
 			};
 
 			var body = context.EvaluateScript(Body);

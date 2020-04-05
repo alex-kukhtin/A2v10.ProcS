@@ -18,6 +18,7 @@ namespace A2v10.ProcS.Infrastructure
 		IDynamicObject EvalObject(String expression);
 		void Execute(String code);
 		void SetValue(String name, IDynamicObject value);
+		void SetValue(String name, Object value);
 		T GetValueFromObject<T>(IDynamicObject obj, String expression);
 	}
 }
