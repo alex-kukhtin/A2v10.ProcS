@@ -1,26 +1,8 @@
 {
 	"$schema": "../../@schemas/statemachine-schema.json#",
 	"Description": "DonorBot",
-	"InitialState": "Init",
+	"InitialState": "Loop",
 	"States": {
-		"Init": {
-			"OnEntry": {
-				"$res": "com.a2v10.procs:SequenceActivity",
-				"Activities": [
-					{
-						"$res": "com.a2v10.procs.chatbot:SendMessageActivity",
-						"BotEngine": "Telegram",
-						"BotKey": "DonorBot",
-						"ChatId": "{{params.ChatId}}",
-						"Message": {
-							"Type": "Text",
-							"Text": "Вітаємо шановний доноре!"
-						}
-					}
-				]
-			},
-			"NextState": "Loop"
-		},
 		"Loop": {
 			"OnEntry": {
 				"$res": "com.a2v10.procs:SequenceActivity",
@@ -32,7 +14,7 @@
 						"ChatId": "{{params.ChatId}}",
 						"Message": {
 							"Type": "Keyboard",
-							"Text": "Do something:",
+							"Text": "Вітаємо шановний доноре!",
 							"Keyboard": {
 								"ColNum": 1,
 								"Buttons": [
