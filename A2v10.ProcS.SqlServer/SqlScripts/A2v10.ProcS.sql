@@ -83,6 +83,10 @@ begin
 end
 go
 ------------------------------------------------
+if not exists (select * from sys.indexes where object_id = object_id(N'A2v10_ProcS.MessageQueue') and name = N'IX_MessageQueue_StateAfter')
+	create index IX_MessageQueue_StateAfter on A2v10_ProcS.MessageQueue ([State], [After]) include ([Id], CorrelationId);
+go
+------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'Sagas')
 begin
 	create table A2v10_ProcS.Sagas
@@ -98,6 +102,10 @@ begin
 		DateCreated datetime2 not null constraint DF_Sagas_DateCreated default(sysutcdatetime())
 	);
 end
+go
+------------------------------------------------
+if not exists (select * from sys.indexes where object_id = object_id(N'A2v10_ProcS.Sagas') and name = N'IX_Sagas_Kind_CorrelationId')
+	create index IX_Sagas_Kind_CorrelationId on A2v10_ProcS.Sagas (Kind, CorrelationId) include ([Id], Hold);
 go
 ------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10_ProcS' and TABLE_NAME=N'Log')
