@@ -53,7 +53,7 @@
 			},
 			"Transitions": {
 				"Loop->Ask1": {
-					"Condition": "reply.Message.Text == '/appointment'",
+					"Condition": "reply.Message.Text == 'Записаться'",
 					"To": "Ask1"
 				},
 				"Loop->Loop": {
