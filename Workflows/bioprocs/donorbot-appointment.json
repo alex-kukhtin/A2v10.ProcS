@@ -145,7 +145,7 @@
 			"Transitions": {
 				"Ask2->Ask3": {
 					"Condition": "reply.Message.Text == 'Ні'",
-					"To": "Ask2"
+					"To": "Ask3"
 				},
 				"Ask1->Deny": {
 					"To": "Deny"
