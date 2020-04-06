@@ -52,6 +52,7 @@ namespace A2v10.ProcS.WebApi.Host
 
 		public static IHostBuilder CreateHostBuilder(String[] args) =>
 			Host.CreateDefaultBuilder(args)
+				.UseWindowsService()
 				.ConfigureLogging(logging => {
 					logging.ClearProviders();
 					logging.AddEventLog();
