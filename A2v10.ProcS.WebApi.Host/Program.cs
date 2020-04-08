@@ -14,6 +14,7 @@ using A2v10.ProcS.WebApi.Host.Classes;
 using A2v10.ProcS.SqlServer;
 using A2v10.Data;
 using A2v10.Data.Interfaces;
+using Microsoft.Extensions.Logging.EventLog;
 
 namespace A2v10.ProcS.WebApi.Host
 {
@@ -27,10 +28,15 @@ namespace A2v10.ProcS.WebApi.Host
 			CreateHostBuilder(args).Build().Run();
 		}
 
-		private static ILogger CreateLogger()
+		private static void ConfigureLogger(ILoggingBuilder builder)
 		{
-			using var factory = LoggerFactory.Create(builder => builder.AddConsole());
-			return factory.CreateLogger<IWorkflowEngine>();
+			builder.ClearProviders();
+			builder.AddEventLog(c =>
+			{
+				c.SourceName = "ProcS_WebHost";
+			});
+			builder.AddConsole();
+			builder.SetMinimumLevel(LogLevel.Trace);
 		}
 
 		private class DatabaseConfig : IDataConfiguration
@@ -53,13 +59,11 @@ namespace A2v10.ProcS.WebApi.Host
 		public static IHostBuilder CreateHostBuilder(String[] args) =>
 			Host.CreateDefaultBuilder(args)
 				.UseWindowsService()
-				.ConfigureLogging(logging => {
-					logging.ClearProviders();
-					logging.AddEventLog();
-					logging.AddConsole();
-				})
+				.ConfigureLogging(ConfigureLogger)
 				.ConfigureServices((ctx, services) =>
 				{
+					services.AddSingleton(s => s.GetRequiredService<ILoggerFactory>().CreateLogger("ProcS"));
+					
 					var conf = ctx.Configuration;
 
 					services.AddHostedService<Service>();
@@ -71,7 +75,6 @@ namespace A2v10.ProcS.WebApi.Host
 					services.AddSingleton<IDataLocalizer, NullDataLocalizer>();
 					services.AddSingleton<IDbContext, SqlDbContext>();
 
-					services.AddSingleton<ILogger, FakeLogger>();
 					services.AddSingleton<INotifyManager, NotifyManager>();
 
 					var tm = new TaskManager();
@@ -92,7 +95,6 @@ namespace A2v10.ProcS.WebApi.Host
 					services.AddSingleton<ServiceBus>();
 					services.AddSingleton<ServiceBusAsync>();
 
-					services.AddSingleton<ILogger>(CreateLogger());
 					services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
 
 					services.AddSingleton<ISagaKeeper, SqlServerSagaKeeper>();

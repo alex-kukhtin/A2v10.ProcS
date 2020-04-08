@@ -120,10 +120,17 @@ namespace A2v10.ProcS
 		{
 			while (!token.IsCancellationRequested)
 			{
-				var sk = await _sagaKeeper.PickSaga();
-				if (!sk.Available) 
-					break;
-				ProcessItem(sk);
+				try
+				{
+					var sk = await _sagaKeeper.PickSaga();
+					if (!sk.Available)
+						break;
+					ProcessItem(sk);
+				}
+				catch (Exception e)
+				{
+					_logger.LogCritical(e, "Erorr while picking saga");
+				}
 			}
 		}
 
@@ -252,7 +259,7 @@ namespace A2v10.ProcS
 				{
 					rwl.ReleaseWriterLock();
 				}
-				await Task.WhenAny(ts.Task, Task.Delay(50, token));
+				await Task.WhenAny(ts.Task, Task.Delay(500, token));
 			}
 		}
 	}
