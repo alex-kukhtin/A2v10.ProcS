@@ -11,20 +11,6 @@ using Microsoft.Extensions.Logging;
 
 namespace A2v10.ProcS.SqlServer
 {
-	public class Tracker
-	{
-		readonly ILogger _logger;
-		public Tracker(ILogger logger)
-		{
-			_logger = logger;
-		}
-
-		public void Track(String text)
-		{
-			//_logger.LogInformation(text);
-		}
-	}
-
 	public class SagaMapItem
 	{
 		public SagaMapItem(String messageKind, String sagaKind)
@@ -42,7 +28,7 @@ namespace A2v10.ProcS.SqlServer
 		private readonly ISagaResolver _sagaResolver;
 		private readonly IDbContext _dbContext;
 		private readonly IResourceWrapper _resourceWrapper;
-		private readonly Tracker _tracker;
+		private readonly ILogger _logger;
 
 		// TODO: ??????????? Config????
 		private static readonly Guid _host = Guid.Parse("BBDFE351-D6A1-4F22-9341-6FBD6628424B");
@@ -57,7 +43,17 @@ namespace A2v10.ProcS.SqlServer
 			_sagaResolver = sagaResolver ?? throw new ArgumentNullException(nameof(sagaResolver));
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 			_resourceWrapper = resourceWrapper ?? throw new ArgumentNullException(nameof(resourceWrapper));
-			_tracker = new Tracker(logger);
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+		}
+
+		void LogInformation(String msg)
+		{
+			_logger.LogInformation(msg);
+		}
+
+		void LogError(String msg)
+		{
+			_logger.LogError(msg);
 		}
 
 		public async Task<PickedSaga> PickSaga()
@@ -83,8 +79,7 @@ namespace A2v10.ProcS.SqlServer
 			var message = _resourceWrapper.Unwrap<IMessage>(msgdo);
 			String sagaCorrelationId = dobj.Get<String>("SagaCorrelationId");
 
-			_tracker.Track("---------------");
-			_tracker.Track($"Peek Message. type:{message.GetType()}, correlationId: {message.CorrelationId}");
+			LogInformation($"Peek Message. type:{message.GetType()}, correlationId: {message.CorrelationId}");
 
 			Guid? sagaId = dobj.Get<Guid?>("SagaId");
 
@@ -99,11 +94,11 @@ namespace A2v10.ProcS.SqlServer
 				var sagaRes = new Resource(sagakind, sagbodydo);
 				saga = _resourceWrapper.Unwrap<ISaga>(sagaRes);
 				saga.CorrelationId.FromString(sagaCorrelationId);
-				_tracker.Track($"Restore saga. id:{sagaId}, kind:{sagakind}, correlationId: {sagaCorrelationId}");
+				LogInformation($"Restore saga. id:{sagaId}, kind:{sagakind}, correlationId: {sagaCorrelationId}");
 			}
 			else
 			{
-				_tracker.Track($"Create saga. id:{sagaId}, kind:{sagakind}, correlationId: {sagaCorrelationId}");
+				LogInformation($"Create saga. id:{sagaId}, kind:{sagakind}, correlationId: {sagaCorrelationId}");
 				saga = _resourceWrapper.Create<ISaga>(sagakind, new DynamicObject());
 			}
 			return new PickedSaga(sagaId, saga, new ServiceBusItem(message));
@@ -131,7 +126,7 @@ namespace A2v10.ProcS.SqlServer
 				{ "CorrelationId", item.Message.CorrelationId.ToString() }
 			};
 
-			_tracker.Track($"SendMessage. kind:{prm.Get<String>("Kind")}, correlationId: {item.Message.CorrelationId}");
+			LogInformation($"SendMessage. kind:{prm.Get<String>("Kind")}, correlationId: {item.Message.CorrelationId}");
 
 			await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", prm);
 			// TODO: msgId ????
@@ -151,7 +146,7 @@ namespace A2v10.ProcS.SqlServer
 						{ "CorrelationId", a.Message.CorrelationId.ToString() }
 					};
 
-					_tracker.Track($"SendMessage. kind:{prmafter.Get<String>("Kind")}, correlationId: {a.Message.CorrelationId}");
+					LogInformation($"SendMessage. kind:{prmafter.Get<String>("Kind")}, correlationId: {a.Message.CorrelationId}");
 					await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Message.Send]", prmafter);
 				}
 			}
@@ -167,7 +162,7 @@ namespace A2v10.ProcS.SqlServer
 				{ "Body", body },
 				{ "IsComplete", saga.IsComplete }
 			};
-			_tracker.Track($"Update saga. id: {id}, isComplete: {saga.IsComplete}, kind:{saga.Kind}, correlationId: {saga.CorrelationId}");
+			LogInformation($"Update saga. id: {id}, isComplete: {saga.IsComplete}, kind:{saga.Kind}, correlationId: {saga.CorrelationId}");
 			return _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Saga.Update]", prms);
 		}
 
@@ -178,6 +173,7 @@ namespace A2v10.ProcS.SqlServer
 			if (_sagaMapSaved)
 				return;
 			var list = _sagaResolver.GetMap().Select(x => new SagaMapItem(x.Key, x.Value.SagaKind));
+			LogInformation($"Save SagaMap");
 			await _dbContext.SaveListAsync<SagaMapItem>(null, $"{Schema}.[SagaMap.Save]", new { Host = _host }, list);
 			_sagaMapSaved = true;
 		}
@@ -196,18 +192,13 @@ namespace A2v10.ProcS.SqlServer
 					{"StackTrace", exception.StackTrace },
 					{"CorrelationId", correlationId }
 				};
-				_tracker.Track($"Fail saga. id:{picked.Id}, kind:{picked.Saga.Kind}, correlationId: {correlationId}");
+				LogInformation($"Fail saga. id:{picked.Id}, kind:{picked.Saga.Kind}, correlationId: {correlationId}");
 				await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Saga.Fail]", dobj);
 			}
 			catch (Exception ex)
 			{
-				LogSystemException(ex);
+				LogError(ex.ToString());
 			}
-		}
-
-		void LogSystemException(Exception ex)
-		{
-			// TODO: (
 		}
 	}
 }

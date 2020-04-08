@@ -73,21 +73,25 @@ namespace A2v10.ProcS
 
 		public WaitResumeSaga() : base(ukey)
 		{
-
+			isWaiting = false;
 		}
 
 		// serializable
 		private Guid bookmark;
+		private Boolean isWaiting;
 
 		protected override Task Handle(IHandleContext context, WaitResumeMessage message)
 		{
 			bookmark = message.BookmarkId;
+			isWaiting = true;
 			SetCorrelation(message);
 			return Task.CompletedTask;
 		}
 
 		protected override Task Handle(IHandleContext context, ResumeMessage message)
 		{
+			if (!isWaiting)
+				return Task.CompletedTask;
 			var msg = new ResumeBookmarkMessage(bookmark, message.Result);
 			context.SendMessage(msg);
 			return Task.CompletedTask;
@@ -97,12 +101,14 @@ namespace A2v10.ProcS
 		{
 			var d = new DynamicObject();
 			d.Set(nameof(bookmark), bookmark);
+			d.Set(nameof(isWaiting), isWaiting);
 			return d;
 		}
 
 		public override void Restore(IDynamicObject store, IResourceWrapper _)
 		{
 			bookmark = store.Get<Guid>(nameof(bookmark));
+			isWaiting = store.Get<Boolean>(nameof(isWaiting));
 		}
 	}
 }
