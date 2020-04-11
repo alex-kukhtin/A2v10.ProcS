@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-
+using System.Threading.Tasks;
 using A2v10.ProcS.Infrastructure;
 
 namespace A2v10.ProcS
@@ -30,6 +30,27 @@ namespace A2v10.ProcS
 				return handlers.GetOrAdd(key, k => factory.CreateHandler());
 			}
 			return null;
+		}
+	}
+
+	public class DefaultCallback : IEndpointHandler
+	{
+		private readonly IServiceBus bus;
+
+		public DefaultCallback(IServiceBus bus)
+		{
+			this.bus = bus;
+		}
+
+		public Task<(String body, String type)> HandleAsync(String body, String path)
+		{
+			var pathes = path.Split('/');
+			var cbm = new CallbackMessage(pathes[0])
+			{
+				Result = DynamicObjectConverters.FromJson(body)
+			};
+			bus.Send(cbm);
+			return Task.FromResult(("", "text/plain"));
 		}
 	}
 }

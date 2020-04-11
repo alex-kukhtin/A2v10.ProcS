@@ -12,6 +12,12 @@ namespace A2v10.ProcS
 	public static class ProcS
 	{
 		public const String ResName = "com.a2v10.procs";
+
+		public static void RegisterEndpoints(IEndpointManager endpointManager, IServiceBus bus)
+		{
+			var dcb = new DefaultCallback(bus);
+			endpointManager.RegisterEndpoint("cb", dcb);
+		}
 		
 		public static void RegisterSagas(IResourceManager resourceManager, ISagaManager sagaManager, IScriptEngine scriptEngine, IRepository repository)
 		{

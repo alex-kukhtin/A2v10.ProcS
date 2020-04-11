@@ -31,8 +31,9 @@ namespace A2v10.ProcS.WebApi.Host
 		public IServiceBus ServiceBus => bus;
 		public IRepository Repository { get; }
 
-		public Service(IScriptEngine se, IRepository rp, IResourceManager rm, ISagaManager sm, PluginManager pm, ServiceBusAsync sb, IConfiguration conf, IDbContext dbContext)
+		public Service(IScriptEngine se, IRepository rp, IEndpointManager em, IResourceManager rm, ISagaManager sm, PluginManager pm, ServiceBusAsync sb, IConfiguration conf, IDbContext dbContext)
 		{
+			ProcS.RegisterEndpoints(em, sb);
 			ProcS.RegisterActivities(rm);
 			ProcS.RegisterSagas(rm, sm, se, rp);
 			SqlServerProcS.RegisterActivities(rm);
