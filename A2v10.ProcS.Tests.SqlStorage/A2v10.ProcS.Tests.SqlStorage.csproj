@@ -24,8 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\A2v10.Data.NetStandard\A2v10.Data.Interfaces\A2v10.Data.Interfaces.csproj" />
-    <ProjectReference Include="..\..\A2v10.Data.NetStandard\A2v10.Data\A2v10.Data.csproj" />
     <ProjectReference Include="..\A2v10.ProcS.Infrastructure\A2v10.ProcS.Infrastructure.csproj" />
     <ProjectReference Include="..\A2v10.ProcS.SqlServer\A2v10.ProcS.SqlServer.csproj" />
     <ProjectReference Include="..\A2v10.ProcS\A2v10.ProcS.csproj" />

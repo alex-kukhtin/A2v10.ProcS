@@ -1,13 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\A2v10.Data.NetStandard\A2v10.Data.Interfaces\A2v10.Data.Interfaces.csproj" />
-    <ProjectReference Include="..\..\A2v10.Data.NetStandard\A2v10.Data\A2v10.Data.csproj" />
+    <PackageReference Include="A2v10.Data.Core" Version="10.0.7239" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\A2v10.ProcS.Infrastructure\A2v10.ProcS.Infrastructure.csproj" />
     <ProjectReference Include="..\A2v10.ProcS\A2v10.ProcS.csproj" />
   </ItemGroup>
