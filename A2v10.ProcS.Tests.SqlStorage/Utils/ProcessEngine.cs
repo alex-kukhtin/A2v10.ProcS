@@ -68,14 +68,14 @@ namespace A2v10.ProcS.Tests.SqlStorage
 
 		static String GetPluginPath()
 		{
-			var path = new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath;
+			var path = Assembly.GetExecutingAssembly().Location;
 			var pathes = path.Split(Path.DirectorySeparatorChar);
 			var debugRelease = pathes[^3];
 			var newPathes = pathes.Take(pathes.Length - 5).ToList();
 			newPathes.Add($"A2v10.ProcS.Plugin");
 			newPathes.Add($"bin");
 			newPathes.Add(debugRelease);
-			newPathes.Add("netstandard2.0");
+			newPathes.Add("net5.0");
 			return (!String.IsNullOrEmpty(newPathes[0]) ? String.Empty : new String(Path.DirectorySeparatorChar, 1)) + Path.Combine(newPathes.ToArray());
 		}
 	}
